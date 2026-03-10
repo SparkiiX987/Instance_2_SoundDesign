@@ -77,13 +77,13 @@ jobs:
       - name: Download Windows build
         uses: actions/download-artifact@v4
         with:
-          name: ${{ env.PROJECT_NAME }}-StandaloneWindows64
+          name: ${{ env.PROJECT_NAME }}-Windows64
           path: artifacts/
 
       - name: Download Linux build
         uses: actions/download-artifact@v4
         with:
-          name: ${{ env.PROJECT_NAME }}-StandaloneLinux64
+          name: ${{ env.PROJECT_NAME }}-Linux64
           path: artifacts/
 
       - name: Publish Release
