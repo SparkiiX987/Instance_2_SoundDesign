@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using UnityEditor;
+using UnityEditor.Build.Reporting;
 using UnityEngine;
 
 /// <summary>
@@ -62,7 +63,7 @@ public static class BuildScript
             options          = BuildOptions.None,
         });
 
-        if (report.summary.result == UnityEditor.Build.Reporting.BuildResult.Succeeded)
+        if (report.summary.result == BuildResult.Succeeded)
         {
             Debug.Log($"[BuildScript] Build succeeded. Size: {report.summary.totalSize} bytes");
             EditorApplication.Exit(0);
