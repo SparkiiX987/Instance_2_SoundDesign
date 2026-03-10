@@ -28,30 +28,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Récupère le nombre de releases existantes → devient le numéro de version
           COUNT=$(gh api repos/${{ github.repository }}/releases --paginate --jq 'length' 2>/dev/null || echo "0")
           NEXT=$((COUNT + 1))
           VERSION="v1.0.${NEXT}"
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "Prochaine version : ${VERSION}"
 
-      - name: Delete all previous releases and tags
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Supprime toutes les releases
-          RELEASE_IDS=$(gh api repos/${{ github.repository }}/releases --paginate --jq '.[].id' 2>/dev/null || true)
-          for ID in $RELEASE_IDS; do
-            echo "Suppression release $ID"
-            gh api -X DELETE repos/${{ github.repository }}/releases/$ID || true
-          done
-
-          # Supprime tous les tags de build précédents (build-* et v1.0.*)
-          TAGS=$(gh api repos/${{ github.repository }}/git/refs/tags --paginate --jq '.[].ref' 2>/dev/null || true)
-          for TAG in $TAGS; do
-            echo "Suppression tag $TAG"
-            gh api -X DELETE repos/${{ github.repository }}/git/$TAG || true
-          done
 
   # ──────────────────────────────────────────────
   # Build matrix: Windows64 & Linux64 en parallèle

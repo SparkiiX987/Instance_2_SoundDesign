@@ -1,0 +1,47 @@
+name: Delete All Releases & Tags
+
+# Workflow manuel : à lancer depuis Actions → "Delete All Releases & Tags" → Run workflow
+# ⚠️  Supprime TOUTES les releases et tous les tags du repo
+
+on:
+  workflow_dispatch:
+
+jobs:
+  delete:
+    name: Delete all releases and tags
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Delete all releases
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          RELEASE_IDS=$(gh api repos/${{ github.repository }}/releases --paginate --jq '.[].id' 2>/dev/null || true)
+          if [ -z "$RELEASE_IDS" ]; then
+            echo "Aucune release à supprimer."
+          else
+            for ID in $RELEASE_IDS; do
+              echo "Suppression release $ID"
+              gh api -X DELETE repos/${{ github.repository }}/releases/$ID || true
+            done
+          fi
+
+      - name: Delete all tags
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAGS=$(gh api repos/${{ github.repository }}/git/refs/tags --paginate --jq '.[].ref' 2>/dev/null || true)
+          if [ -z "$TAGS" ]; then
+            echo "Aucun tag à supprimer."
+          else
+            for TAG in $TAGS; do
+              echo "Suppression tag $TAG"
+              gh api -X DELETE repos/${{ github.repository }}/git/$TAG || true
+            done
+          fi
+
+      - name: Done
+        run: echo "✅ Toutes les releases et tags ont été supprimés."
+
