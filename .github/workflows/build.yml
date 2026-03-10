@@ -1,0 +1,124 @@
+name: Build & Release
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  UNITY_VERSION: 6000.3.10f1
+  PROJECT_NAME: Instance_2_SoundDesign
+
+jobs:
+  # ──────────────────────────────────────────────
+  # Build matrix: Windows64 & Linux64 in parallel
+  # ──────────────────────────────────────────────
+  build:
+    name: Build – ${{ matrix.targetPlatform }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - targetPlatform: StandaloneLinux64
+            unityModule: linux-il2cpp
+          - targetPlatform: StandaloneWindows64
+            unityModule: windows-mono
+
+    steps:
+      # 1. Checkout sources
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      # 2. Cache the Unity Library folder (speeds up subsequent builds)
+      - name: Cache Unity Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-${{ matrix.targetPlatform }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-${{ matrix.targetPlatform }}-
+            Library-
+
+      # 3. Activate Unity Personal license (via game-ci)
+      #    → automatically generates .alf, sends it to Unity, retrieves .ulf
+      #    → required secrets: UNITY_EMAIL + UNITY_PASSWORD
+      - name: Activate Unity License
+        uses: game-ci/unity-activate@v2
+        env:
+          UNITY_EMAIL:    ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+
+      # 4. Build via Dockerfile
+      - name: Build Docker image (${{ matrix.targetPlatform }})
+        run: |
+          docker build \
+            --build-arg UNITY_VERSION=${{ env.UNITY_VERSION }} \
+            --build-arg UNITY_MODULE=${{ matrix.unityModule }} \
+            --build-arg BUILD_TARGET=${{ matrix.targetPlatform }} \
+            --tag unity-build:${{ matrix.targetPlatform }} \
+            .
+
+      # 5. Extract the build output from the container
+      - name: Extract build output
+        run: |
+          container_id=$(docker create unity-build:${{ matrix.targetPlatform }})
+          mkdir -p build/${{ matrix.targetPlatform }}
+          docker cp "${container_id}:/build/." build/${{ matrix.targetPlatform }}/
+          docker rm "${container_id}"
+
+      # 6. Return Unity License (frees the seat)
+      - name: Return Unity License
+        uses: game-ci/unity-return-license@v2
+        if: always()
+
+      # 7. Zip the build output
+      - name: Zip build
+        run: |
+          cd build
+          zip -r ../${{ env.PROJECT_NAME }}-${{ matrix.targetPlatform }}.zip ${{ matrix.targetPlatform }}
+
+      # 8. Upload artifact for the release job
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PROJECT_NAME }}-${{ matrix.targetPlatform }}
+          path: ${{ env.PROJECT_NAME }}-${{ matrix.targetPlatform }}.zip
+          retention-days: 7
+
+  # ──────────────────────────────────────────────
+  # Release: create a GitHub Release with both ZIPs
+  # ──────────────────────────────────────────────
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      # Download both build artifacts
+      - name: Download Windows build
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.PROJECT_NAME }}-StandaloneWindows64
+          path: artifacts/
+
+      - name: Download Linux build
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.PROJECT_NAME }}-StandaloneLinux64
+          path: artifacts/
+
+      # Publish the GitHub Release
+      - name: Publish Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: "Build #${{ github.run_number }} (${{ github.sha }})"
+          body: |
+            Automated build from commit ${{ github.sha }} on branch `main`.
+          files: artifacts/*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
