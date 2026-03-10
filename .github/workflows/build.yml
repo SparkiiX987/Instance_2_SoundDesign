@@ -21,8 +21,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - targetPlatform: StandaloneLinux64
-          - targetPlatform: StandaloneWindows64
+          - targetPlatform: Linux64
+          - targetPlatform: Windows64
 
     steps:
       - name: Checkout repository
