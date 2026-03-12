@@ -1,24 +1,35 @@
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody))]
 public class PlayerController : MonoBehaviour
 {
-    Rigidbody rb;
-    PlayerMove move;
-    PlayerLook look;
-    PlayerCrouch crouch;
-    PlayerJump jump;
-    
+    public bool canMove = true;
+
+    public Vector2 MoveInput { get; set; }
+    public Vector2 LookInput { get; set; }
+
+    [SerializeField] private Rigidbody rb;
+    [SerializeField] private PlayerMove move;
+    [SerializeField] private PlayerLook look;
+    [SerializeField] private PlayerCrouch crouch;
+    [SerializeField] private PlayerJump jump;
+
     void Awake()
     {
-        rb = GetComponent<Rigidbody>();
-        move = GetComponent<PlayerMove>();
-        look = GetComponent<PlayerLook>();
-        crouch = GetComponent<PlayerCrouch>();
-        
-        move.Init(this);
-        jump.Init(this);
-        look.Init(this);
-        crouch.Init(this);
+        move?.Init(this);
+        look?.Init(this);
+        crouch?.Init(this);
+        jump?.Init(this);
+    }
+
+    void Update()
+    {
+        look.Execute();
+        crouch.Execute();
+    }
+
+    void FixedUpdate()
+    {
+        move.Execute();
+        jump.Execute();
     }
 }

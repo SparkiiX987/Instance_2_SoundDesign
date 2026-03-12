@@ -1,45 +1,46 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(Rigidbody))]
-public class PlayerMove : MonoBehaviour
+public class PlayerMove : PlayerAbility
 {
-    [SerializeField] private InputActionReference moveAction;
-    [SerializeField] private InputActionReference sprintAction;
-    [SerializeField] private float walkSpeed = 6f;
-    [SerializeField] private float runSpeed = 12f;
+    [SerializeField] private float walkSpeed = 4f;
+    [SerializeField] private float runSpeed = 8f;
 
-    private Rigidbody rb;
-    public bool canMove = true;
-    public bool isCrouching = false;
-    public float crouchSpeed = 3f;
+    private PlayerController player;
+    [SerializeField] private Rigidbody rb;
+    private float moveSpeed;
+    private bool isRunning = false;
 
-    void Start()
+    public override void Init(PlayerController playerController)
     {
-        rb = GetComponent<Rigidbody>();
-        rb.freezeRotation = true;
+        player = playerController;
+        moveSpeed = walkSpeed;
     }
 
-    void FixedUpdate()
+    public override void Execute()
     {
-        Vector2 moveInput = moveAction != null ? moveAction.action.ReadValue<Vector2>() : Vector2.zero;
-        bool isRunning = sprintAction != null && sprintAction.action.IsPressed();
+        if (player == null || !player.canMove) return;
 
-        float currentSpeed = isCrouching ? crouchSpeed : (isRunning ? runSpeed : walkSpeed);
+        moveSpeed = isRunning ? runSpeed : walkSpeed;
 
-        Vector3 forward = transform.forward * moveInput.y;
-        Vector3 right   = transform.right   * moveInput.x;
-        Vector3 move    = (forward + right).normalized * currentSpeed;
-
-        if (!canMove) move = Vector3.zero;
+        Vector2 moveInput = player.MoveInput;
+        Vector3 move = transform.right * moveInput.x + transform.forward * moveInput.y;
+        move = move.normalized * moveSpeed;
 
         rb.linearVelocity = new Vector3(move.x, rb.linearVelocity.y, move.z);
     }
 
-    public void OnMove(InputAction.CallbackContext context) { }
-    
-    public void Init(PlayerController playerControlller)
+    public void OnMove(InputAction.CallbackContext context)
     {
-        
+        if (player != null)
+            player.MoveInput = context.ReadValue<Vector2>();
+    }
+
+    public void OnRun(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+            isRunning = true;
+        else if (context.canceled)
+            isRunning = false;
     }
 }
