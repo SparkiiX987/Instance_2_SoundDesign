@@ -1,27 +1,30 @@
-using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(Rigidbody))]
-public class PlayerJump : MonoBehaviour
+public class PlayerJump : PlayerAbility
 {
     [SerializeField] private float jumpPower = 5f;
     [SerializeField] private LayerMask groundMask;
 
-    private Rigidbody rb;
+    private PlayerController player;
+    [SerializeField] private Rigidbody rb;
     private CapsuleCollider capsuleCollider;
+    private bool canJump = true;
+    private bool isGrounded = false;
     private bool jumpRequested = false;
-    public bool canMove = true;
 
-    void Start()
+    public override void Init(PlayerController playerController)
     {
-        rb = GetComponent<Rigidbody>();
+        player = playerController;
         capsuleCollider = GetComponent<CapsuleCollider>();
     }
 
-    void FixedUpdate()
+    public override void Execute()
     {
-        if (jumpRequested && IsGrounded())
+        isGrounded = CheckGrounded();
+        canJump = isGrounded;
+
+        if (jumpRequested && canJump)
         {
             rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
             rb.AddForce(Vector3.up * jumpPower, ForceMode.Impulse);
@@ -30,7 +33,7 @@ public class PlayerJump : MonoBehaviour
         jumpRequested = false;
     }
 
-    private bool IsGrounded()
+    private bool CheckGrounded()
     {
         float radius = capsuleCollider != null ? capsuleCollider.radius : 0.3f;
         float distance = (capsuleCollider != null ? capsuleCollider.height / 2f : 1f) + 0.1f;
@@ -39,15 +42,7 @@ public class PlayerJump : MonoBehaviour
 
     public void OnJump(InputAction.CallbackContext context)
     {
-        if (context.performed && canMove && IsGrounded())
-        {
+        if (context.performed && player != null && player.canMove && canJump)
             jumpRequested = true;
-        }
     }
-
-    public void Init(PlayerController playerController)
-    {
-        
-    }
-    
 }
