@@ -6,14 +6,14 @@ public class PlayerMove : PlayerAbility
     [SerializeField] private float walkSpeed = 4f;
     [SerializeField] private float runSpeed = 8f;
 
-    private PlayerController player;
-    [SerializeField] private Rigidbody rb;
+    private Rigidbody rb;
     private float moveSpeed;
     private bool isRunning = false;
 
-    public override void Init(PlayerController playerController)
+    public override void Init(PlayerController _playerController)
     {
-        player = playerController;
+        base.Init(_playerController);
+        rb = player.rb;
         moveSpeed = walkSpeed;
     }
 
@@ -30,17 +30,17 @@ public class PlayerMove : PlayerAbility
         rb.linearVelocity = new Vector3(move.x, rb.linearVelocity.y, move.z);
     }
 
-    public void OnMove(InputAction.CallbackContext context)
+    public void OnMove(InputAction.CallbackContext _context)
     {
         if (player != null)
-            player.MoveInput = context.ReadValue<Vector2>();
+            player.MoveInput = _context.ReadValue<Vector2>();
     }
 
-    public void OnRun(InputAction.CallbackContext context)
+    public void OnRun(InputAction.CallbackContext _context)
     {
-        if (context.performed)
+        if (_context.performed)
             isRunning = true;
-        else if (context.canceled)
+        else if (_context.canceled)
             isRunning = false;
     }
 }

@@ -3,20 +3,22 @@ using UnityEngine.InputSystem;
 
 public class PlayerJump : PlayerAbility
 {
-    [SerializeField] private float jumpPower = 5f;
-    [SerializeField] private LayerMask groundMask;
+    [SerializeField] 
+    private float jumpPower = 5f;
+    [SerializeField] 
+    private LayerMask groundMask;
 
-    private PlayerController player;
-    [SerializeField] private Rigidbody rb;
     private CapsuleCollider capsuleCollider;
+    private Rigidbody rb;
     private bool canJump = true;
     private bool isGrounded = false;
     private bool jumpRequested = false;
 
-    public override void Init(PlayerController playerController)
+    public override void Init(PlayerController _playerController)
     {
-        player = playerController;
-        capsuleCollider = GetComponent<CapsuleCollider>();
+        base.Init(_playerController);
+        capsuleCollider = player.playerCollider;
+        rb = player.rb;
     }
 
     public override void Execute()
@@ -40,9 +42,9 @@ public class PlayerJump : PlayerAbility
         return Physics.SphereCast(transform.position, radius * 0.9f, Vector3.down, out _, distance, groundMask);
     }
 
-    public void OnJump(InputAction.CallbackContext context)
+    public void OnJump(InputAction.CallbackContext _context)
     {
-        if (context.performed && player != null && player.canMove && canJump)
+        if (_context.performed && player != null && player.canMove && canJump)
             jumpRequested = true;
     }
 }
