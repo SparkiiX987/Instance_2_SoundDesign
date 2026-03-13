@@ -1,185 +1,258 @@
-using System.Collections;
 using UnityEngine;
+using System.Runtime.InteropServices;
 
 /// <summary>
-/// Detecte le volume du micro du joueur et declenche le sonar avec une portee dynamique.
-/// Plus le joueur crie fort, plus l'onde va loin.
-/// La touche E reste fonctionnelle dans Sonar (portee max).
-/// Workaround bug Unity (60) "Error initializing output device" integre.
+/// Capture micro via FMOD Sound.lock + delta recPos.
+/// Mechanique de charge : tant que la voix depasse le seuil, on accumule
+/// le volume max entendu pendant chargeMaxDuration secondes.
+/// Quand la voix retombe OU que le chrono expire, on declenche l'onde
+/// avec la portee correspondant au pic de volume accumule.
 /// </summary>
-[RequireComponent(typeof(AudioSource))]
 public class VoiceTrigger : MonoBehaviour
 {
-    [Header("Parametres")]
-    [SerializeField] private SO_SonarSettings settings;
+    [Header("Reference")]
+    [SerializeField] private RadarSystem radarSystem;
 
-    [Header("References")]
-    [SerializeField] private Sonar sonar;
+    [Header("Seuils de volume")]
+    [Range(0f, 1f)] [SerializeField] private float volumeThreshold = 0.02f;
+    [Range(0f, 1f)] [SerializeField] private float volumeMax       = 0.3f;
+
+    [Header("Lissage")]
+    [Range(1, 30)] [SerializeField] private int smoothFrames = 10;
+
+    [Header("Charge")]
+    [Tooltip("Duree max de charge en secondes. L'onde part automatiquement a la fin.")]
+    [SerializeField] private float chargeMaxDuration = 1.5f;
+    [Tooltip("Delai minimal avant de pouvoir declencher (evite les faux departs).")]
+    [SerializeField] private float chargeMinDuration = 0.1f;
 
     [Header("Options")]
     [SerializeField] private bool voiceTriggerEnabled = true;
 
     // ---------------------------------------------------------------
 
-    private AudioClip micClip;
-    private string micName;
-    private bool micReady = false;
-    private int sampleRate = 16000;
-    private AudioSource dummySource;
-    private float[] volumeHistory;
-    private int volumeHistoryIndex = 0;
+    private FMOD.Sound _recordingSound;
+    private bool       _recording;
+    private uint       _lastRecPos;
+    private uint       _soundLengthSamples;
+    private int        _driverChannels;
+    private int        _driverRate;
+
+    // Etat de charge
+    private bool  _isCharging;
+    private float _chargeTimer;
+    private float _chargePeakVolume;   // volume max capte pendant la charge
+
+    private float[] _volumeHistory;
+    private int     _volumeHistoryIndex;
+    private float   _lastRaw;
+    private float   _lastSmooth;
+
+    private const int DRIVER_INDEX = 0;
+    private const int BUFFER_SEC   = 2;
 
     // ---------------------------------------------------------------
 
-    private void Awake()
-    {
-        if (settings == null)
-            Debug.LogError("[VoiceTrigger] SO_SonarSettings non assigne !");
-
-        // WORKAROUND BUG UNITY (60) :
-        // Un AudioSource doit jouer AVANT Microphone.Start()
-        dummySource              = GetComponent<AudioSource>();
-        dummySource.clip         = AudioClip.Create("silence", 44100, 1, 44100, false);
-        dummySource.loop         = true;
-        dummySource.volume       = 0f;
-        dummySource.spatialBlend = 0f;
-        dummySource.Play();
-
-        volumeHistory = new float[settings != null ? settings.voiceSmoothFrames : 10];
-    }
-
     private void Start()
     {
-        StartCoroutine(InitMicrophoneCoroutine());
-    }
+        _volumeHistory = new float[smoothFrames];
 
-    private IEnumerator InitMicrophoneCoroutine()
-    {
-        yield return null;
-        yield return null;
+        FMOD.System core = FMODUnity.RuntimeManager.CoreSystem;
 
-        if (Microphone.devices.Length == 0)
-        {
-            Debug.LogWarning("[VoiceTrigger] Aucun microphone detecte !");
-            yield break;
-        }
+        core.getRecordNumDrivers(out int numDrivers, out int _);
+        if (numDrivers == 0) { UnityEngine.Debug.LogError("[VT] Aucun driver."); return; }
 
-        micName = Microphone.devices[0];
-        Debug.Log($"[VoiceTrigger] Micro trouve : {micName}");
+        core.getRecordDriverInfo(
+            DRIVER_INDEX, out string driverName, 256,
+            out System.Guid _, out _driverRate,
+            out FMOD.SPEAKERMODE _, out _driverChannels,
+            out FMOD.DRIVER_STATE state);
 
-        Microphone.GetDeviceCaps(micName, out int minFreq, out int maxFreq);
+        UnityEngine.Debug.Log($"[VT] Driver : '{driverName}' {_driverRate}Hz {_driverChannels}ch state={state}");
 
-        if (minFreq == 0 && maxFreq == 0)       sampleRate = 16000;
-        else if (minFreq == maxFreq)             sampleRate = minFreq;
-        else                                     sampleRate = Mathf.Clamp(16000, minFreq, maxFreq);
+        FMOD.CREATESOUNDEXINFO ex = new FMOD.CREATESOUNDEXINFO();
+        ex.cbsize           = Marshal.SizeOf(ex);
+        ex.numchannels      = _driverChannels;
+        ex.defaultfrequency = _driverRate;
+        ex.length           = (uint)(_driverRate * sizeof(float) * _driverChannels * BUFFER_SEC);
+        ex.format           = FMOD.SOUND_FORMAT.PCMFLOAT;
 
-        micClip = Microphone.Start(micName, true, 1, sampleRate);
+        FMOD.RESULT r = core.createSound(
+            (string)null,
+            FMOD.MODE.LOOP_NORMAL | FMOD.MODE.OPENUSER,
+            ref ex, out _recordingSound);
 
-        if (micClip == null)
-        {
-            Debug.LogError("[VoiceTrigger] Microphone.Start() a retourne null !");
-            yield break;
-        }
+        if (r != FMOD.RESULT.OK) { UnityEngine.Debug.LogError($"[VT] createSound={r}"); return; }
 
-        float timeout = 5f;
-        float elapsed = 0f;
-        while (Microphone.GetPosition(micName) <= 0)
-        {
-            elapsed += Time.deltaTime;
-            if (elapsed >= timeout)
-            {
-                Debug.LogError("[VoiceTrigger] Timeout micro !");
-                Microphone.End(micName);
-                yield break;
-            }
-            yield return null;
-        }
+        _recordingSound.getLength(out _soundLengthSamples, FMOD.TIMEUNIT.PCM);
 
-        micReady = true;
-        Debug.Log("[VoiceTrigger] Micro pret !");
+        r = core.recordStart(DRIVER_INDEX, _recordingSound, true);
+        if (r != FMOD.RESULT.OK) { _recordingSound.release(); return; }
+
+        _lastRecPos = 0;
+        _recording  = true;
+        UnityEngine.Debug.Log("[VT] Pret !");
     }
 
     private void Update()
     {
-        if (!voiceTriggerEnabled || !micReady || settings == null) return;
+        if (!_recording || !voiceTriggerEnabled) { return; }
 
-        float rawVolume    = GetMicVolume();
-        float smoothVolume = GetSmoothedVolume(rawVolume);
+        _lastRaw    = ComputeRMSDelta();
+        _lastSmooth = GetSmoothedVolume(_lastRaw);
 
-        if (smoothVolume < settings.voiceThreshold) return;
+        bool voiceActive = _lastSmooth >= volumeThreshold;
 
-        float normalizedVolume = settings.GetNormalizedVolume(smoothVolume);
-        sonar.TriggerWaveWithVolume(normalizedVolume);
+        if (voiceActive)
+        {
+            if (!_isCharging)
+            {
+                // Debut de la charge
+                _isCharging       = true;
+                _chargeTimer      = 0f;
+                _chargePeakVolume = 0f;
+            }
+
+            _chargeTimer += Time.deltaTime;
+
+            // Garde le pic de volume le plus fort entendu pendant la charge
+            if (_lastSmooth > _chargePeakVolume)
+            {
+                _chargePeakVolume = _lastSmooth;
+            }
+
+            // Chrono expire → on tire meme si la voix est encore active
+            if (_chargeTimer >= chargeMaxDuration)
+            {
+                Fire();
+            }
+        }
+        else
+        {
+            // La voix est retombee sous le seuil
+            if (_isCharging && _chargeTimer >= chargeMinDuration)
+            {
+                Fire();
+            }
+            else
+            {
+                // Trop court : annule la charge sans tirer
+                _isCharging = false;
+            }
+        }
     }
 
-    private float GetMicVolume()
+    private void Fire()
     {
-        if (micClip == null) return 0f;
+        _isCharging = false;
 
-        int sampleCount = Mathf.CeilToInt(sampleRate * settings.voiceSampleWindow);
-        int micPosition = Microphone.GetPosition(micName);
+        float normalizedVolume = Mathf.Clamp01(
+            Mathf.InverseLerp(volumeThreshold, volumeMax, _chargePeakVolume));
 
-        if (micPosition < sampleCount) return 0f;
+        UnityEngine.Debug.Log(
+            $"[VT] FIRE ! peak={_chargePeakVolume:F4} norm={normalizedVolume:F4} " +
+            $"chargeTime={_chargeTimer:F2}s");
 
-        float[] samples = new float[sampleCount];
-        micClip.GetData(samples, micPosition - sampleCount);
+        radarSystem.TriggerWaveWithVolume(normalizedVolume);
+    }
 
-        float sum = 0f;
-        foreach (float sample in samples)
-            sum += sample * sample;
+    private float ComputeRMSDelta()
+    {
+        FMOD.System core = FMODUnity.RuntimeManager.CoreSystem;
+        core.getRecordPosition(DRIVER_INDEX, out uint writePos);
 
-        return Mathf.Sqrt(sum / sampleCount);
+        uint delta = (writePos >= _lastRecPos)
+            ? writePos - _lastRecPos
+            : _soundLengthSamples - _lastRecPos + writePos;
+
+        if (delta == 0) { return 0f; }
+
+        uint byteOffset = _lastRecPos * (uint)sizeof(float) * (uint)_driverChannels;
+        uint byteCount  = delta       * (uint)sizeof(float) * (uint)_driverChannels;
+        _lastRecPos = writePos;
+
+        FMOD.RESULT r = _recordingSound.@lock(
+            byteOffset, byteCount,
+            out System.IntPtr ptr1, out System.IntPtr ptr2,
+            out uint len1, out uint len2);
+
+        if (r != FMOD.RESULT.OK) { return 0f; }
+
+        float rms   = 0f;
+        int   total = 0;
+
+        if (ptr1 != System.IntPtr.Zero && len1 > 0)
+        {
+            int count    = (int)(len1 / sizeof(float));
+            float[] buf  = new float[count];
+            Marshal.Copy(ptr1, buf, 0, count);
+            for (int i = 0; i < count; i++) { rms += buf[i] * buf[i]; }
+            total += count;
+        }
+
+        if (ptr2 != System.IntPtr.Zero && len2 > 0)
+        {
+            int count    = (int)(len2 / sizeof(float));
+            float[] buf  = new float[count];
+            Marshal.Copy(ptr2, buf, 0, count);
+            for (int i = 0; i < count; i++) { rms += buf[i] * buf[i]; }
+            total += count;
+        }
+
+        _recordingSound.unlock(ptr1, ptr2, len1, len2);
+
+        return total > 0 ? Mathf.Sqrt(rms / total) : 0f;
     }
 
     private float GetSmoothedVolume(float _rawVolume)
     {
-        volumeHistory[volumeHistoryIndex] = _rawVolume;
-        volumeHistoryIndex = (volumeHistoryIndex + 1) % volumeHistory.Length;
-
+        _volumeHistory[_volumeHistoryIndex] = _rawVolume;
+        _volumeHistoryIndex = (_volumeHistoryIndex + 1) % smoothFrames;
         float sum = 0f;
-        foreach (float volume in volumeHistory)
-            sum += volume;
-
-        return sum / volumeHistory.Length;
+        foreach (float v in _volumeHistory) { sum += v; }
+        return sum / smoothFrames;
     }
 
-    /// <summary>Active ou desactive la detection vocale depuis un autre script.</summary>
-    public void SetVoiceTrigger(bool _enabled)
-    {
-        voiceTriggerEnabled = _enabled;
-    }
+    public void SetVoiceTrigger(bool _enabled) => voiceTriggerEnabled = _enabled;
 
     private void OnDestroy()
     {
-        if (micReady)        Microphone.End(micName);
-        if (dummySource != null) dummySource.Stop();
+        if (_recording) { FMODUnity.RuntimeManager.CoreSystem.recordStop(DRIVER_INDEX); }
+        if (_recordingSound.hasHandle()) { _recordingSound.release(); }
     }
-
-    // ---------------------------------------------------------------
-    // Debug visuel (Editor uniquement)
 
     private void OnGUI()
     {
 #if UNITY_EDITOR
-        if (settings == null) return;
+        // Barre de charge
+        float chargeRatio = _isCharging ? Mathf.Clamp01(_chargeTimer / chargeMaxDuration) : 0f;
+        float peakRatio   = _isCharging ? Mathf.Clamp01(_chargePeakVolume / volumeMax) : 0f;
 
-        float raw    = micReady ? GetMicVolume() : 0f;
-        float smooth = micReady ? GetSmoothedVolume(raw) : 0f;
-        float norm   = settings.GetNormalizedVolume(smooth);
+        string status = !_recording      ? "Non demarre"
+            : _isCharging                ? $"CHARGE {chargeRatio * 100f:F0}% | pic={_chargePeakVolume:F4}"
+            : _lastSmooth < volumeThreshold ? "silence"
+            : "...";
 
-        string status = !micReady                          ? "Initialisation..."
-                      : smooth < settings.voiceThreshold   ? "silence"
-                      :                                      $">>> ONDE | Portee : {norm * 100f:F0}% <<<";
+        GUI.Label(new Rect(10, 10, 900, 20),
+            $"[VT] Brut:{_lastRaw:F4} Lisse:{_lastSmooth:F4} Seuil:{volumeThreshold:F4} | {status}");
 
-        GUI.Label(new Rect(10, 10, 600, 20),
-            $"[VoiceTrigger] Brut: {raw:F4} | Lisse: {smooth:F4} | Seuil: {settings.voiceThreshold:F4} | {status}");
+        // Barre volume lisse (gris/vert)
+        float volBar = Mathf.Clamp01(_lastSmooth / volumeMax) * 300f;
+        GUI.color = _lastSmooth >= volumeThreshold ? Color.green : Color.gray;
+        GUI.DrawTexture(new Rect(10, 30, volBar, 10), Texture2D.whiteTexture);
 
-        float barWidth = Mathf.Clamp01(smooth / settings.voiceMax) * 300f;
-        GUI.color = smooth >= settings.voiceThreshold ? Color.green : Color.gray;
-        GUI.DrawTexture(new Rect(10, 30, barWidth, 12), Texture2D.whiteTexture);
-
+        // Ligne seuil (rouge)
         GUI.color = Color.red;
-        GUI.DrawTexture(new Rect(10f + (settings.voiceThreshold / settings.voiceMax) * 300f, 28, 2, 16), Texture2D.whiteTexture);
+        GUI.DrawTexture(new Rect(10f + (volumeThreshold / volumeMax) * 300f, 28, 2, 14), Texture2D.whiteTexture);
+
+        // Barre de charge (cyan, grandit avec le temps)
+        GUI.color = new Color(0f, 0.8f, 1f, 0.9f);
+        GUI.DrawTexture(new Rect(10, 44, chargeRatio * 300f, 8), Texture2D.whiteTexture);
+
+        // Barre pic de volume (jaune)
+        GUI.color = Color.yellow;
+        GUI.DrawTexture(new Rect(10, 54, peakRatio * 300f, 6), Texture2D.whiteTexture);
+
         GUI.color = Color.white;
 #endif
     }
