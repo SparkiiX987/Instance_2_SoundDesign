@@ -3,44 +3,40 @@ using UnityEngine.InputSystem;
 
 namespace Player.Scripts
 {
-    /// <summary>
-    /// Handles player jumping. Applies a vertical impulse through the Rigidbody
-    /// only when the player is grounded.
-    /// </summary>
+    [RequireComponent(typeof(BoxCollider))]
     public class PlayerJump : PlayerAbility
     {
         [SerializeField] private float jumpPower = 5f;
         [SerializeField] private LayerMask groundMask;
+        [SerializeField] private int nbJump = 1;
 
-        /// <summary>
-        /// Executes the jump if the action is performed and the player is grounded.
-        /// </summary>
-        /// <param name="_context">The InputAction callback context.</param>
+        private int _jumpsRemaining;
+
+        public override void Init(PlayerController _playerController)
+        {
+            base.Init(_playerController);
+            _jumpsRemaining = nbJump;
+
+            // Configure le BoxCollider comme trigger sous les pieds
+            BoxCollider box  = GetComponent<BoxCollider>();
+            box.isTrigger    = true;
+            box.size         = new Vector3(0.8f, 0.1f, 0.8f);
+            box.center       = new Vector3(0f, -1f, 0f);
+        }
+
         public override void Execute(InputAction.CallbackContext _context)
         {
             base.Execute(_context);
-            
-            if (_context.performed)
-            {
-                if (!CheckGrounded())
-                    return; 
-                
-                controller.Rb.AddForce(Vector3.up * jumpPower, ForceMode.Impulse);
-            }
+            if (!_context.performed || _jumpsRemaining <= 0) { return; }
+
+            controller.Rb.AddForce(Vector3.up * jumpPower, ForceMode.Impulse);
+            _jumpsRemaining--;
         }
 
-        /// <summary>
-        /// Checks whether the player is touching the ground using a downward SphereCast.
-        /// </summary>
-        /// <returns>True if the player is grounded, false otherwise.</returns>
-        private bool CheckGrounded()
+        private void OnTriggerEnter(Collider _other)
         {
-            /*if (controller)
-                Debug.Log("Checking grounded with radius: " + (controller.BodyCollider ? controller.BodyCollider.radius : 0.3f) + " and distance: " + ((controller.BodyCollider ? controller.BodyCollider.height / 2f : 1f) + 0.1f));*/
-            
-            float radius = controller.BodyCollider ? controller.BodyCollider.radius : 0.3f;
-            float distance = (controller.BodyCollider ? controller.BodyCollider.height / 2f : 1f) + 0.1f;
-            return Physics.SphereCast(transform.position, radius * 0.9f, Vector3.down, out _, distance, groundMask);
+            if ((groundMask & (1 << _other.gameObject.layer)) == 0) { return; }
+            _jumpsRemaining = nbJump;
         }
     }
 }
