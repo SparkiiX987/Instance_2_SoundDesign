@@ -11,7 +11,7 @@ using UnityEngine;
 /// - Gizmos : cone (haut/bas), portee max, portee min/max voix, onde courante.
 /// Prerequis : DOTween importe dans le projet.
 /// </summary>
-public class RadarSystem : MonoBehaviour
+public class Sonar : MonoBehaviour
 {
     [Header("Parametres")]
     [SerializeField] private SO_SonarSettings settings;
