@@ -30,7 +30,7 @@ jobs:
         run: |
           COUNT=$(gh api repos/${{ github.repository }}/releases --paginate --jq 'length' 2>/dev/null || echo "0")
           NEXT=$((COUNT + 1))
-          VERSION="v1.0.${NEXT}"
+          VERSION="v0.0.${NEXT}"
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "Prochaine version : ${VERSION}"
 
