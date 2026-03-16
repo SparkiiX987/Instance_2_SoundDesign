@@ -179,7 +179,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1419428141154948861}
   - component: {fileID: 4936258935366062123}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Corps - Capsule
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -329,6 +329,7 @@ GameObject:
   - component: {fileID: 6497665006139214408}
   - component: {fileID: 5804936052691532636}
   - component: {fileID: 4369203399664267969}
+  - component: {fileID: 82036979122223303}
   - component: {fileID: 7384705160287058495}
   - component: {fileID: 96766279338221178}
   - component: {fileID: 2378271195371270544}
@@ -444,6 +445,31 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player.Scripts.PlayerRun
   runSpeedMultiplier: 2
+--- !u!114 &82036979122223303
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6585705549612740297}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 88fe93450f0d7c94aac3fd6471c0065a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Sonar
+  settings: {fileID: 11400000, guid: 7a206510d89b8e740b08c7575866747d, type: 2}
+  coneOrigin: {fileID: 0}
+  detectableLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  obstacleMask:
+    serializedVersion: 2
+    m_Bits: 0
+  showRaycasts: 1
+  raycastDrawDuration: 0.5
+  raycastHitColor: {r: 0, g: 1, b: 1, a: 1}
+  raycastToWallColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  raycastWallToTargetColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!54 &7384705160287058495
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -533,7 +559,19 @@ MonoBehaviour:
     m_ActionId: 6c2ab1b8-8984-453a-af3d-a3c78ae1679a
     m_ActionName: 'Player/Attack[/Mouse/leftButton,/Keyboard/enter]'
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 82036979122223303}
+        m_TargetAssemblyTypeName: Sonar, Assembly-CSharp
+        m_MethodName: Execute
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: 852140f2-7766-474d-8707-702459ba45f3
     m_ActionName: 'Player/Interact[/Keyboard/e]'
   - m_PersistentCalls:
