@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using DG.Tweening;
+using Player.Scripts;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// Radar / ecolocation par onde propagee.
@@ -11,13 +13,13 @@ using UnityEngine;
 /// - Gizmos : cone (haut/bas), portee max, portee min/max voix, onde courante.
 /// Prerequis : DOTween importe dans le projet.
 /// </summary>
-public class Sonar : MonoBehaviour
+public class Sonar : PlayerAbility
 {
     [Header("Parametres")]
     [SerializeField] private SO_SonarSettings settings;
 
-    [Header("Activation clavier")]
-    [SerializeField] private KeyCode activationKey = KeyCode.E;
+    //[Header("Activation clavier")]
+    //[SerializeField] private KeyCode activationKey = KeyCode.E;
 
     [Header("Origine du cone")]
     [Tooltip("Transform depuis lequel part l'onde. Vide = ce GameObject.")]
@@ -56,11 +58,17 @@ public class Sonar : MonoBehaviour
     {
         _cooldownTimer -= Time.deltaTime;
 
-        if (Input.GetKeyDown(activationKey) && _cooldownTimer <= 0f)
-            TriggerWave();
+        //if (Input.GetKeyDown(activationKey) && _cooldownTimer <= 0f)
+        //    TriggerWave();
     }
 
     // ---------------------------------------------------------------
+
+    public override void Execute(InputAction.CallbackContext _context)
+    {
+        base.Execute(_context);
+        TriggerWave();
+    }
 
     public void TriggerWave()
     {
