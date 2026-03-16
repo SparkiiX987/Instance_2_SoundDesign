@@ -98,14 +98,15 @@ public class Sonar : MonoBehaviour
         _frozenConeForward = coneOrigin.forward;
         _coneIsFrozen      = true;
 
+        Vector3 originPos = coneOrigin.position;
+        Vector3 originFwd = coneOrigin.forward;
+
         // Pousse les globals de trace residuelle
         float fadeDuration = settings.GetFadeDuration(_normalizedVolume);
         Shader.SetGlobalFloat(ID_WaveFireTime,     Time.time);
         Shader.SetGlobalFloat(ID_WaveMaxRadius,    _activeRange);
         Shader.SetGlobalFloat(ID_WaveFadeDuration, fadeDuration);
-
-        Vector3 originPos = coneOrigin.position;
-        Vector3 originFwd = coneOrigin.forward;
+        SonarSoundEvent.Emit(originPos, _normalizedVolume);
 
         _waveTween?.Kill();
         _waveTween = DOTween.To(

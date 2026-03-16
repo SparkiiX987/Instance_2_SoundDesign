@@ -13,6 +13,12 @@ using UnityEngine.InputSystem;
 /// </summary>
 public class VoiceTrigger : PlayerAbility
 {
+    /// <summary>
+    /// Declenche au moment du Fire avec les bytes PCM du cri.
+    /// EnemyVoiceCapture s'abonne pour capturer la voix du joueur.
+    /// float[] = samples PCM, int = rate, int = channels, float = volume normalise
+    /// </summary>
+    public static event System.Action<float[], int, int, float> OnSoundCaptured;
     [Header("References")]
     [SerializeField] private Sonar sonar;
 
@@ -250,7 +256,58 @@ public class VoiceTrigger : PlayerAbility
         _isCharging = false;
         float normalizedVolume = Mathf.Clamp01(
             Mathf.InverseLerp(volumeThreshold, volumeMax, _chargePeakVolume));
+
+        // Capture un extrait PCM du buffer actuel pour EnemyVoiceCapture
+        EmitPCMSnapshot(normalizedVolume);
+
         sonar.TriggerWaveWithVolume(normalizedVolume);
+    }
+
+    /// <summary>
+    /// Lit un extrait du buffer FMOD et le passe a OnSoundCaptured.
+    /// </summary>
+    private void EmitPCMSnapshot(float _normalizedVolume)
+    {
+        if (OnSoundCaptured == null) { return; }
+
+        FMODUnity.RuntimeManager.CoreSystem
+            .getRecordPosition(_activeDriverIndex, out uint writePos);
+
+        // Lit les N derniers samples selon la duree du cri
+        int sampleCount = (int)(_driverRate * Mathf.Lerp(0.5f, 1.5f, _normalizedVolume));
+        sampleCount     = Mathf.Min(sampleCount, (int)_soundLengthSamples);
+
+        uint startPos   = (writePos + _soundLengthSamples - (uint)sampleCount)
+                          % _soundLengthSamples;
+        uint byteOffset = startPos    * (uint)sizeof(float) * (uint)_driverChannels;
+        uint byteCount  = (uint)sampleCount * (uint)sizeof(float) * (uint)_driverChannels;
+
+        FMOD.RESULT r = _recordingSound.@lock(
+            byteOffset, byteCount,
+            out System.IntPtr ptr1, out System.IntPtr ptr2,
+            out uint len1, out uint len2);
+
+        if (r != FMOD.RESULT.OK) { return; }
+
+        int total = (int)((len1 + len2) / sizeof(float));
+        float[] pcm = new float[total];
+        int offset  = 0;
+
+        if (ptr1 != System.IntPtr.Zero && len1 > 0)
+        {
+            int c = (int)(len1 / sizeof(float));
+            Marshal.Copy(ptr1, pcm, offset, c);
+            offset += c;
+        }
+        if (ptr2 != System.IntPtr.Zero && len2 > 0)
+        {
+            int c = (int)(len2 / sizeof(float));
+            Marshal.Copy(ptr2, pcm, offset, c);
+        }
+
+        _recordingSound.unlock(ptr1, ptr2, len1, len2);
+
+        OnSoundCaptured?.Invoke(pcm, _driverRate, _driverChannels, _normalizedVolume);
     }
 
     // ── RMS ──────────────────────────────────────────────────────────
