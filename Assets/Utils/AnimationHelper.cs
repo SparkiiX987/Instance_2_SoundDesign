@@ -37,6 +37,7 @@ namespace Utils
         public static readonly Ease OUT_SMOOTH = Ease.InQuad;
         public static readonly Ease OUT_FAST = Ease.InCubic;
         public static readonly Ease LOOP = Ease.InOutSine;
+        public static readonly Ease OUT_LOOP = Ease.OutSine;
         public static readonly Ease HOVER = Ease.OutQuad;
 
         #endregion

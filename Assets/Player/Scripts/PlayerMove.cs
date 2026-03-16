@@ -1,46 +1,108 @@
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerMove : PlayerAbility
+namespace Player.Scripts
 {
-    [SerializeField] private float walkSpeed = 4f;
-    [SerializeField] private float runSpeed = 8f;
-
-    private Rigidbody rb;
-    private float moveSpeed;
-    private bool isRunning = false;
-
-    public override void Init(PlayerController _playerController)
+    /// <summary>
+    /// Handles player movement. Stores the input direction and applies
+    /// velocity to the Rigidbody every FixedUpdate. Supports smooth
+    /// speed transitions via DOTween (walk/run).
+    /// </summary>
+    public class PlayerMove : PlayerAbility
     {
-        base.Init(_playerController);
-        rb = player.rb;
-        moveSpeed = walkSpeed;
-    }
+        [SerializeField] private float walkSpeed = 4f;
+        [SerializeField] private float accelerationDuration = 0.2f;
 
-    public override void Execute()
-    {
-        if (player == null || !player.canMove) return;
+        private float moveSpeed;
+        private bool isRunning;
+        private Tween moveTween;
+        private Vector2 inputDirection;
+        
+        /// <summary>
+        /// Initializes the movement speed to the walk speed.
+        /// </summary>
+        /// <param name="_playerController">Reference to the parent PlayerController.</param>
+        public override void Init(PlayerController _playerController)
+        {
+            base.Init(_playerController);
+            moveSpeed = walkSpeed;
+        }
 
-        moveSpeed = isRunning ? runSpeed : walkSpeed;
+        /// <summary>
+        /// Records the input direction received from the InputAction.
+        /// </summary>
+        /// <param name="_context">The InputAction callback context.</param>
+        public override void Execute(InputAction.CallbackContext _context)
+        {
+            base.Execute(_context);
+            
+            inputDirection = _context.ReadValue<Vector2>();
+        }
 
-        Vector2 moveInput = player.MoveInput;
-        Vector3 move = transform.right * moveInput.x + transform.forward * moveInput.y;
-        move = move.normalized * moveSpeed;
+        /// <summary>
+        /// Applies velocity to the Rigidbody based on the input direction
+        /// and current speed, preserving the vertical component.
+        /// </summary>
+        private void FixedUpdate()
+        {
+            if (!controller.Rb)
+                return;
 
-        rb.linearVelocity = new Vector3(move.x, rb.linearVelocity.y, move.z);
-    }
+            Vector3 targetVelocity = (transform.right * inputDirection.x + transform.forward * inputDirection.y).normalized * moveSpeed;
+            
+            controller.Rb.linearVelocity = new Vector3(targetVelocity.x, controller.Rb.linearVelocity.y, targetVelocity.z);
+        }
 
-    public void OnMove(InputAction.CallbackContext _context)
-    {
-        if (player != null)
-            player.MoveInput = _context.ReadValue<Vector2>();
-    }
+        /// <summary>
+        /// Kills the active tween on component destruction.
+        /// </summary>
+        private void OnDestroy()
+        {
+            moveTween?.Kill();
+        }
+        
+        /// <summary>
+        /// Changes the movement speed, with an optional smooth transition via DOTween.
+        /// </summary>
+        /// <param name="_speed">Target speed.</param>
+        /// <param name="_instant">If true, applies the speed immediately without transition.</param>
+        public void SetMoveSpeed(float _speed, bool _instant = false)
+        {
+            if (_instant)
+                moveSpeed = _speed;
+            else
+                DOTween.To(() => moveSpeed, v => moveSpeed = v, _speed, accelerationDuration)
+                    .SetEase(Ease.OutSine);
+        }
 
-    public void OnRun(InputAction.CallbackContext _context)
-    {
-        if (_context.performed)
-            isRunning = true;
-        else if (_context.canceled)
-            isRunning = false;
+        /// <summary>
+        /// Enables or disables running. Interpolates speed between walk and run via DOTween.
+        /// </summary>
+        /// <param name="_value">True to run, false to walk.</param>
+        /// <param name="_runSpeedMultiplier">Walk speed multiplier for running.</param>
+        public void SetRunning(bool _value, float _runSpeedMultiplier = 2f)
+        {
+            isRunning = _value;
+            
+            float targetSpeed = isRunning ? walkSpeed * _runSpeedMultiplier : walkSpeed;
+            DOTween.To(() => moveSpeed, v => moveSpeed = v, targetSpeed, accelerationDuration)
+                .SetEase(Ease.OutSine);
+        }
+        
+        /// <summary>
+        /// Returns the current running state.
+        /// </summary>
+        /// <returns>True if the player is currently running.</returns>
+        public bool IsRunning() => isRunning;
+
+        /// <summary>
+        /// Returns the current movement speed.
+        /// </summary>
+        /// <returns>The player's current speed.</returns>
+        public float GetCurrentSpeed()
+        {
+            return moveSpeed;
+        }
     }
 }
