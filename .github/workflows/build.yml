@@ -75,6 +75,7 @@ jobs:
           unityVersion:   ${{ env.UNITY_VERSION }}
           targetPlatform: ${{ matrix.targetPlatform }}
           buildsPath:     build
+          buildName:      ${{ env.PROJECT_NAME }}
 
       # Nom de l'asset : ProjectName_vX.X.X_Linux64.zip / _Windows64.zip
       - name: Zip build
