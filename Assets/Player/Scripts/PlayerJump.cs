@@ -3,7 +3,6 @@ using UnityEngine.InputSystem;
 
 namespace Player.Scripts
 {
-    [RequireComponent(typeof(BoxCollider))]
     public class PlayerJump : PlayerAbility
     {
         [SerializeField] private float jumpPower = 5f;
@@ -17,11 +16,6 @@ namespace Player.Scripts
             base.Init(_playerController);
             _jumpsRemaining = nbJump;
 
-            // Configure le BoxCollider comme trigger sous les pieds
-            BoxCollider box  = GetComponent<BoxCollider>();
-            box.isTrigger    = true;
-            box.size         = new Vector3(0.8f, 0.1f, 0.8f);
-            box.center       = new Vector3(0f, -1f, 0f);
         }
 
         public override void Execute(InputAction.CallbackContext _context)
