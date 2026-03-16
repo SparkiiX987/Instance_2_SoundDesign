@@ -17,6 +17,7 @@ namespace Player.Scripts
         [SerializeField] private float crouchDuration = 0.25f;
 
         private Transform playerTransform;
+        private float currentHeight;
         private CapsuleCollider capsuleCollider;
         private bool isCrouching;
         private Tween crouchTween;
@@ -40,6 +41,7 @@ namespace Player.Scripts
 
             capsuleCollider = controller.BodyCollider;
             defaultHeight = capsuleCollider.height;
+
             
             playerTransform = controller.transform;
             
@@ -66,13 +68,12 @@ namespace Player.Scripts
             crouchTween?.Kill();
 
             crouchTween = DOTween.To(
-                () => capsuleCollider.height,
+                () => playerTransform.localScale.y * defaultHeight,
                 h =>
                 {
-                    capsuleCollider.height = h;
-
                     float scaleY = h / defaultHeight;
                     playerTransform.localScale = new Vector3(1f, scaleY, 1f);
+                    capsuleCollider.transform.parent.localScale = new Vector3(scaleY, scaleY, 1f);
                 },
                 targetHeight,
                 crouchDuration
