@@ -20,7 +20,7 @@ public class GameManager : MonoBehaviour
         EventBus.Subscribe<OnDefaite>(Defaite);
         EventBus.Subscribe<OnVictory>(Victory);
 
-        Instantiate(playerPrefab, playerSpawnPoint.position, Quaternion.identity);
+        Instantiate(playerPrefab, playerSpawnPoint.position, playerSpawnPoint.rotation);
     }
 
     private void OnDestroy()
