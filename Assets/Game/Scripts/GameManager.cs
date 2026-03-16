@@ -13,6 +13,9 @@ public class GameManager : MonoBehaviour
 
     private void SpawnPlayer()
     {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
         EventBus.Subscribe<OnTrapEnter>(KillPlayer);
         EventBus.Subscribe<OnDefaite>(Defaite);
         EventBus.Subscribe<OnVictory>(Victory);

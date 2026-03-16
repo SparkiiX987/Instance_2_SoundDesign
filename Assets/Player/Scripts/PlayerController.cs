@@ -21,9 +21,6 @@ namespace Player.Scripts
         /// </summary>
         void Awake()
         {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-
             gameObject.SetActive(true);
             
             rb = GetComponent<Rigidbody>();

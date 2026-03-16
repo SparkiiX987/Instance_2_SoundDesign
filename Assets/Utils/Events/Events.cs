@@ -22,3 +22,8 @@ public struct OnVictory
 {
 
 }
+
+public struct OnPlayerDetectGround
+{
+
+}

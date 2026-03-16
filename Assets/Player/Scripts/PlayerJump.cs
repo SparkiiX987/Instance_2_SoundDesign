@@ -1,11 +1,5 @@
-using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
-
-public struct OnPlayerDetectGround
-{
-
-}
 
 namespace Player.Scripts
 {
