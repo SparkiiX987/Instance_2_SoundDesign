@@ -17,7 +17,6 @@ namespace Player.Scripts
         [SerializeField] private float crouchDuration = 0.25f;
 
         private Transform playerTransform;
-        private float currentHeight;
         private CapsuleCollider capsuleCollider;
         private bool isCrouching;
         private Tween crouchTween;
@@ -42,7 +41,6 @@ namespace Player.Scripts
             capsuleCollider = controller.BodyCollider;
             defaultHeight = capsuleCollider.height;
 
-            
             playerTransform = controller.transform;
             
             Assert.IsNotNull(capsuleCollider, $"[{GetType().Name}] CapsuleCollider reference is null.");

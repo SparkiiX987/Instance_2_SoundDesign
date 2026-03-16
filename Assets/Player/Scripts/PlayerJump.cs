@@ -1,21 +1,36 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+
+public struct OnPlayerDetectGround
+{
+
+}
 
 namespace Player.Scripts
 {
     public class PlayerJump : PlayerAbility
     {
         [SerializeField] private float jumpPower = 5f;
-        [SerializeField] private LayerMask groundMask;
         [SerializeField] private int nbJump = 1;
+        [SerializeField] private BoxCollider feetCollider;
 
         private int _jumpsRemaining;
-
+        
         public override void Init(PlayerController _playerController)
         {
             base.Init(_playerController);
             _jumpsRemaining = nbJump;
+        }
 
+        private void OnEnable()
+        {
+            EventBus.Subscribe<OnPlayerDetectGround>(OnDetectGround);
+        }
+        
+        private void OnDisable()
+        {
+            EventBus.Unsubscribe<OnPlayerDetectGround>(OnDetectGround);
         }
 
         public override void Execute(InputAction.CallbackContext _context)
@@ -27,9 +42,8 @@ namespace Player.Scripts
             _jumpsRemaining--;
         }
 
-        private void OnTriggerEnter(Collider _other)
+        private void OnDetectGround(OnPlayerDetectGround _detectGround)
         {
-            if ((groundMask & (1 << _other.gameObject.layer)) == 0) { return; }
             _jumpsRemaining = nbJump;
         }
     }
