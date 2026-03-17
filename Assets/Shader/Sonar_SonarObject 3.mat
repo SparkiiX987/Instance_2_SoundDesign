@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Sonar_SonarSurface
-  m_Shader: {fileID: 4800000, guid: 957220e8c8f721344b8e42e12f87ee6b, type: 3}
+  m_Name: Sonar_SonarObject 3
+  m_Shader: {fileID: 4800000, guid: b095832563610ea6a8f8e44092b8270d, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -26,30 +26,20 @@ Material:
     m_Ints: []
     m_Floats:
     - _ConeEdgeSoftness: 0.05
-    - _DepthEdgeMult: 1
-    - _DiagAngle: 0.95
-    - _EdgeAngle: 15
-    - _EdgeBias: 0.5
-    - _EdgeBrightness: 2
     - _EdgeFadeMult: 4
-    - _EdgeThickness: 0.3
-    - _EdgeThreshold: 0.35
-    - _FadeDuration: 4
-    - _FresnelBias: 0.05
-    - _FresnelPower: 3
-    - _NormalEdgeMult: 5
-    - _OutlineWidth: 0.03
+    - _FadeDuration: 15
+    - _NoiseScale: 500
+    - _NoiseSpeed: 0.01
+    - _NoiseStrength: 0.695
     - _RingThickness: 0.15
-    - _SilhouetteCull: 0.3
-    - _WaveThickness: 2.44
-    - _WireThickness: 1
+    - _SilhouetteCull: 0
+    - _WaveThickness: 0.8
+    - _WireThickness: 2
     m_Colors:
-    - _BaseColor: {r: 0, g: 0, b: 0, a: 1}
     - _EdgeColor: {r: 1, g: 1, b: 1, a: 1}
-    - _EdgeWaveColor: {r: 1, g: 1, b: 1, a: 1}
+    - _EdgeWaveColor: {r: 0.8, g: 1, b: 1, a: 1}
     - _EnemyRingColor: {r: 1, g: 0.29999998, b: 0.09999997, a: 1}
     - _RingColor: {r: 0.5, g: 0.9, b: 1, a: 1}
     - _SurfaceColor: {r: 0, g: 0.29999998, b: 0.5, a: 1}
-    - _WaveColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
