@@ -3,6 +3,9 @@ using UnityEngine.SceneManagement;
 
 public class ButtonsSystem : MonoBehaviour
 {
+    [SerializeField] private GameObject panelMainMenu;
+    [SerializeField] private GameObject panelSettings;
+    
     public void Play()
     {
         SceneManager.LoadScene("ProtoDeplacements");
@@ -10,7 +13,8 @@ public class ButtonsSystem : MonoBehaviour
 
     public void Settings()
     {
-        SceneManager.LoadScene("Settings");
+        panelSettings.SetActive(true);
+        panelMainMenu.SetActive(false);
     }
 
     public void Credits()
