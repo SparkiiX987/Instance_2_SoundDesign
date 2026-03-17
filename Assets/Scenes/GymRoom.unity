@@ -2480,7 +2480,7 @@ PrefabInstance:
     - target: {fileID: 1966658568233291450, guid: 9a6ad751aae924641890fe9a062a5647, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 3e189a5cb4aa6824e9ba227aaae391f2, type: 2}
+      objectReference: {fileID: 2100000, guid: bcee0f426b8d25745b7fffc6b027b147, type: 2}
     - target: {fileID: 3450259318710168831, guid: 9a6ad751aae924641890fe9a062a5647, type: 3}
       propertyPath: m_Name
       value: DoorWithSwitch
@@ -2504,7 +2504,7 @@ PrefabInstance:
     - target: {fileID: 4912008149014254810, guid: 9a6ad751aae924641890fe9a062a5647, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 3e189a5cb4aa6824e9ba227aaae391f2, type: 2}
+      objectReference: {fileID: 2100000, guid: bcee0f426b8d25745b7fffc6b027b147, type: 2}
     - target: {fileID: 4930174528272910965, guid: 9a6ad751aae924641890fe9a062a5647, type: 3}
       propertyPath: m_Layer
       value: 9
@@ -2516,7 +2516,7 @@ PrefabInstance:
     - target: {fileID: 6306675289395706076, guid: 9a6ad751aae924641890fe9a062a5647, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 3e189a5cb4aa6824e9ba227aaae391f2, type: 2}
+      objectReference: {fileID: 2100000, guid: bcee0f426b8d25745b7fffc6b027b147, type: 2}
     - target: {fileID: 6347254331626746588, guid: 9a6ad751aae924641890fe9a062a5647, type: 3}
       propertyPath: m_Enabled
       value: 0
