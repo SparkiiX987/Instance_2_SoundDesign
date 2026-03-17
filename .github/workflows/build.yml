@@ -30,7 +30,7 @@ jobs:
         run: |
           COUNT=$(gh api repos/${{ github.repository }}/releases --paginate --jq 'length' 2>/dev/null || echo "0")
           NEXT=$((COUNT + 1))
-          VERSION="v1.0.${NEXT}"
+          VERSION="v0.0.${NEXT}"
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "Prochaine version : ${VERSION}"
 
@@ -75,6 +75,7 @@ jobs:
           unityVersion:   ${{ env.UNITY_VERSION }}
           targetPlatform: ${{ matrix.targetPlatform }}
           buildsPath:     build
+          buildName:      ${{ env.PROJECT_NAME }}
 
       # Nom de l'asset : ProjectName_vX.X.X_Linux64.zip / _Windows64.zip
       - name: Zip build
