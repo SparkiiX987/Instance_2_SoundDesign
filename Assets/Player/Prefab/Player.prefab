@@ -704,6 +704,7 @@ GameObject:
   - component: {fileID: 4153043474004934558}
   - component: {fileID: 2052296737824674740}
   - component: {fileID: 5864307829325704268}
+  - component: {fileID: 430797880866526772}
   m_Layer: 0
   m_Name: Feets - BoxCollider
   m_TagString: Untagged
@@ -762,3 +763,17 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 8
+--- !u!114 &430797880866526772
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8422393609135186145}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbc0e06b96d599144a97afa1450092a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerFeetReposition
+  crouchPos: {x: 0, y: -0.7, z: 0}
+  unCrouchPos: {x: 0, y: -0.47, z: 0}
