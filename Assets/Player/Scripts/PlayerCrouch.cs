@@ -1,5 +1,5 @@
-using UnityEngine;
 using DG.Tweening;
+using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.InputSystem;
 using Utils;
@@ -42,7 +42,7 @@ namespace Player.Scripts
             defaultHeight = capsuleCollider.height;
 
             playerTransform = controller.transform;
-            
+
             Assert.IsNotNull(capsuleCollider, $"[{GetType().Name}] CapsuleCollider reference is null.");
             Assert.IsNotNull(playerTransform, $"[{GetType().Name}] PlayerTransform is null.");
         }
@@ -57,9 +57,16 @@ namespace Player.Scripts
             base.Execute(_context);
 
             if (_context.performed)
+            {
                 isCrouching = !isCrouching;
+            }
             else
                 return;
+
+            if (isCrouching)
+                EventBus.Publish(new OnPlayerCrouch());
+            else
+                EventBus.Publish(new OnPlayerUnCrouch());
 
             float targetHeight = isCrouching ? crouchHeight : defaultHeight;
 
