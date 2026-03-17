@@ -5,13 +5,9 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// Radar / ecolocation par onde propagee.
-/// Utilise SO_SonarSettings pour tous les parametres.
-/// - Touche E : onde a portee maximale.
-/// - TriggerWaveWithVolume : portee dynamique selon la voix (VoiceTrigger).
-/// - Raycasts visibles dans la vue Scene via Debug.DrawRay.
-/// - Gizmos : cone (haut/bas), portee max, portee min/max voix, onde courante.
-/// Prerequis : DOTween importe dans le projet.
+/// Sonar / echolocalisation — Echo Maze.
+/// Pousse les globals shader chaque frame pour synchroniser SonarSurface.shader.
+/// La duree de revelation (_WaveFadeDuration) est proportionnelle a la charge.
 /// </summary>
 public class Sonar : PlayerAbility
 {
@@ -36,12 +32,23 @@ public class Sonar : PlayerAbility
     [SerializeField] private Color raycastToWallColor       = Color.yellow;
     [SerializeField] private Color raycastWallToTargetColor = Color.red;
 
-    // ---------------------------------------------------------------
+    // ── Shader IDs ───────────────────────────────────────────────────
+    private static readonly int ID_WaveOrigin        = Shader.PropertyToID("_WaveOrigin");
+    private static readonly int ID_WaveRadius        = Shader.PropertyToID("_WaveRadius");
+    private static readonly int ID_WaveActive        = Shader.PropertyToID("_WaveActive");
+    private static readonly int ID_ConeForward       = Shader.PropertyToID("_ConeForward");
+    private static readonly int ID_ConeHalfAngleCos  = Shader.PropertyToID("_ConeHalfAngleCos");
+    private static readonly int ID_WaveFireTime      = Shader.PropertyToID("_WaveFireTime");
+    private static readonly int ID_WaveMaxRadius     = Shader.PropertyToID("_WaveMaxRadius");
+    private static readonly int ID_WaveFadeDuration  = Shader.PropertyToID("_WaveFadeDuration");
 
+    // ── Etat ─────────────────────────────────────────────────────────
     private float                _currentWaveRadius;
     private float                _previousWaveRadius;
     private float                _activeRange;
     private float                _cooldownTimer;
+    private Vector3              _frozenConeForward;
+    private bool                 _coneIsFrozen;
     private HashSet<IDetectable> _hitObjects = new();
     private Tween                _waveTween;
 
@@ -49,20 +56,19 @@ public class Sonar : PlayerAbility
 
     private void Awake()
     {
-        if (coneOrigin == null) coneOrigin = transform;
-        if (settings == null)
-            Debug.LogError("[RadarSystem] SO_SonarSettings non assigne !");
+        if (coneOrigin == null) { coneOrigin = transform; }
+        if (settings   == null) { Debug.LogError("[Sonar] SO_SonarSettings non assigne !"); }
     }
 
     private void Update()
     {
         _cooldownTimer -= Time.deltaTime;
-
         //if (Input.GetKeyDown(activationKey) && _cooldownTimer <= 0f)
         //    TriggerWave();
+        PushShaderGlobals();
     }
 
-    // ---------------------------------------------------------------
+    // ── API publique ─────────────────────────────────────────────────
 
     public override void Execute(InputAction.CallbackContext _context)
     {
@@ -72,19 +78,25 @@ public class Sonar : PlayerAbility
 
     public void TriggerWave()
     {
-        if (_cooldownTimer > 0f) return;
-        EmitWave(settings.range);
+        if (_cooldownTimer > 0f) { return; }
+        EmitWave(settings.range, 1f);
     }
 
+    /// <summary>
+    /// Declenche l'onde avec portee et duree de revelation dynamiques.
+    /// _normalizedVolume [0..1] : 0 = min, 1 = max.
+    /// </summary>
     public void TriggerWaveWithVolume(float _normalizedVolume)
     {
-        if (_cooldownTimer > 0f) return;
-        EmitWave(settings.GetVoiceRange(_normalizedVolume));
+        if (_cooldownTimer > 0f) { return; }
+        EmitWave(
+            settings.GetVoiceRange(_normalizedVolume),
+            _normalizedVolume);
     }
 
-    // ---------------------------------------------------------------
+    // ── Logique interne ──────────────────────────────────────────────
 
-    private void EmitWave(float _range)
+    private void EmitWave(float _range, float _normalizedVolume)
     {
         _cooldownTimer      = settings.cooldown;
         _activeRange        = Mathf.Clamp(_range, settings.minVoiceRange, settings.range);
@@ -92,8 +104,18 @@ public class Sonar : PlayerAbility
         _previousWaveRadius = 0f;
         _hitObjects.Clear();
 
+        _frozenConeForward = coneOrigin.forward;
+        _coneIsFrozen      = true;
+
         Vector3 originPos = coneOrigin.position;
         Vector3 originFwd = coneOrigin.forward;
+
+        // Pousse les globals de trace residuelle
+        float fadeDuration = settings.GetFadeDuration(_normalizedVolume);
+        Shader.SetGlobalFloat(ID_WaveFireTime,     Time.time);
+        Shader.SetGlobalFloat(ID_WaveMaxRadius,    _activeRange);
+        Shader.SetGlobalFloat(ID_WaveFadeDuration, fadeDuration);
+        SonarSoundEvent.Emit(originPos, _normalizedVolume);
 
         _waveTween?.Kill();
         _waveTween = DOTween.To(
@@ -107,95 +129,102 @@ public class Sonar : PlayerAbility
             _activeRange,
             settings.GetWaveDuration(_activeRange))
             .SetEase(settings.waveEase)
-            .OnComplete(() => _currentWaveRadius = 0f);
+            .OnComplete(() =>
+            {
+                _currentWaveRadius = 0f;
+                _coneIsFrozen      = false;
+                Shader.SetGlobalFloat(ID_WaveActive, 0f);
+            });
     }
 
     private void OnWaveStep(Vector3 _originPos, Vector3 _originFwd)
     {
-        Collider[] hits = Physics.OverlapSphere(_originPos, _currentWaveRadius, detectableLayerMask);
+        Collider[] hits = Physics.OverlapSphere(
+            _originPos, _currentWaveRadius, detectableLayerMask);
 
         foreach (Collider hit in hits)
         {
             IDetectable detectable = hit.GetComponent<IDetectable>();
-            if (detectable == null || !detectable.IsActive()) continue;
-            if (_hitObjects.Contains(detectable)) continue;
+            if (detectable == null || !detectable.IsActive()) { continue; }
+            if (_hitObjects.Contains(detectable))             { continue; }
 
             Vector3 position = detectable.GetPosition();
             float   distance = Vector3.Distance(_originPos, position);
 
-            if (distance < _previousWaveRadius) continue;
-            if (!IsInsideCone(_originPos, _originFwd, position)) continue;
+            if (distance < _previousWaveRadius)                  { continue; }
+            if (!IsInsideCone(_originPos, _originFwd, position)) { continue; }
 
-            Vector3 dir = (position - _originPos).normalized;
-
+            Vector3    dir = (position - _originPos).normalized;
             RaycastHit wallHit;
+
             if (Physics.Raycast(_originPos, dir, out wallHit, distance, obstacleMask))
             {
                 if (showRaycasts)
                 {
-                    Debug.DrawRay(_originPos, dir * wallHit.distance, raycastToWallColor,      raycastDrawDuration);
-                    Debug.DrawLine(wallHit.point, position,           raycastWallToTargetColor, raycastDrawDuration);
+                    Debug.DrawRay(_originPos, dir * wallHit.distance,
+                        raycastToWallColor, raycastDrawDuration);
+                    Debug.DrawLine(wallHit.point, position,
+                        raycastWallToTargetColor, raycastDrawDuration);
                 }
                 continue;
             }
 
             if (showRaycasts)
-                Debug.DrawRay(_originPos, dir * distance, raycastHitColor, raycastDrawDuration);
+                Debug.DrawRay(_originPos, dir * distance,
+                    raycastHitColor, raycastDrawDuration);
 
             _hitObjects.Add(detectable);
-
-            float normalizedProximity = Mathf.Clamp01(1f - (distance / _activeRange));
-            detectable.OnProb(normalizedProximity);
+            float proximity = Mathf.Clamp01(1f - (distance / _activeRange));
+            detectable.OnProb(proximity);
         }
     }
 
-    private bool IsInsideCone(Vector3 _origin, Vector3 _forward, Vector3 _targetPosition)
+    private bool IsInsideCone(Vector3 _origin, Vector3 _forward, Vector3 _target)
+        => Vector3.Angle(_forward, (_target - _origin).normalized) <= settings.coneHalfAngle;
+
+    private void PushShaderGlobals()
     {
-        Vector3 direction = (_targetPosition - _origin).normalized;
-        return Vector3.Angle(_forward, direction) <= settings.coneHalfAngle;
+        Vector3 fwd = _coneIsFrozen ? _frozenConeForward : coneOrigin.forward;
+        Shader.SetGlobalVector(ID_WaveOrigin,       coneOrigin.position);
+        Shader.SetGlobalFloat( ID_WaveRadius,       _currentWaveRadius);
+        Shader.SetGlobalFloat( ID_WaveActive,       _currentWaveRadius > 0f ? 1f : 0f);
+        Shader.SetGlobalVector(ID_ConeForward,      fwd);
+        Shader.SetGlobalFloat( ID_ConeHalfAngleCos, Mathf.Cos(settings.coneHalfAngle * Mathf.Deg2Rad));
     }
 
-    // ---------------------------------------------------------------
-    // Gizmos
+    // ── Gizmos ───────────────────────────────────────────────────────
 
     private void OnDrawGizmosSelected()
     {
-        if (settings == null) return;
+        if (settings == null) { return; }
         Transform origin = coneOrigin != null ? coneOrigin : transform;
 
-        // Portee maximale
         Gizmos.color = new Color(0f, 1f, 0.5f, 0.06f);
         Gizmos.DrawSphere(origin.position, settings.range);
         Gizmos.color = new Color(0f, 1f, 0.5f, 0.5f);
         Gizmos.DrawWireSphere(origin.position, settings.range);
 
-        // Portee minimale voix
         Gizmos.color = new Color(1f, 1f, 0f, 0.06f);
         Gizmos.DrawSphere(origin.position, settings.minVoiceRange);
         Gizmos.color = new Color(1f, 1f, 0f, 0.5f);
         Gizmos.DrawWireSphere(origin.position, settings.minVoiceRange);
 
-        // Portee maximale voix
         Gizmos.color = new Color(1f, 0.5f, 0f, 0.06f);
         Gizmos.DrawSphere(origin.position, settings.maxVoiceRange);
         Gizmos.color = new Color(1f, 0.5f, 0f, 0.5f);
         Gizmos.DrawWireSphere(origin.position, settings.maxVoiceRange);
 
-        // Cone haut et bas
         Gizmos.color = new Color(0f, 1f, 0.5f, 1f);
         DrawConeRay(origin.position, origin.forward,  settings.coneHalfAngle);
         DrawConeRay(origin.position, origin.forward, -settings.coneHalfAngle);
 
-        // Axe forward
         Gizmos.color = Color.yellow;
         Gizmos.DrawRay(origin.position, origin.forward * settings.range);
 
-        // Onde courante (runtime uniquement)
         if (Application.isPlaying && _currentWaveRadius > 0f)
         {
             Gizmos.color = new Color(0.2f, 0.6f, 1f, 0.9f);
             Gizmos.DrawWireSphere(origin.position, _currentWaveRadius);
-
             Gizmos.color = new Color(1f, 0.3f, 0.3f, 0.3f);
             Gizmos.DrawWireSphere(origin.position, _activeRange);
         }
@@ -203,15 +232,11 @@ public class Sonar : PlayerAbility
 
     private void DrawConeRay(Vector3 _origin, Vector3 _forward, float _angleOffset)
     {
-        Vector2 forward2D = new Vector2(_forward.x, _forward.y).normalized;
-
-        float   rad   = _angleOffset * Mathf.Deg2Rad;
-        float   cos   = Mathf.Cos(rad);
-        float   sin   = Mathf.Sin(rad);
-        Vector2 dir2D = new Vector2(
-            forward2D.x * cos - forward2D.y * sin,
-            forward2D.x * sin + forward2D.y * cos);
-
-        Gizmos.DrawRay(_origin, new Vector3(dir2D.x, dir2D.y, 0f) * settings.range);
+        Vector2 f2  = new Vector2(_forward.x, _forward.y).normalized;
+        float   rad = _angleOffset * Mathf.Deg2Rad;
+        Vector2 d2  = new Vector2(
+            f2.x * Mathf.Cos(rad) - f2.y * Mathf.Sin(rad),
+            f2.x * Mathf.Sin(rad) + f2.y * Mathf.Cos(rad));
+        Gizmos.DrawRay(_origin, new Vector3(d2.x, d2.y, 0f) * settings.range);
     }
 }

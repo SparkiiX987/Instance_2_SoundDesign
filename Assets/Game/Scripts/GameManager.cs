@@ -1,11 +1,11 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private Transform playerSpawnPoint;
 
+    private GameObject player;
     private void Start()
     {
         SpawnPlayer();
@@ -20,7 +20,7 @@ public class GameManager : MonoBehaviour
         EventBus.Subscribe<OnDefaite>(Defaite);
         EventBus.Subscribe<OnVictory>(Victory);
 
-        Instantiate(playerPrefab, playerSpawnPoint.position, playerSpawnPoint.rotation);
+        player = Instantiate(playerPrefab, playerSpawnPoint.position, playerSpawnPoint.rotation);
     }
 
     private void OnDestroy()
@@ -40,7 +40,8 @@ public class GameManager : MonoBehaviour
     private void Defaite(OnDefaite defaite)
     {
         print("defaite");
-        SceneManager.LoadScene(0);
+        //SceneManager.LoadScene(0);
+        player.transform.position = playerSpawnPoint.position;
     }
 
     private void Victory(OnVictory victory)
