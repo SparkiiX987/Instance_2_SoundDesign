@@ -184,11 +184,11 @@ MonoBehaviour:
   isActiveOnStart: 1
   sound:
     Guid:
-      Data1: 0
-      Data2: 0
-      Data3: 0
-      Data4: 0
-    Path: 
+      Data1: 805203070
+      Data2: 1084855665
+      Data3: -182505563
+      Data4: 1395056263
+    Path: event:/Bad GPE Encounter
   volumeMin: 0.1
   volumeMax: 1
   pitchMin: 0.5

@@ -27,3 +27,13 @@ public struct OnPlayerDetectGround
 {
 
 }
+
+public struct OnPlayerCrouch
+{
+
+}
+
+public struct OnPlayerUnCrouch
+{
+
+}
