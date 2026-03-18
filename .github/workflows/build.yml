@@ -18,7 +18,7 @@ jobs:
     name: Compute Version
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
     outputs:
       version: ${{ steps.compute.outputs.version }}
 
@@ -27,10 +27,24 @@ jobs:
         id: compute
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MAJOR: 0
+          MINOR: 1
         run: |
-          COUNT=$(gh api repos/${{ github.repository }}/releases --paginate --jq 'length' 2>/dev/null || echo "0")
-          NEXT=$((COUNT + 1))
-          VERSION="v1.0.${NEXT}"
+          PREFIX="v${MAJOR}.${MINOR}."
+
+          TAGS=$(gh api repos/${{ github.repository }}/tags --paginate --jq '.[].name')
+
+          MATCHING=$(echo "$TAGS" | grep "^${PREFIX}" || true)
+
+          if [ -z "$MATCHING" ]; then
+            NEXT=1
+          else
+            LAST=$(echo "$MATCHING" | sed "s/${PREFIX}//" | sort -n | tail -n 1)
+            NEXT=$((LAST + 1))
+          fi
+
+          VERSION="${PREFIX}${NEXT}"
+
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "Prochaine version : ${VERSION}"
 
@@ -71,10 +85,12 @@ jobs:
           UNITY_LICENSE:  ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL:    ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         with:
           unityVersion:   ${{ env.UNITY_VERSION }}
           targetPlatform: ${{ matrix.targetPlatform }}
           buildsPath:     build
+          buildName:      ${{ env.PROJECT_NAME }}
 
       # Nom de l'asset : ProjectName_vX.X.X_Linux64.zip / _Windows64.zip
       - name: Zip build
@@ -126,3 +142,14 @@ jobs:
           files: artifacts/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Send Discord notification
+        run: |
+          jq -n \
+            --arg version "${{ needs.version.outputs.version }}" \
+            --arg msg "${{ github.event.head_commit.message }}" \
+            --arg url "https://github.com/${{ github.repository }}/releases/tag/${{ needs.version.outputs.version }}" \
+            '{
+              username: "GitHub Bot",
+              content: "@everyone\n🚀 Nouvelle build publiée !\n\n📦 Version: \($version)\n📝 Patch note: \($msg)\n🔗 \($url)"
+            }' | curl -H "Content-Type: application/json" -X POST -d @- ${{ secrets.DISCORD_WEBHOOK_URL }}

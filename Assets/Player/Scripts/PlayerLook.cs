@@ -34,6 +34,9 @@ namespace Player.Scripts
         {
             base.Execute(_context);
 
+            if (!enabled) 
+                return;
+            
             Vector2 lookInput = _context.ReadValue<Vector2>();
 
             rotationX -= lookInput.y * lookSpeed;
