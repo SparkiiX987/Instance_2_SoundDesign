@@ -128,7 +128,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
-            - name: Send Discord notification
+      - name: Send Discord notification
         run: |
           curl -H "Content-Type: application/json" \
           -X POST \
