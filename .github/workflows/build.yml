@@ -133,7 +133,7 @@ jobs:
         run: |
           jq -n \
             --arg version "${{ needs.version.outputs.version }}" \
-            --arg msg "${{ github.event.commits[0].message }}" \
+            --arg msg "${{ github.event.head_commit.message }}" \
             --arg url "https://github.com/${{ github.repository }}/releases/tag/${{ needs.version.outputs.version }}" \
             '{
               username: "GitHub Bot",
