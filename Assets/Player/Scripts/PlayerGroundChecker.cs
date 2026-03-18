@@ -5,14 +5,19 @@ namespace Player.Scripts
     public class PlayerGroundChecker : MonoBehaviour
     {
         [SerializeField] private LayerMask groundMask;
+        [SerializeField] private LayerMask objectMask;
 
         private void OnTriggerEnter(Collider _other)
         {
-            // Check if the layer of the colliding object is in the groundMask
-            if ((groundMask & (1 << _other.gameObject.layer)) == 0)
+            if (IsOnGround(groundMask, _other) && IsOnGround(objectMask, _other))
                 return;
             
             EventBus.Publish(new OnPlayerDetectGround());
+        }
+
+        private bool IsOnGround(LayerMask _layerMask, Collider _collider)
+        {
+            return (_layerMask & (1 << _collider.gameObject.layer)) != 0;
         }
     }
 }
