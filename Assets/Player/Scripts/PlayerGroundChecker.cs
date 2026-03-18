@@ -9,7 +9,7 @@ namespace Player.Scripts
 
         private void OnTriggerEnter(Collider _other)
         {
-            if (IsOnGround(groundMask, _other) || IsOnGround(objectMask, _other))
+            if (IsOnGround(groundMask, _other) && IsOnGround(objectMask, _other))
                 return;
             
             EventBus.Publish(new OnPlayerDetectGround());
