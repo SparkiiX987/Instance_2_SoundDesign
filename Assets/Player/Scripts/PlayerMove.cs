@@ -38,6 +38,10 @@ namespace Player.Scripts
             if (!CanExecute()) return;
 
             inputDirection = _context.ReadValue<Vector2>();
+            EventBus.Publish(new OnPlayerInputEnter
+            {
+                moveDirection = new Vector2(inputDirection.x,inputDirection.y)
+            });
         }
 
         /// <summary>

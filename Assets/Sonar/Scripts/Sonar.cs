@@ -73,6 +73,11 @@ public class Sonar : PlayerAbility
     public override void Execute(InputAction.CallbackContext _context)
     {
         if (!CanExecute()) return;
+        base.Execute(_context);
+        EventBus.Publish(new OnPlayerInputEnter
+        {
+            input = "echolocation"
+        });
         TriggerWave();
     }
 

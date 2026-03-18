@@ -33,7 +33,11 @@ namespace Player.Scripts
             if (!_context.performed || _jumpsRemaining <= 0 || controller.Rb.linearVelocity.y > 0) return;
 
             controller.Rb.AddForce(Vector3.up * jumpPower, ForceMode.Impulse);
-            _jumpsRemaining--;
+            _jumpsRemaining--;           
+            EventBus.Publish(new OnPlayerInputEnter
+            {
+                input = "jump"
+            });
         }
 
         private void OnDetectGround(OnPlayerDetectGround _detectGround)

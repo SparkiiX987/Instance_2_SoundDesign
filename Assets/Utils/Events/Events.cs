@@ -1,3 +1,5 @@
+using UnityEngine;
+
 public struct OnSwitchOnEvent
 {
     public int switchId;
@@ -46,4 +48,9 @@ public struct OnEnableInput
 public struct OnDisableInput
 {
 
+}
+public struct OnPlayerInputEnter
+{
+    public string input;
+    public Vector2 moveDirection;
 }

@@ -1,4 +1,10 @@
+using DG.Tweening;
+using System.Collections;
+using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
+using Utils;
 
 public class TutorialInputVerif : MonoBehaviour
 {
@@ -8,40 +14,91 @@ public class TutorialInputVerif : MonoBehaviour
     bool keyDPressed = false;
     bool keyEPressed = false;
     bool keyJumpPressed = false;
+    [SerializeField] int fadeValue;
+    [SerializeField] int fadeDuration;
+    Vector2 upDirection = new Vector2 (0, 1);
+    Vector2 downDirection = new Vector2(0, -1);
+    Vector2 leftDirection = new Vector2(-1, 0);
+    Vector2 rightDirection = new Vector2(1, 0);
+    [SerializeField] Image upButton;
+    [SerializeField] Image downButton;
+    [SerializeField] Image leftButton;
+    [SerializeField] Image rightButton;
+    [SerializeField] TextMeshPro upText;
+    [SerializeField] TextMeshPro leftText;
+    [SerializeField] TextMeshPro rightText;
+    [SerializeField] TextMeshPro DownText;
+    [SerializeField] private Rigidbody cageRigidBody;
 
-    void KeyZPressed()
+    public void Start()
     {
-        keyZPressed = true;
-        LookIfAllKeyPressed();
+        EventBus.Subscribe<OnPlayerInputEnter>(TutorialButton);
     }
 
-    void KeySPressed()
+    public void OnDestroy()
     {
-        keySPressed = true;
-        LookIfAllKeyPressed();
+        EventBus.Unsubscribe<OnPlayerInputEnter>(LookIfAllKeyPressed);
     }
-    void KeyQPressed()
+
+    void TutorialButton(OnPlayerInputEnter _InputEnter)
     {
-        keySPressed = true;
-        LookIfAllKeyPressed();
+        if(_InputEnter.input == "echolocation" && keyEPressed ==false)
+        {
+            upButton.enabled = false;
+            keyEPressed = true;
+            upButton.enabled = true;
+        }
+        if(_InputEnter.input == "jump" && keyJumpPressed == false  && keyEPressed ==true)
+        {
+            keyJumpPressed = true;
+            leftButton.enabled = true;
+            rightButton.enabled = true;
+            downButton.enabled = true;
+        }
     }
-    void KeyDPressed()
+    void LookIfAllKeyPressed(OnPlayerInputEnter _InputEnter)
     {
-        keySPressed = true;
-        LookIfAllKeyPressed();
+       if (_InputEnter.input == "jump")
+        {
+            keyJumpPressed = true;
+        }
+        if (_InputEnter.input == "echolocation")
+        {
+            keyEPressed = true;
+        }
+        if (_InputEnter.moveDirection.Equals(upDirection))
+        {
+            keyZPressed = true;
+        }
+        if (_InputEnter.moveDirection.Equals(downDirection))
+        {
+            keySPressed = true;
+        }
+        if (_InputEnter.moveDirection.Equals(leftDirection))
+        {
+            keyQPressed = true;
+        }
+        if (_InputEnter.moveDirection.Equals(rightDirection))
+        {
+            keyDPressed = true;
+        }
+        if (keyZPressed && keySPressed &&  keyQPressed && keyDPressed && keyEPressed && keyJumpPressed)
+        {
+            FinishTutorial();
+        }
     }
-    void KeyEPressed()
+
+    private void FinishTutorial()
     {
-        keySPressed = true;
-        LookIfAllKeyPressed();
+        cageRigidBody.isKinematic = false;
     }
-    void KeySpacePressed()
+    
+    private void Fade(Image button)
     {
-        keySPressed = true;
-        LookIfAllKeyPressed();
 
     }
-    void LookIfAllKeyPressed()
+
+    private void UnFade(Image button)
     {
 
     }
