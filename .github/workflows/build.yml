@@ -15,33 +15,38 @@ jobs:
   # Calcul de la version (basé sur le nb de releases existantes)
   # ──────────────────────────────────────────────
   version:
-    - name: Compute next version
-      id: compute
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        MAJOR: 0
-        MINOR: 1
-      run: |
-        PREFIX="v${MAJOR}.${MINOR}."
+    name: Compute Version
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.compute.outputs.version }}
 
-        # Récupère tous les tags
-        TAGS=$(gh api repos/${{ github.repository }}/tags --paginate --jq '.[].name')
+    steps:
+      - name: Compute next version
+        id: compute
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MAJOR: 0
+          MINOR: 1
+        run: |
+          PREFIX="v${MAJOR}.${MINOR}."
 
-        # Filtre ceux correspondant à la version
-        MATCHING=$(echo "$TAGS" | grep "^${PREFIX}" || true)
+          TAGS=$(gh api repos/${{ github.repository }}/tags --paginate --jq '.[].name')
 
-        if [ -z "$MATCHING" ]; then
-          NEXT=1
-        else
-          # Récupère le plus grand patch
-          LAST=$(echo "$MATCHING" | sed "s/${PREFIX}//" | sort -n | tail -n 1)
-          NEXT=$((LAST + 1))
-        fi
+          MATCHING=$(echo "$TAGS" | grep "^${PREFIX}" || true)
 
-        VERSION="${PREFIX}${NEXT}"
+          if [ -z "$MATCHING" ]; then
+            NEXT=1
+          else
+            LAST=$(echo "$MATCHING" | sed "s/${PREFIX}//" | sort -n | tail -n 1)
+            NEXT=$((LAST + 1))
+          fi
 
-        echo "version=${VERSION}" >> $GITHUB_OUTPUT
-        echo "Prochaine version : ${VERSION}"
+          VERSION="${PREFIX}${NEXT}"
+
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Prochaine version : ${VERSION}"
 
 
   # ──────────────────────────────────────────────
