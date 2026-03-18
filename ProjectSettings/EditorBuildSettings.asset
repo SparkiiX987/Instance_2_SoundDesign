@@ -6,19 +6,11 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-<<<<<<< feat/MainMenu
-    path: Assets/Scenes/MainMenuProto.unity
-    guid: 5c75d7c870e1e06428a540b48c04e7c2
-  - enabled: 1
-    path: Assets/Scenes/ProtoDeplacements.unity
-    guid: 70da5c4a84e35c549a30221cdcb63cad
-=======
     path: Assets/Scenes/Debug_Menu.unity
     guid: b2202ce1f8a431248854722922b52e5b
   - enabled: 1
     path: Assets/Scenes/GymRoom.unity
     guid: 4db0ea80aeca9a648b935db0373d9c1d
->>>>>>> Dev
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

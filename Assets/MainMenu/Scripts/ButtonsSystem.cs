@@ -6,9 +6,9 @@ public class ButtonsSystem : MonoBehaviour
     [SerializeField] private GameObject panelMainMenu;
     [SerializeField] private GameObject panelSettings;
     
-    public void Play()
+    public void Play(int _sceneId)
     {
-        SceneManager.LoadScene("ProtoDeplacements");
+        SceneManager.LoadScene(_sceneId);
     }
 
     public void Settings()
