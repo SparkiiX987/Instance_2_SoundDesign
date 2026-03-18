@@ -127,3 +127,13 @@ jobs:
           files: artifacts/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Send Discord notification
+        run: |
+          curl -H "Content-Type: application/json" \
+          -X POST \
+          -d "{
+            \"username\": \"GitHub Bot\",
+            \"content\": \"@everyone\n 🚀 Nouvelle build publiée !\n\n📦 Version : ${{ needs.version.outputs.version }}\n📝 Patch note : ${{ github.event.head_commit.message }}\n🔗 https://github.com/${{ github.repository }}/releases/tag/${{ needs.version.outputs.version }}\"
+          }" \
+          ${{ secrets.DISCORD_WEBHOOK_URL }}
