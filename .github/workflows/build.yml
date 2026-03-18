@@ -71,6 +71,7 @@ jobs:
           UNITY_LICENSE:  ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL:    ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         with:
           unityVersion:   ${{ env.UNITY_VERSION }}
           targetPlatform: ${{ matrix.targetPlatform }}
@@ -130,10 +131,11 @@ jobs:
       
       - name: Send Discord notification
         run: |
-          curl -H "Content-Type: application/json" \
-          -X POST \
-          -d "{
-            \"username\": \"GitHub Bot\",
-            \"content\": \"@everyone\n 🚀 Nouvelle build publiée !\n\n📦 Version : ${{ needs.version.outputs.version }}\n📝 Patch note : ${{ github.event.head_commit.message }}\n🔗 https://github.com/${{ github.repository }}/releases/tag/${{ needs.version.outputs.version }}\"
-          }" \
-          ${{ secrets.DISCORD_WEBHOOK_URL }}
+          jq -n \
+            --arg version "${{ needs.version.outputs.version }}" \
+            --arg msg "${{ github.event.commits[0].message }}" \
+            --arg url "https://github.com/${{ github.repository }}/releases/tag/${{ needs.version.outputs.version }}" \
+            '{
+              username: "GitHub Bot",
+              content: "@everyone\n🚀 Nouvelle build publiée !\n\n📦 Version: \($version)\n📝 Patch note: \($msg)\n🔗 \($url)"
+            }' | curl -H "Content-Type: application/json" -X POST -d @- ${{ secrets.DISCORD_WEBHOOK_URL }}
