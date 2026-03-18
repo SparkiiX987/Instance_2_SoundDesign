@@ -134,6 +134,6 @@ jobs:
           -X POST \
           -d "{
             \"username\": \"GitHub Bot\",
-            \"content\": \"🚀 Nouvelle build publiée !\n\n📦 Version : ${{ needs.version.outputs.version }}\n📝 Patch note : ${{ github.event.head_commit.message }}\n🌿 Branche: ${{ github.ref_name }}\n🔗 https://github.com/${{ github.repository }}/releases/tag/${{ needs.version.outputs.version }}\"
+            \"content\": \"🚀 Nouvelle build publiée !\n\n📦 Version : ${{ needs.version.outputs.version }}\n📝 Patch note : ${{ github.event.head_commit.message }}\n🔗 https://github.com/${{ github.repository }}/releases/tag/${{ needs.version.outputs.version }}\"
           }" \
           ${{ secrets.DISCORD_WEBHOOK_URL }}
