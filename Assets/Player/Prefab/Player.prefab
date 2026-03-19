@@ -433,7 +433,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f331e3a26ba715c449423bf369c1e865, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerLook
-  playerCamera: {fileID: 6390567357980119463}
+  cameraRoot: {fileID: 4319829264616014411}
   lookSpeed: 0.3
   lookXLimit: 80
 --- !u!114 &4369203399664267969
@@ -461,10 +461,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f03d048340dd46a9c82770be18cc4c35, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player.Scripts.PlayerLeap
-  distHoriJump: 4
-  height: 2
-  angle: 45
-  cooldown: 5
+  maxDistance: 5
+  maxHeight: 2
+  launchAngle: 45
+  leapCooldown: 0.5
 --- !u!114 &82036979122223303
 MonoBehaviour:
   m_ObjectHideFlags: 0
