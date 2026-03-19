@@ -1,44 +1,30 @@
 using DG.Tweening;
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
+using static UnityEngine.Rendering.DebugUI;
 
 public class SonarEffect : MonoBehaviour
 {
-    [SerializeField] private RectTransform sonarRingRef;
-    [SerializeField] private Image sonarImageRef;
-
-    [Header("Sonar Effect")]
-    private static RectTransform sonarRing;
-    private static Image sonarImage;
-
-    [Header("Textes")]
-    [SerializeField] private TextMeshProUGUI[] tmpText;
-    [SerializeField] private Image[] images;
     [Header("Paramètres")]
     [SerializeField] private float maxScale = 3f;
     [SerializeField] private float duration = 1.2f;
     [SerializeField] private float interval = 3f;
-    [SerializeField] private Color sonarColor = Color.white;
 
-    private Sequence sonarSequence;
+    [SerializeField] private Material TMPWaveMat;
 
-    void Awake()
+    [SerializeField] private TextMeshProUGUI[] texts;
+
+    private List<Material> materials = new List<Material>();
+
+    private void Awake()
     {
-        if (sonarRingRef != null) sonarRing = sonarRingRef;
-        if (sonarImageRef != null) sonarImage = sonarImageRef;
-
-        sonarImage.color = new Color(sonarColor.r, sonarColor.g, sonarColor.b, 0f);
-
-        /*foreach (TextMeshProUGUI text in tmpText)
-            text.color = new Color(0f, 0f, 0f, 1f);
-
-        if (images != null)
+        foreach (TextMeshProUGUI text in texts)
         {
-            foreach (Image image in images)
-                image.color = new Color(0f, 0f, 0f, 1f);
-        }*/
+            text.fontMaterial = Instantiate(TMPWaveMat);
+            materials.Add(text.fontMaterial);
+        }
     }
 
     private void Start()
@@ -57,50 +43,55 @@ public class SonarEffect : MonoBehaviour
 
     private void PlaySonar()
     {
-        Vector2 mousePosition = UnityEngine.InputSystem.Mouse.current.position.ReadValue();
+        Vector3 mouse = Input.mousePosition;
+        mouse.z = 10f;
 
-        sonarRing.position = mousePosition;
-        sonarRing.localScale = Vector3.one;
-        sonarImage.color = new Color(sonarColor.r, sonarColor.g, sonarColor.b, 0.0f);
-        sonarImage.gameObject.SetActive(true);
+        Vector3 world = Camera.main.ScreenToWorldPoint(mouse);
+        ShowMatPos();
 
-        /*foreach (TextMeshProUGUI text in tmpText)
-            text.color = new Color(0f, 0f, 0f, 1f);
+        UpdateMatPos(new Vector4(world.x, world.y, 0, 0));
 
-        foreach (Image image in images)
-            image.color = new Color(0f, 0f, 0f, 1f);*/
+        //DOTween.To(() => radius,
+        //    x =>
+        //    {
+        //        radius = x;
+        //        UpdateMatRadius(radius);
+        //        ShowMatRadius();
+        //    },
+        //    maxScale,
+        //    duration)
+        //    .OnComplete(() => UpdateMatRadius(0));
+    }
 
-        sonarSequence?.Kill();
-        sonarSequence = DOTween.Sequence();
-
-        sonarSequence.Append(
-            sonarRing.DOScale(maxScale, duration).SetEase(Ease.OutCubic)
-        );
-        sonarSequence.Join(
-            sonarImage.DOFade(0f, duration).SetEase(Ease.InQuad)
-        );
-
-        /*foreach (TextMeshProUGUI text in tmpText)
-            sonarSequence.Join(
-                text.DOColor(Color.white, 0.5f).SetEase(Ease.InQuad)
-            );
-
-        foreach (Image image in images)
-            sonarSequence.Join(
-                image.DOColor(Color.white, 0.5f).SetEase(Ease.InQuad)
-            );*/
-
-        sonarSequence.OnComplete(() =>
+    private void UpdateMatPos(Vector4 _value)
+    {
+        foreach (Material mat in materials)
         {
-            sonarRing.localScale = Vector3.one;
-            sonarImage.color = new Color(sonarColor.r, sonarColor.g, sonarColor.b, 0f);
-            sonarImage.gameObject.SetActive(false);
+            mat.SetVector("_MousePos", _value);
+        }
+    }
 
-            /*foreach (TextMeshProUGUI text in tmpText)
-                text.DOColor(Color.black, 1.5f);
+    private void UpdateMatRadius(float _value)
+    {
+        foreach (Material mat in materials)
+        {
+            mat.SetFloat("_WaveRadius", _value);
+        }
+    }
 
-            foreach (Image image in images)
-                image.DOColor(Color.black, 1.5f);*/
-        });
+    private void ShowMatPos()
+    {
+        foreach (Material mat in materials)
+        {
+            mat.GetVector("_MousePos");
+        }
+    }
+
+    private void ShowMatRadius()
+    {
+        foreach (Material mat in materials)
+        {
+            mat.GetFloat("_WaveRadius");
+        }
     }
 }
