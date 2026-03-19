@@ -72,7 +72,7 @@ public class Sonar : PlayerAbility
 
     public override void Execute(InputAction.CallbackContext _context)
     {
-        base.Execute(_context);
+        if (!CanExecute()) return;
         TriggerWave();
     }
 

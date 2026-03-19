@@ -12,12 +12,14 @@ namespace Player.Scripts
     /// </summary>
     public class PlayerCrouch : PlayerAbility
     {
-        [SerializeField] private float defaultHeight = 2f;
-        [SerializeField] private float crouchHeight = 1f;
         [SerializeField] private float crouchDuration = 0.25f;
+        [SerializeField, Tooltip("Par rapport à la scale du transform"), Range(1f, 5f)]
+        private float crouchPercentage = 2f;
+
+        private float defaultHeight;
+        private float crouchHeight;
 
         private Transform playerTransform;
-        private CapsuleCollider capsuleCollider;
         private bool isCrouching;
         private Tween crouchTween;
 
@@ -27,7 +29,7 @@ namespace Player.Scripts
         /// <param name="_collider">The player's body CapsuleCollider.</param>
         public void SetCapsuleCollider(CapsuleCollider _collider)
         {
-            capsuleCollider = _collider;
+            //capsuleCollider = _collider;
         }
 
         /// <summary>
@@ -38,12 +40,11 @@ namespace Player.Scripts
         {
             base.Init(_playerController);
 
-            capsuleCollider = controller.BodyCollider;
-            defaultHeight = capsuleCollider.height;
-
             playerTransform = controller.transform;
+            defaultHeight = playerTransform.localScale.y;
+            
+            crouchHeight = defaultHeight / crouchPercentage;
 
-            Assert.IsNotNull(capsuleCollider, $"[{GetType().Name}] CapsuleCollider reference is null.");
             Assert.IsNotNull(playerTransform, $"[{GetType().Name}] PlayerTransform is null.");
         }
 
@@ -54,35 +55,40 @@ namespace Player.Scripts
         /// <param name="_context">The InputAction callback context.</param>
         public override void Execute(InputAction.CallbackContext _context)
         {
-            base.Execute(_context);
+            if (!CanExecute()) return;
 
-            if (_context.performed)
+            if (_context.started)
             {
-                isCrouching = !isCrouching;
-            }
-            else
-                return;
-
-            if (isCrouching)
+                isCrouching = true;
                 EventBus.Publish(new OnPlayerCrouch());
-            else
+                AnimateCrouch(crouchHeight);
+            }
+            else if (_context.canceled)
+            {
+                isCrouching = false;
                 EventBus.Publish(new OnPlayerUnCrouch());
+                AnimateCrouch(defaultHeight);
+            }
+        }
 
-            float targetHeight = isCrouching ? crouchHeight : defaultHeight;
-
+        private void AnimateCrouch(float targetHeight)
+        {
             crouchTween?.Kill();
-
             crouchTween = DOTween.To(
-                () => playerTransform.localScale.y * defaultHeight,
-                h =>
-                {
-                    float scaleY = h / defaultHeight;
-                    playerTransform.localScale = new Vector3(1f, scaleY, 1f);
-                    capsuleCollider.transform.parent.localScale = new Vector3(scaleY, scaleY, 1f);
-                },
+                () => playerTransform.localScale.y,
+                scaleY => playerTransform.localScale = new Vector3(playerTransform.localScale.x, scaleY, playerTransform.localScale.z),
                 targetHeight,
                 crouchDuration
             ).SetEase(AnimationHelper.IN_SMOOTH);
+        }
+
+        public void ForceUnCrouch()
+        {
+            if (!isCrouching) return;
+
+            isCrouching = false;
+            EventBus.Publish(new OnPlayerUnCrouch());
+            AnimateCrouch(defaultHeight);
         }
 
         /// <summary>

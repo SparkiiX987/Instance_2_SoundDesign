@@ -37,3 +37,13 @@ public struct OnPlayerUnCrouch
 {
 
 }
+
+public struct OnEnableInput
+{
+
+}
+
+public struct OnDisableInput
+{
+
+}

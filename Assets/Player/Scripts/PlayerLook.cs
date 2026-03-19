@@ -32,16 +32,16 @@ namespace Player.Scripts
         /// <param name="_context">The InputAction callback context.</param>
         public override void Execute(InputAction.CallbackContext _context)
         {
-            base.Execute(_context);
+            if (!CanExecute()) return;
 
-            if (!enabled) 
+            if (!enabled)
                 return;
-            
+
             Vector2 lookInput = _context.ReadValue<Vector2>();
 
             rotationX -= lookInput.y * lookSpeed;
             rotationX = Mathf.Clamp(rotationX, -lookXLimit, lookXLimit);
-            
+
             playerCamera.transform.localRotation = Quaternion.Euler(rotationX, 0f, 0f);
             transform.Rotate(Vector3.up * lookInput.x * lookSpeed);
         }
