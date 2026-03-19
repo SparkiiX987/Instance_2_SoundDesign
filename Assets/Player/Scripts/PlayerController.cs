@@ -51,6 +51,7 @@ namespace Player.Scripts
         public void DisableInput()
         {
             canInput = false;
+            Debug.Log("Player input disabled.");
         }
         
         /// <summary>Whether the player inputs are currently active.</summary>

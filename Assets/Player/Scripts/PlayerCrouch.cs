@@ -55,33 +55,40 @@ namespace Player.Scripts
         /// <param name="_context">The InputAction callback context.</param>
         public override void Execute(InputAction.CallbackContext _context)
         {
-            base.Execute(_context);
+            if (!CanExecute()) return;
 
-            if (_context.performed)
+            if (_context.started)
             {
-                isCrouching = !isCrouching;
-            }
-            else
-                return;
-
-
-            if (isCrouching)
+                isCrouching = true;
                 EventBus.Publish(new OnPlayerCrouch());
-            else
+                AnimateCrouch(crouchHeight);
+            }
+            else if (_context.canceled)
+            {
+                isCrouching = false;
                 EventBus.Publish(new OnPlayerUnCrouch());
+                AnimateCrouch(defaultHeight);
+            }
+        }
 
-            float targetHeight = isCrouching ? crouchHeight : defaultHeight;
-            
-            Debug.Log($"Crouch toggled: {isCrouching}, Target Height: {targetHeight}");
-            
+        private void AnimateCrouch(float targetHeight)
+        {
             crouchTween?.Kill();
-
             crouchTween = DOTween.To(
                 () => playerTransform.localScale.y,
                 scaleY => playerTransform.localScale = new Vector3(playerTransform.localScale.x, scaleY, playerTransform.localScale.z),
                 targetHeight,
                 crouchDuration
             ).SetEase(AnimationHelper.IN_SMOOTH);
+        }
+
+        public void ForceUnCrouch()
+        {
+            if (!isCrouching) return;
+
+            isCrouching = false;
+            EventBus.Publish(new OnPlayerUnCrouch());
+            AnimateCrouch(defaultHeight);
         }
 
         /// <summary>
