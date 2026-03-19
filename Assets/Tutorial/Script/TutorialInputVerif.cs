@@ -13,6 +13,7 @@ public class TutorialInputVerif : MonoBehaviour
     bool keyCPressed = false;
     bool keyJumpPressed = false;
     bool fadeFinish = false;
+    bool movementDone = false;
     [SerializeField] int fadeValue;
     [SerializeField] int fadeDuration;
     Vector2 upDirection = new Vector2 (0, 1);
@@ -67,6 +68,7 @@ public class TutorialInputVerif : MonoBehaviour
         if(_InputEnter.input == "crouch" && keyJumpPressed == true  && fadeFinish == true)
         {
             Fade(upButton, true, z);
+            fadeFinish = false;
             DOVirtual.DelayedCall(5, () => fadeFinish = true);
             keyCPressed = true;
             UnFade(leftButton, q);
@@ -93,7 +95,7 @@ public class TutorialInputVerif : MonoBehaviour
             keyDPressed = true;
             rightButton.color = Color.green;
         }
-        if (keyZPressed && keySPressed && keyQPressed && keyDPressed)
+        if (keyZPressed && keySPressed && keyQPressed && keyDPressed && movementDone == false)
         {
             DOVirtual.DelayedCall(3, () => downButton.color = Color.white);
             DOVirtual.DelayedCall(3, () => upButton.color = Color.white);
@@ -104,11 +106,18 @@ public class TutorialInputVerif : MonoBehaviour
             Fade(downButton, true, plus);
             Fade(rightButton, true, space);
             DOVirtual.DelayedCall(5, () => fadeFinish = true);
-            DOVirtual.DelayedCall(8, () => EventBus.Publish(new OnTutorialFinish
+            movementDone = true;
+        }
+        if (_InputEnter.input == "leap" && movementDone == true && fadeFinish == true)
+        {
+            Fade(leftButton, false, c);
+            Fade(downButton, false, plus);
+            Fade(rightButton, false, space);
+            DOVirtual.DelayedCall(3, () => EventBus.Publish(new OnTutorialFinish
             {
 
             }));
-            DOVirtual.DelayedCall(8, () => Destroy(gameObject));
+            Destroy(gameObject);
         }
     }
 
