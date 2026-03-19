@@ -1,5 +1,5 @@
-using UnityEngine;
 using DG.Tweening;
+using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.InputSystem;
 using Utils;
@@ -40,9 +40,9 @@ namespace Player.Scripts
 
             capsuleCollider = controller.BodyCollider;
             defaultHeight = capsuleCollider.height;
-            
+
             playerTransform = controller.transform;
-            
+
             Assert.IsNotNull(capsuleCollider, $"[{GetType().Name}] CapsuleCollider reference is null.");
             Assert.IsNotNull(playerTransform, $"[{GetType().Name}] PlayerTransform is null.");
         }
@@ -57,22 +57,28 @@ namespace Player.Scripts
             base.Execute(_context);
 
             if (_context.performed)
+            {
                 isCrouching = !isCrouching;
+            }
             else
                 return;
+
+            if (isCrouching)
+                EventBus.Publish(new OnPlayerCrouch());
+            else
+                EventBus.Publish(new OnPlayerUnCrouch());
 
             float targetHeight = isCrouching ? crouchHeight : defaultHeight;
 
             crouchTween?.Kill();
 
             crouchTween = DOTween.To(
-                () => capsuleCollider.height,
+                () => playerTransform.localScale.y * defaultHeight,
                 h =>
                 {
-                    capsuleCollider.height = h;
-
                     float scaleY = h / defaultHeight;
                     playerTransform.localScale = new Vector3(1f, scaleY, 1f);
+                    capsuleCollider.transform.parent.localScale = new Vector3(scaleY, scaleY, 1f);
                 },
                 targetHeight,
                 crouchDuration
