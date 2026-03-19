@@ -1,8 +1,8 @@
+using DG.Tweening;
+using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using DG.Tweening;
-using TMPro;
-using System.Collections;
 
 public class SonarEffect : MonoBehaviour
 {
@@ -16,7 +16,6 @@ public class SonarEffect : MonoBehaviour
     [Header("Textes")]
     [SerializeField] private TextMeshProUGUI[] tmpText;
     [SerializeField] private Image[] images;
-
     [Header("Paramètres")]
     [SerializeField] private float maxScale = 3f;
     [SerializeField] private float duration = 1.2f;
@@ -32,14 +31,14 @@ public class SonarEffect : MonoBehaviour
 
         sonarImage.color = new Color(sonarColor.r, sonarColor.g, sonarColor.b, 0f);
 
-        foreach (var text in tmpText)
+        /*foreach (TextMeshProUGUI text in tmpText)
             text.color = new Color(0f, 0f, 0f, 1f);
 
         if (images != null)
         {
-            foreach (var image in images)
+            foreach (Image image in images)
                 image.color = new Color(0f, 0f, 0f, 1f);
-        }
+        }*/
     }
 
     private void Start()
@@ -62,13 +61,14 @@ public class SonarEffect : MonoBehaviour
 
         sonarRing.position = mousePosition;
         sonarRing.localScale = Vector3.one;
-        sonarImage.color = new Color(sonarColor.r, sonarColor.g, sonarColor.b, 0.8f);
+        sonarImage.color = new Color(sonarColor.r, sonarColor.g, sonarColor.b, 0.0f);
+        sonarImage.gameObject.SetActive(true);
 
-        foreach (var text in tmpText)
+        /*foreach (TextMeshProUGUI text in tmpText)
             text.color = new Color(0f, 0f, 0f, 1f);
 
-        foreach (var image in images)
-            image.color = new Color(0f, 0f, 0f, 1f);
+        foreach (Image image in images)
+            image.color = new Color(0f, 0f, 0f, 1f);*/
 
         sonarSequence?.Kill();
         sonarSequence = DOTween.Sequence();
@@ -80,26 +80,27 @@ public class SonarEffect : MonoBehaviour
             sonarImage.DOFade(0f, duration).SetEase(Ease.InQuad)
         );
 
-        foreach (var text in tmpText)
+        /*foreach (TextMeshProUGUI text in tmpText)
             sonarSequence.Join(
                 text.DOColor(Color.white, 0.5f).SetEase(Ease.InQuad)
             );
 
-        foreach (var image in images)
+        foreach (Image image in images)
             sonarSequence.Join(
                 image.DOColor(Color.white, 0.5f).SetEase(Ease.InQuad)
-            );
+            );*/
 
         sonarSequence.OnComplete(() =>
         {
             sonarRing.localScale = Vector3.one;
             sonarImage.color = new Color(sonarColor.r, sonarColor.g, sonarColor.b, 0f);
+            sonarImage.gameObject.SetActive(false);
 
-            foreach (var text in tmpText)
+            /*foreach (TextMeshProUGUI text in tmpText)
                 text.DOColor(Color.black, 1.5f);
 
-            foreach (var image in images)
-                image.DOColor(Color.black, 1.5f);
+            foreach (Image image in images)
+                image.DOColor(Color.black, 1.5f);*/
         });
     }
 }
