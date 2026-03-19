@@ -85,7 +85,10 @@ Shader "Sonar/SonarSurface"
                 float eRing      = eRingInner * eRingOuter * _EnemyWaveActive;
 
                 if (saturate(wave + ring + eWave + eRing) < 0.01)
-                    return half4(0, 0, 0, 1);
+                {
+                      return half4(0, 0, 0, 1);
+                }
+                  
 
                 float3 col = _SurfaceColor.rgb * wave;
                 col = lerp(col, _RingColor.rgb,      ring);
@@ -165,7 +168,7 @@ Shader "Sonar/SonarSurface"
                 float3 deltas  = fwidth(IN.bary);
                 float3 smooth3 = smoothstep(float3(0,0,0), deltas * max(_WireThickness, 0.1), IN.bary);
                 float  wire    = 1.0 - min(smooth3.x, min(smooth3.y, smooth3.z));
-                if (wire < 0.01) return half4(0,0,0,0);
+                if (wire < 0.01) {return half4(0,0,0,0);}
 
                 // ── Onde joueur ───────────────────────────────────────
                 float3 toPixel  = normalize(IN.posWS - _WaveOrigin.xyz);
@@ -196,7 +199,8 @@ Shader "Sonar/SonarSurface"
                 float eRing      = eRingInner * eRingOuter * _EnemyWaveActive;
 
                 float revealed = saturate(wave + ring + wasSwept + eWave + eRing);
-                if (revealed < 0.01) return half4(0,0,0,0);
+                if (revealed < 0.01)
+                {return half4(0,0,0,0);}
 
                 // Couleur : joueur = blanc/cyan, ennemi = orange
                 float3 col = _EdgeColor.rgb     * wasSwept;
