@@ -61,6 +61,10 @@ namespace Player.Scripts
             {
                 isCrouching = true;
                 EventBus.Publish(new OnPlayerCrouch());
+                EventBus.Publish(new OnPlayerInputEnter
+                {
+                    input = "crouch"
+                });
                 AnimateCrouch(crouchHeight);
             }
             else if (_context.canceled)

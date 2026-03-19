@@ -15,12 +15,16 @@ public struct OnTrapEnter
 
 }
 
-public struct OnDefaite
+public struct OnDefeat
 {
 
 }
 
 public struct OnVictory
+{
+
+}
+public struct OnTutorialFinish
 {
 
 }

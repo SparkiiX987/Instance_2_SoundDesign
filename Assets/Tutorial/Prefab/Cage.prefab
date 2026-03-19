@@ -1722,7 +1722,6 @@ GameObject:
   - component: {fileID: 2155131594753998441}
   - component: {fileID: 4425444053129576708}
   - component: {fileID: 6874577946984538360}
-  - component: {fileID: 5410575716641599762}
   m_Layer: 3
   m_Name: Cage
   m_TagString: Untagged
@@ -1881,16 +1880,4 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   Cage: {fileID: 9118423918982632940}
---- !u!114 &5410575716641599762
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9118423918982632940}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ef4154af2effc344bb1fc390fa9b6f6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TutorialInputVerif
-  cageRigidBody: {fileID: 4425444053129576708}
+  cageRb: {fileID: 4425444053129576708}
