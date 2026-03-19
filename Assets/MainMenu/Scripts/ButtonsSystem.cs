@@ -3,9 +3,9 @@ using UnityEngine.SceneManagement;
 
 public class ButtonsSystem : MonoBehaviour
 {
-    public void Play()
+    public void Play(int _sceneId)
     {
-        SceneManager.LoadScene("ProtoDeplacements");
+        SceneManager.LoadScene(_sceneId);
     }
 
     public void Quit()
