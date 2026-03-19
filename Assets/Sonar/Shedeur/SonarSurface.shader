@@ -38,14 +38,13 @@ Shader "Sonar/SonarSurface"
             #pragma fragment fragRing
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
-            // Joueur
             float4 _WaveOrigin; float _WaveRadius; float _WaveActive;
             float4 _ConeForward; float _ConeHalfAngleCos;
             float  _WaveFireTime; float _WaveMaxRadius; float _WaveFadeDuration;
-            float _ConeEdgeSoftness;
-            
-            // Ennemi
+            float  _ConeEdgeSoftness;
+
             float4 _EnemyWaveOrigin; float _EnemyWaveRadius; float _EnemyWaveActive;
+            float  _EnemyWaveFireTime; float _EnemyWaveMaxRadius; float _EnemyWaveFadeDuration;
 
             float4 _RingColor; float4 _SurfaceColor; float4 _EnemyRingColor;
             float  _WaveThickness; float _RingThickness; float _FadeDuration;
@@ -63,12 +62,11 @@ Shader "Sonar/SonarSurface"
 
             half4 fragRing(Varyings IN) : SV_Target
             {
-                // ── Onde joueur ───────────────────────────────────────
+                // Onde joueur
                 float3 toPixel  = normalize(IN.posWS - _WaveOrigin.xyz);
-                float angleCos = dot(toPixel, normalize(_ConeForward.xyz));
-                float inCone = smoothstep(_ConeHalfAngleCos - _ConeEdgeSoftness,
-                          _ConeHalfAngleCos, angleCos);
-                float dist     = distance(IN.posWS, _WaveOrigin.xyz);
+                float  angleCos = dot(toPixel, normalize(_ConeForward.xyz));
+                float  inCone   = smoothstep(_ConeHalfAngleCos - _ConeEdgeSoftness, _ConeHalfAngleCos, angleCos);
+                float  dist     = distance(IN.posWS, _WaveOrigin.xyz);
 
                 float inner = smoothstep(_WaveRadius - _WaveThickness, _WaveRadius, dist);
                 float outer = smoothstep(_WaveRadius + _WaveThickness, _WaveRadius, dist);
@@ -78,7 +76,7 @@ Shader "Sonar/SonarSurface"
                 float ringOuter = smoothstep(_WaveRadius + _RingThickness, _WaveRadius, dist);
                 float ring      = ringInner * ringOuter * _WaveActive * inCone;
 
-                // ── Onde ennemi (pas de cone) ─────────────────────────
+                // Onde ennemi
                 float eDist      = distance(IN.posWS, _EnemyWaveOrigin.xyz);
                 float eInner     = smoothstep(_EnemyWaveRadius - _WaveThickness, _EnemyWaveRadius, eDist);
                 float eOuter     = smoothstep(_EnemyWaveRadius + _WaveThickness, _EnemyWaveRadius, eDist);
@@ -88,10 +86,7 @@ Shader "Sonar/SonarSurface"
                 float eRing      = eRingInner * eRingOuter * _EnemyWaveActive;
 
                 if (saturate(wave + ring + eWave + eRing) < 0.01)
-                {
-                      return half4(0, 0, 0, 1);
-                }
-                  
+                    return half4(0, 0, 0, 1);
 
                 float3 col = _SurfaceColor.rgb * wave;
                 col = lerp(col, _RingColor.rgb,      ring);
@@ -118,13 +113,12 @@ Shader "Sonar/SonarSurface"
             #pragma target   4.0
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
-            // Joueur
             float4 _WaveOrigin; float _WaveRadius; float _WaveActive;
             float4 _ConeForward; float _ConeHalfAngleCos;
             float  _WaveFireTime; float _WaveMaxRadius; float _WaveFadeDuration;
 
-            // Ennemi
             float4 _EnemyWaveOrigin; float _EnemyWaveRadius; float _EnemyWaveActive;
+            float  _EnemyWaveFireTime; float _EnemyWaveMaxRadius; float _EnemyWaveFadeDuration;
 
             float4 _EdgeColor; float4 _EdgeWaveColor; float4 _RingColor; float4 _EnemyRingColor;
             float  _WaveThickness; float _RingThickness;
@@ -138,7 +132,6 @@ Shader "Sonar/SonarSurface"
                 float4 posHCS : SV_POSITION;
                 float3 posWS  : TEXCOORD0;
                 float3 normWS : TEXCOORD1;
-                float inCone   : TEXCOORD2;
             };
 
             struct Varyings
@@ -146,7 +139,6 @@ Shader "Sonar/SonarSurface"
                 float4 posHCS : SV_POSITION;
                 float3 posWS  : TEXCOORD0;
                 float3 bary   : TEXCOORD1;
-                float inCone   : TEXCOORD2;
             };
 
             GeoInput vert(Attributes IN)
@@ -155,11 +147,6 @@ Shader "Sonar/SonarSurface"
                 O.posWS  = TransformObjectToWorld(IN.posOS.xyz);
                 O.posHCS = TransformWorldToHClip(O.posWS);
                 O.normWS = TransformObjectToWorldNormal(IN.normOS);
-                
-                float3 toVert  = normalize(O.posWS - _WaveOrigin.xyz);
-                float  angleCos = dot(toVert, normalize(_ConeForward.xyz));
-                O.inCone = smoothstep(_ConeHalfAngleCos - 0.05, 
-                                      _ConeHalfAngleCos, angleCos);
                 return O;
             }
 
@@ -167,18 +154,18 @@ Shader "Sonar/SonarSurface"
             void geom(triangle GeoInput IN[3], inout TriangleStream<Varyings> stream)
             {
                 Varyings O;
-                O.posHCS = IN[0].posHCS; O.posWS = IN[0].posWS; O.bary = float3(1,0,0); O.inCone = IN[0].inCone; stream.Append(O);
-                O.posHCS = IN[1].posHCS; O.posWS = IN[1].posWS; O.bary = float3(0,1,0); O.inCone = IN[1].inCone; stream.Append(O);
-                O.posHCS = IN[2].posHCS; O.posWS = IN[2].posWS; O.bary = float3(0,0,1); O.inCone = IN[2].inCone; stream.Append(O);
+                O.posHCS = IN[0].posHCS; O.posWS = IN[0].posWS; O.bary = float3(1,0,0); stream.Append(O);
+                O.posHCS = IN[1].posHCS; O.posWS = IN[1].posWS; O.bary = float3(0,1,0); stream.Append(O);
+                O.posHCS = IN[2].posHCS; O.posWS = IN[2].posWS; O.bary = float3(0,0,1); stream.Append(O);
             }
 
             half4 frag(Varyings IN) : SV_Target
             {
-                // Wireframe via coordonnees barycentriques
+                // Wireframe
                 float3 deltas  = fwidth(IN.bary);
                 float3 smooth3 = smoothstep(float3(0,0,0), deltas * max(_WireThickness, 0.1), IN.bary);
                 float  wire    = 1.0 - min(smooth3.x, min(smooth3.y, smooth3.z));
-                if (wire < 0.01) {return half4(0,0,0,0);}
+                if (wire < 0.01) return half4(0,0,0,0);
 
                 // ── Onde joueur ───────────────────────────────────────
                 float3 toPixel  = normalize(IN.posWS - _WaveOrigin.xyz);
@@ -194,12 +181,18 @@ Shader "Sonar/SonarSurface"
                 float ringOuter = smoothstep(_WaveRadius + _RingThickness, _WaveRadius, dist);
                 float ring      = ringInner * ringOuter * _WaveActive * inCone;
 
+                // Fade joueur
+                float fadeDurBase = max(_WaveFadeDuration, _FadeDuration);
+                float fadeDurEdge = fadeDurBase * _EdgeFadeMult;
                 float firedOnce     = step(0.5, _WaveFireTime);
                 float waveHasPassed = step(dist, _WaveRadius) * firedOnce;
                 float wasSwept      = step(dist, _WaveMaxRadius) * inCone * waveHasPassed;
-                float trailFade     = wasSwept;
+                float delay         = (dist / max(_WaveMaxRadius, 0.001)) * (fadeDurBase * 0.1);
+                float elapsed       = max(0.0, _Time.y - _WaveFireTime - delay);
+                float fadeOut       = 1.0 - smoothstep(fadeDurEdge * 0.8, fadeDurEdge, elapsed);
+                float trailFade     = wasSwept * fadeOut;
 
-                // ── Onde ennemi (pas de cone, pas de fade) ────────────
+                // ── Onde ennemi — meme logique, sans cone ─────────────
                 float eDist      = distance(IN.posWS, _EnemyWaveOrigin.xyz);
                 float eInner     = smoothstep(_EnemyWaveRadius - _WaveThickness, _EnemyWaveRadius, eDist);
                 float eOuter     = smoothstep(_EnemyWaveRadius + _WaveThickness, _EnemyWaveRadius, eDist);
@@ -208,14 +201,24 @@ Shader "Sonar/SonarSurface"
                 float eRingOuter = smoothstep(_EnemyWaveRadius + _RingThickness, _EnemyWaveRadius, eDist);
                 float eRing      = eRingInner * eRingOuter * _EnemyWaveActive;
 
-                float revealed = saturate(wave + ring + wasSwept + eWave + eRing);
-                if (revealed < 0.01)
-                {return half4(0,0,0,0);}
+                // Fade ennemi (meme courbe, sans cone)
+                float eFadeDurBase  = max(_EnemyWaveFadeDuration, _FadeDuration);
+                float eFadeDurEdge  = eFadeDurBase * _EdgeFadeMult;
+                float eFiredOnce    = step(0.5, _EnemyWaveFireTime);
+                float eHasPassed    = step(eDist, _EnemyWaveRadius) * eFiredOnce;
+                float eWasSwept     = step(eDist, _EnemyWaveMaxRadius) * eHasPassed;
+                float eDelay        = (eDist / max(_EnemyWaveMaxRadius, 0.001)) * (eFadeDurBase * 0.1);
+                float eElapsed      = max(0.0, _Time.y - _EnemyWaveFireTime - eDelay);
+                float eFadeOut      = 1.0 - smoothstep(eFadeDurEdge * 0.8, eFadeDurEdge, eElapsed);
+                float eTrailFade    = eWasSwept * eFadeOut;
 
-                // Couleur : joueur = blanc/cyan, ennemi = orange
-                float3 col = _EdgeColor.rgb     * wasSwept;
+                float revealed = saturate(wave + ring + trailFade + eWave + eRing + eTrailFade);
+                if (revealed < 0.01) return half4(0,0,0,0);
+
+                float3 col = _EdgeColor.rgb      * trailFade;
                 col = lerp(col, _EdgeWaveColor.rgb,  wave);
                 col = lerp(col, _RingColor.rgb,      ring);
+                col = lerp(col, _EnemyRingColor.rgb, eTrailFade);
                 col = lerp(col, _EnemyRingColor.rgb, eWave);
                 col = lerp(col, _EnemyRingColor.rgb, eRing);
 
