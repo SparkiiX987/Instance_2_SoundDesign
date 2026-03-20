@@ -44,6 +44,11 @@ public struct OnPlayerUnCrouch
 
 }
 
+public struct OnPaused
+{
+    
+}
+
 public struct OnEnableInput
 {
 
@@ -53,6 +58,7 @@ public struct OnDisableInput
 {
 
 }
+
 public struct OnPlayerInputEnter
 {
     public string input;

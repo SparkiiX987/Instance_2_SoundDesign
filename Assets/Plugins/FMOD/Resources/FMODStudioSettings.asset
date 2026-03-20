@@ -405,6 +405,7 @@ MonoBehaviour:
   Plugins: []
   MasterBanks:
   - Master
+  - Master
   Banks:
   - Pied
   BanksToLoad: []
