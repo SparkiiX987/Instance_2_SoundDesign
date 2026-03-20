@@ -1,3 +1,5 @@
+using UnityEngine;
+
 public struct OnSwitchOnEvent
 {
     public int switchId;
@@ -13,12 +15,16 @@ public struct OnTrapEnter
 
 }
 
-public struct OnDefaite
+public struct OnDefeat
 {
 
 }
 
 public struct OnVictory
+{
+
+}
+public struct OnTutorialFinish
 {
 
 }
@@ -41,4 +47,20 @@ public struct OnPlayerUnCrouch
 public struct OnPaused
 {
     
+}
+
+public struct OnEnableInput
+{
+
+}
+
+public struct OnDisableInput
+{
+
+}
+
+public struct OnPlayerInputEnter
+{
+    public string input;
+    public Vector2 moveDirection;
 }
