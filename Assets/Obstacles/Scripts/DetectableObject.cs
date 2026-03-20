@@ -1,6 +1,8 @@
 using AudioSystem;
 using FMODUnity;
 using UnityEngine;
+using DG.Tweening;
+using FMOD.Studio;
 
 /// <summary>
 /// Composant a attacher sur tout objet detectable par le radar.
@@ -57,36 +59,36 @@ public class DetectableObject : MonoBehaviour, IDetectable
     {
         if (!sound.IsNull)
         {
-            GameAudioManager.instance.PlayOneShot(sound, transform.position);
+            //GameAudioManager.instance.PlayOneShot(sound, transform.position);
+            float targetVolume = Mathf.Lerp(volumeMin, volumeMax, normalizedProximity);
+            float targetPitch = Mathf.Lerp(pitchMin, pitchMax, normalizedProximity);
+            
+            EventInstance instance = RuntimeManager.CreateInstance(sound);
+            instance.set3DAttributes(RuntimeUtils.To3DAttributes(transform));
+            instance.setPitch(targetPitch);
+            instance.setVolume(0f);
+            instance.start();
+            
+            float currentVolume = 0f;
+            DOTween.Sequence()
+                .Append(DOTween.To(
+                    () => currentVolume,
+                    v => { currentVolume = v; instance.setVolume(v); },
+                    targetVolume,
+                    fadeInDuration).SetEase(Ease.OutQuad))
+                .AppendInterval(sustainDuration)
+                .Append(DOTween.To(
+                    () => currentVolume,
+                    v => { currentVolume = v; instance.setVolume(v); },
+                    0f,
+                    fadeOutDuration).SetEase(Ease.InQuad))
+                .OnComplete(() =>
+                {
+                    instance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
+                    instance.release();
+                });
             return;
 
-            //float targetVolume = Mathf.Lerp(volumeMin, volumeMax, normalizedProximity);
-            //float targetPitch = Mathf.Lerp(pitchMin, pitchMax, normalizedProximity);
-            //
-            //EventInstance instance = RuntimeManager.CreateInstance(sound);
-            //instance.set3DAttributes(RuntimeUtils.To3DAttributes(transform));
-            //instance.setPitch(targetPitch);
-            //instance.setVolume(0f);
-            //instance.start();
-            //
-            //float currentVolume = 0f;
-            //DOTween.Sequence()
-            //    .Append(DOTween.To(
-            //        () => currentVolume,
-            //        v => { currentVolume = v; instance.setVolume(v); },
-            //        targetVolume,
-            //        fadeInDuration).SetEase(Ease.OutQuad))
-            //    .AppendInterval(sustainDuration)
-            //    .Append(DOTween.To(
-            //        () => currentVolume,
-            //        v => { currentVolume = v; instance.setVolume(v); },
-            //        0f,
-            //        fadeOutDuration).SetEase(Ease.InQuad))
-            //    .OnComplete(() =>
-            //    {
-            //        instance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
-            //        instance.release();
-            //    });
         }
 
 

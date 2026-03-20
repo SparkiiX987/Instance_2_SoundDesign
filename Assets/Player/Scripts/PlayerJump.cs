@@ -56,7 +56,7 @@ namespace Player.Scripts
             _jumpsRemaining--;           
             EventBus.Publish(new OnPlayerInputEnter
             {
-                input = "jump"
+                input = TutorialVerifState.jump
             });
         }
 

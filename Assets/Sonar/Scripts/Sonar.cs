@@ -1,8 +1,10 @@
-using System.Collections.Generic;
 using DG.Tweening;
+using Player.Scripts;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
-public class Sonar : MonoBehaviour
+public class Sonar : PlayerAbility
 {
     [Header("Parametres")]
     [SerializeField] private SO_SonarSettings settings;
@@ -55,11 +57,17 @@ public class Sonar : MonoBehaviour
         // Defreeze le cone quand le cooldown est termine
         if (_cooldownTimer <= 0f && !_isMovementWave)
             _coneIsFrozen = false;
+    }
 
-        if (Input.GetKeyDown(activationKey) && _cooldownTimer <= 0f)
-            TriggerWave();
-        HandleMovementWave();
-        PushShaderGlobals();
+    public override void Execute(InputAction.CallbackContext _context)
+    {
+        if (!CanExecute()) return;
+        base.Execute(_context);
+        EventBus.Publish(new OnPlayerInputEnter
+        {
+            input = TutorialVerifState.echolocation
+        });
+        TriggerWave();
     }
 
     public void TriggerWave()
