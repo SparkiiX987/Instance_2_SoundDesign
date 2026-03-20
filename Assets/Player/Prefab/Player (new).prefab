@@ -355,7 +355,7 @@ GameObject:
   - component: {fileID: 6647301995817762499}
   - component: {fileID: 82036979122223303}
   - component: {fileID: 8512829847286032187}
-  - component: {fileID: 435650477057624943}
+  - component: {fileID: 2529698057788608306}
   - component: {fileID: 7384705160287058495}
   - component: {fileID: 96766279338221178}
   m_Layer: 0
@@ -496,6 +496,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Sonar
   settings: {fileID: 11400000, guid: 7a206510d89b8e740b08c7575866747d, type: 2}
+  activationKey: 101
   coneOrigin: {fileID: 0}
   detectableLayerMask:
     serializedVersion: 2
@@ -503,11 +504,9 @@ MonoBehaviour:
   obstacleMask:
     serializedVersion: 2
     m_Bits: 904
-  showRaycasts: 1
-  raycastDrawDuration: 0.5
-  raycastHitColor: {r: 0, g: 1, b: 1, a: 1}
-  raycastToWallColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  raycastWallToTargetColor: {r: 1, g: 0, b: 0, a: 1}
+  movementWaveRange: 3
+  movementWaveInterval: 0.35
+  movementThreshold: 0.05
 --- !u!114 &8512829847286032187
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -527,7 +526,7 @@ MonoBehaviour:
   chargeMaxDuration: 1.5
   chargeMinDuration: 0.1
   driverCheckInterval: 2
---- !u!114 &435650477057624943
+--- !u!114 &2529698057788608306
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -539,10 +538,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07ec8653ea3132d72bbe4f42b698e3ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player.Scripts.PlayerConduitChecker
-  playerCollider: {fileID: 1048908493737238015}
+  playerCollider: {fileID: 0}
   conduitLayer:
     serializedVersion: 2
-    m_Bits: 1024
+    m_Bits: 0
   checkDelay: 0.2
   rayDistance: 1.5
 --- !u!54 &7384705160287058495

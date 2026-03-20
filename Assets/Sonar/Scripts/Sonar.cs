@@ -1,8 +1,10 @@
-using System.Collections.Generic;
 using DG.Tweening;
+using Player.Scripts;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
-public class Sonar : MonoBehaviour
+public class Sonar : PlayerAbility
 {
     [Header("Parametres")]
     [SerializeField] private SO_SonarSettings settings;
@@ -55,6 +57,7 @@ public class Sonar : MonoBehaviour
         // Defreeze le cone quand le cooldown est termine
         if (_cooldownTimer <= 0f && !_isMovementWave)
             _coneIsFrozen = false;
+    }
 
     public override void Execute(InputAction.CallbackContext _context)
     {
