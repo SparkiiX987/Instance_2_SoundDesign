@@ -51,6 +51,11 @@ public class Sonar : MonoBehaviour
     private void Update()
     {
         _cooldownTimer -= Time.deltaTime;
+
+        // Defreeze le cone quand le cooldown est termine
+        if (_cooldownTimer <= 0f && !_isMovementWave)
+            _coneIsFrozen = false;
+
         if (Input.GetKeyDown(activationKey) && _cooldownTimer <= 0f)
             TriggerWave();
         HandleMovementWave();
@@ -59,13 +64,10 @@ public class Sonar : MonoBehaviour
 
     public void TriggerWave()
     {
-        if (!CanExecute()) return;
-        base.Execute(_context);
-        EventBus.Publish(new OnPlayerInputEnter
-        {
-            input = "echolocation"
-        });
-        TriggerWave();
+        if (_cooldownTimer > 0f) return;
+        _isMovementWave = false;
+        EmitWave(settings.range, settings.GetWaveDuration(settings.range));
+        _cooldownTimer = settings.cooldown;
     }
 
     public void TriggerWaveWithVolume(float normalizedVolume)
@@ -124,9 +126,9 @@ public class Sonar : MonoBehaviour
          .OnComplete(() =>
          {
              _currentWaveRadius = 0f;
-             _coneIsFrozen      = false;
              _isMovementWave    = false;
              Shader.SetGlobalFloat(ID_WaveActive, 0f);
+             // _coneIsFrozen reste true jusqu'a la fin du cooldown
          });
     }
 
