@@ -15,12 +15,16 @@ public struct OnTrapEnter
 
 }
 
-public struct OnDefaite
+public struct OnDefeat
 {
 
 }
 
 public struct OnVictory
+{
+
+}
+public struct OnTutorialFinish
 {
 
 }
@@ -38,6 +42,11 @@ public struct OnPlayerCrouch
 public struct OnPlayerUnCrouch
 {
 
+}
+
+public struct OnPaused
+{
+    
 }
 
 public struct OnEnableInput
@@ -58,4 +67,10 @@ public struct OnPlayerEnterConduit
 public struct OnPlayerExitConduit
 {
 
+}
+
+public struct OnPlayerInputEnter
+{
+    public string input;
+    public Vector2 moveDirection;
 }

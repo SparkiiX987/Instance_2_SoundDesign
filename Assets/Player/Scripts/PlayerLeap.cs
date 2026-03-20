@@ -93,6 +93,10 @@ namespace Player.Scripts
                 return;
 
             PerformLeapJump();
+            EventBus.Publish(new OnPlayerInputEnter
+            {
+                input = "leap"
+            });
         }
 
         private void PerformLeapJump()
