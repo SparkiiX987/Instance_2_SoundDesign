@@ -21,6 +21,7 @@ namespace Player.Scripts
 
         private Transform playerTransform;
         private bool isCrouching;
+        private bool isInConduit;
         private Tween crouchTween;
 
         /// <summary>
@@ -55,7 +56,8 @@ namespace Player.Scripts
         /// <param name="_context">The InputAction callback context.</param>
         public override void Execute(InputAction.CallbackContext _context)
         {
-            if (!CanExecute()) return;
+            if (!CanExecute())
+                return;
 
             if (_context.started)
             {
@@ -69,12 +71,19 @@ namespace Player.Scripts
             }
             else if (_context.canceled)
             {
+                if (isInConduit)
+                    return;
+
                 isCrouching = false;
                 EventBus.Publish(new OnPlayerUnCrouch());
                 AnimateCrouch(defaultHeight);
             }
         }
 
+        /// <summary>
+        /// Animates the player's Y scale to the target height using DOTween.
+        /// </summary>
+        /// <param name="targetHeight">The target Y scale value.</param>
         private void AnimateCrouch(float targetHeight)
         {
             crouchTween?.Kill();
@@ -86,9 +95,13 @@ namespace Player.Scripts
             ).SetEase(AnimationHelper.IN_SMOOTH);
         }
 
-        public void ForceUnCrouch()
+        /// <summary>
+        /// Forces the player back to standing if currently crouching.
+        /// </summary>
+        private void ForceUnCrouch()
         {
-            if (!isCrouching) return;
+            if (!isCrouching)
+                return;
 
             isCrouching = false;
             EventBus.Publish(new OnPlayerUnCrouch());
@@ -96,7 +109,51 @@ namespace Player.Scripts
         }
 
         /// <summary>
-        /// Kills the active tween on component destruction to prevent leaks.
+        /// Manually sets the conduit state. When true, the player cannot uncrouch.
+        /// </summary>
+        /// <param name="_value">Whether the player is inside a conduit.</param>
+        public void SetInConduit(bool _value)
+        {
+            isInConduit = _value;
+        }
+
+        /// <summary>
+        /// Called when the player enters a conduit. Locks crouch state.
+        /// </summary>
+        private void OnEnterConduit(OnPlayerEnterConduit _event)
+        {
+            isInConduit = true;
+        }
+
+        /// <summary>
+        /// Called when the player exits a conduit. Unlocks crouch and forces uncrouch.
+        /// </summary>
+        private void OnExitConduit(OnPlayerExitConduit _event)
+        {
+            isInConduit = false;
+            ForceUnCrouch();
+        }
+
+        /// <summary>
+        /// Subscribes to conduit enter/exit events.
+        /// </summary>
+        private void OnEnable()
+        {
+            EventBus.Subscribe<OnPlayerEnterConduit>(OnEnterConduit);
+            EventBus.Subscribe<OnPlayerExitConduit>(OnExitConduit);
+        }
+
+        /// <summary>
+        /// Unsubscribes from conduit events.
+        /// </summary>
+        private void OnDisable()
+        {
+            EventBus.Unsubscribe<OnPlayerEnterConduit>(OnEnterConduit);
+            EventBus.Unsubscribe<OnPlayerExitConduit>(OnExitConduit);
+        }
+
+        /// <summary>
+        /// Kills the active tween on destruction to prevent leaks.
         /// </summary>
         private void OnDestroy()
         {

@@ -14,12 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SO_SonarSettings
   ondeSpeed: 15
   range: 20
-  cooldown: 0.8
+  cooldown: 2.5
   waveEase: 1
   coneHalfAngle: 45
   minVoiceRange: 3
   maxVoiceRange: 20
+  fadeDurationMin: 7
+  fadeDurationMax: 15
+  chargeMaxDuration: 2
+  chargeMinDuration: 0.1
   voiceThreshold: 0.02
   voiceMax: 0.54
   voiceSmoothFrames: 10
-  voiceSampleWindow: 0.1

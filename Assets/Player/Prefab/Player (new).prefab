@@ -30,7 +30,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1419428141154948861}
-  - {fileID: 7019770670817904540}
   - {fileID: 4153043474004934558}
   m_Father: {fileID: 9201654293095530808}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -248,59 +247,6 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
---- !u!1 &3178759005281424211
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 7019770670817904540}
-  - component: {fileID: 7084920181186014613}
-  m_Layer: 6
-  m_Name: Corps - Box
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &7019770670817904540
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3178759005281424211}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 2428196376661474785}
-  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
---- !u!65 &7084920181186014613
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3178759005281424211}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 2, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &3238826335146715193
 GameObject:
   m_ObjectHideFlags: 0
@@ -409,6 +355,7 @@ GameObject:
   - component: {fileID: 6647301995817762499}
   - component: {fileID: 82036979122223303}
   - component: {fileID: 8512829847286032187}
+  - component: {fileID: 435650477057624943}
   - component: {fileID: 7384705160287058495}
   - component: {fileID: 96766279338221178}
   m_Layer: 0
@@ -580,6 +527,24 @@ MonoBehaviour:
   chargeMaxDuration: 1.5
   chargeMinDuration: 0.1
   driverCheckInterval: 2
+--- !u!114 &435650477057624943
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6585705549612740297}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07ec8653ea3132d72bbe4f42b698e3ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Player.Scripts.PlayerConduitChecker
+  playerCollider: {fileID: 1048908493737238015}
+  conduitLayer:
+    serializedVersion: 2
+    m_Bits: 1024
+  checkDelay: 0.2
+  rayDistance: 1.5
 --- !u!54 &7384705160287058495
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -812,7 +777,6 @@ GameObject:
   - component: {fileID: 4153043474004934558}
   - component: {fileID: 2052296737824674740}
   - component: {fileID: 5864307829325704268}
-  - component: {fileID: 430797880866526772}
   m_Layer: 0
   m_Name: Feets - BoxCollider
   m_TagString: Untagged
@@ -871,17 +835,3 @@ MonoBehaviour:
   masks:
     serializedVersion: 2
     m_Bits: 136
---- !u!114 &430797880866526772
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8422393609135186145}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cbc0e06b96d599144a97afa1450092a2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerFeetReposition
-  crouchPos: {x: 0, y: -0.7, z: 0}
-  unCrouchPos: {x: 0, y: -0.47, z: 0}
