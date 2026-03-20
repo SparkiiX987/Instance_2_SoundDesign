@@ -95,7 +95,7 @@ namespace Player.Scripts
             PerformLeapJump();
             EventBus.Publish(new OnPlayerInputEnter
             {
-                input = "leap"
+                input = TutorialVerifState.leap
             });
         }
 

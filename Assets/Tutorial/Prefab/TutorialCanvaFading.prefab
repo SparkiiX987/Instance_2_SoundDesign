@@ -216,8 +216,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ef4154af2effc344bb1fc390fa9b6f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TutorialInputVerif
-  fadeValue: 0
-  fadeDuration: 0
   upButton: {fileID: 4451118684676522392}
   downButton: {fileID: 3847220133401592463}
   leftButton: {fileID: 2736428169928003718}
@@ -230,6 +228,22 @@ MonoBehaviour:
   space: {fileID: 21300000, guid: 9e6a85f08d35d3c4899bd8e240ed5d70, type: 3}
   c: {fileID: 21300000, guid: c37b4637dbfbab946bfd0f7c2c48832a, type: 3}
   plus: {fileID: 21300000, guid: 6f89f6e10e0ad05488e0e8f118644bf7, type: 3}
+  imagesList:
+  - {fileID: 4451118684676522392}
+  - {fileID: 2736428169928003718}
+  - {fileID: 3847220133401592463}
+  - {fileID: 7633974260316673813}
+  spritesList:
+  - {fileID: 21300000, guid: 05ce60aac669f774d840ded54ab04983, type: 3}
+  - {fileID: 21300000, guid: 9e6a85f08d35d3c4899bd8e240ed5d70, type: 3}
+  - {fileID: 21300000, guid: c37b4637dbfbab946bfd0f7c2c48832a, type: 3}
+  - {fileID: 21300000, guid: 83445892023edb84688bfc1839bbb8bf, type: 3}
+  - {fileID: 21300000, guid: ad26927b4c80c334b857a638155312be, type: 3}
+  - {fileID: 21300000, guid: 47821e3e5f7d4064780a13caaac88186, type: 3}
+  - {fileID: 21300000, guid: 2e3d564434122c84f9a7f02db4ac9bdc, type: 3}
+  - {fileID: 21300000, guid: 6f89f6e10e0ad05488e0e8f118644bf7, type: 3}
+  fadeValue: 0
+  fadeDuration: 0
 --- !u!1 &6136398569378309987
 GameObject:
   m_ObjectHideFlags: 0

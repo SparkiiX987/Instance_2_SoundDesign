@@ -56,10 +56,15 @@ public class Sonar : MonoBehaviour
         if (_cooldownTimer <= 0f && !_isMovementWave)
             _coneIsFrozen = false;
 
-        if (Input.GetKeyDown(activationKey) && _cooldownTimer <= 0f)
-            TriggerWave();
-        HandleMovementWave();
-        PushShaderGlobals();
+    public override void Execute(InputAction.CallbackContext _context)
+    {
+        if (!CanExecute()) return;
+        base.Execute(_context);
+        EventBus.Publish(new OnPlayerInputEnter
+        {
+            input = TutorialVerifState.echolocation
+        });
+        TriggerWave();
     }
 
     public void TriggerWave()
