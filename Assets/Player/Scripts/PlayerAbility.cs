@@ -28,12 +28,17 @@ namespace Player.Scripts
         /// <param name="_context">The InputAction callback context.</param>
         public virtual void Execute(InputAction.CallbackContext _context) { }
 
+        /// <summary>
+        /// Checks whether this ability can be executed (enabled and input valid).
+        /// </summary>
+        /// <returns>True if the ability is enabled and the controller accepts input.</returns>
         protected bool CanExecute()
         {
             if (!enabled || !controller.IsInputValid)
             {
                 return false;
             }
+            
             return true;
         }
     }

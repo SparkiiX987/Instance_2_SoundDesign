@@ -36,7 +36,7 @@ public struct OnPlayerDetectGround
 
 public struct OnPlayerCrouch
 {
-
+    
 }
 
 public struct OnPlayerUnCrouch
@@ -55,6 +55,16 @@ public struct OnEnableInput
 }
 
 public struct OnDisableInput
+{
+
+}
+
+public struct OnPlayerEnterConduit
+{
+
+}
+
+public struct OnPlayerExitConduit
 {
 
 }
