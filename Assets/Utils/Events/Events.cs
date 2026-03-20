@@ -37,3 +37,8 @@ public struct OnPlayerUnCrouch
 {
 
 }
+
+public struct OnPaused
+{
+    
+}
