@@ -31,6 +31,10 @@ namespace Player.Scripts
         private bool isOnCooldown;
         private Tween leapCooldownTween;
 
+        /// <summary>
+        /// Initializes references to PlayerJump, PlayerMove and PlayerCrouch components.
+        /// </summary>
+        /// <param name="_playerController">Reference to the parent PlayerController.</param>
         public override void Init(PlayerController _playerController)
         {
             base.Init(_playerController);
@@ -42,6 +46,9 @@ namespace Player.Scripts
             Assert.IsNotNull(playerCrouch, $"[{GetType().Name}] PlayerCrouch component is required for PlayerCatJump.");
         }
 
+        /// <summary>
+        /// Subscribes to ground detection, crouch and uncrouch events.
+        /// </summary>
         private void OnEnable()
         {
             EventBus.Subscribe<OnPlayerDetectGround>(OnDetectGround);
@@ -49,6 +56,9 @@ namespace Player.Scripts
             EventBus.Subscribe<OnPlayerUnCrouch>(OnUnCrouch);
         }
 
+        /// <summary>
+        /// Unsubscribes from events and kills the cooldown tween.
+        /// </summary>
         private void OnDisable()
         {
             EventBus.Unsubscribe<OnPlayerDetectGround>(OnDetectGround);
@@ -112,6 +122,10 @@ namespace Player.Scripts
             controller.Rb.linearVelocity = velocity;
         }
 
+        /// <summary>
+        /// Called when the player lands. Ends the leap, starts cooldown,
+        /// re-enables movement and input.
+        /// </summary>
         private void OnDetectGround(OnPlayerDetectGround _)
         {
             if (!isJumping)
