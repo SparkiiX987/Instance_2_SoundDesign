@@ -19,12 +19,13 @@ Material:
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
-  m_LockedProperties: 
+  m_LockedProperties: _EdgeWaveColor
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs: []
     m_Ints: []
     m_Floats:
+    - _ConeEdgeSoftness: 0.05
     - _EdgeFadeMult: 4
     - _FadeDuration: 15
     - _RingThickness: 0.15
@@ -34,8 +35,8 @@ Material:
     m_Colors:
     - _EdgeColor: {r: 1, g: 1, b: 1, a: 1}
     - _EdgeWaveColor: {r: 0.8, g: 1, b: 1, a: 1}
-    - _EnemyRingColor: {r: 1, g: 0.29999998, b: 0.09999997, a: 1}
-    - _RingColor: {r: 0.5, g: 0.9, b: 1, a: 1}
-    - _SurfaceColor: {r: 0, g: 0.29999998, b: 0.5, a: 1}
+    - _EnemyRingColor: {r: 0.99999994, g: 0.65881735, b: 0, a: 1}
+    - _RingColor: {r: 0, g: 0.9265828, b: 1, a: 1}
+    - _SurfaceColor: {r: 0, g: 0.2844552, b: 0.5019608, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
