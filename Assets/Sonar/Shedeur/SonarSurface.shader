@@ -13,6 +13,7 @@ Shader "Sonar/SonarSurface"
         _EdgeFadeMult    ("Multiplicateur duree aretes", Float) = 4.0
         _WireThickness   ("Epaisseur trait (px)",        Float) = 2.0
         _SilhouetteCull  ("Supression silhouette (0-1)", Float) = 0.0
+        _ConeEdgeSoftness ("Douceur bord cone",          Float) = 0.05
     }
 
     SubShader
@@ -41,7 +42,8 @@ Shader "Sonar/SonarSurface"
             float4 _WaveOrigin; float _WaveRadius; float _WaveActive;
             float4 _ConeForward; float _ConeHalfAngleCos;
             float  _WaveFireTime; float _WaveMaxRadius; float _WaveFadeDuration;
-
+            float _ConeEdgeSoftness;
+            
             // Ennemi
             float4 _EnemyWaveOrigin; float _EnemyWaveRadius; float _EnemyWaveActive;
 
@@ -63,9 +65,10 @@ Shader "Sonar/SonarSurface"
             {
                 // ── Onde joueur ───────────────────────────────────────
                 float3 toPixel  = normalize(IN.posWS - _WaveOrigin.xyz);
-                float  angleCos = dot(toPixel, normalize(_ConeForward.xyz));
-                float  inCone   = step(_ConeHalfAngleCos, angleCos);
-                float  dist     = distance(IN.posWS, _WaveOrigin.xyz);
+                float angleCos = dot(toPixel, normalize(_ConeForward.xyz));
+                float inCone = smoothstep(_ConeHalfAngleCos - _ConeEdgeSoftness,
+                          _ConeHalfAngleCos, angleCos);
+                float dist     = distance(IN.posWS, _WaveOrigin.xyz);
 
                 float inner = smoothstep(_WaveRadius - _WaveThickness, _WaveRadius, dist);
                 float outer = smoothstep(_WaveRadius + _WaveThickness, _WaveRadius, dist);
@@ -132,6 +135,7 @@ Shader "Sonar/SonarSurface"
                 float4 posHCS : SV_POSITION;
                 float3 posWS  : TEXCOORD0;
                 float3 normWS : TEXCOORD1;
+                float inCone   : TEXCOORD2;
             };
 
             struct Varyings
@@ -139,6 +143,7 @@ Shader "Sonar/SonarSurface"
                 float4 posHCS : SV_POSITION;
                 float3 posWS  : TEXCOORD0;
                 float3 bary   : TEXCOORD1;
+                float inCone   : TEXCOORD2;
             };
 
             GeoInput vert(Attributes IN)
@@ -147,6 +152,11 @@ Shader "Sonar/SonarSurface"
                 O.posWS  = TransformObjectToWorld(IN.posOS.xyz);
                 O.posHCS = TransformWorldToHClip(O.posWS);
                 O.normWS = TransformObjectToWorldNormal(IN.normOS);
+                
+                float3 toVert  = normalize(O.posWS - _WaveOrigin.xyz);
+                float  angleCos = dot(toVert, normalize(_ConeForward.xyz));
+                O.inCone = smoothstep(_ConeHalfAngleCos - 0.05, 
+                                      _ConeHalfAngleCos, angleCos);
                 return O;
             }
 
@@ -154,9 +164,9 @@ Shader "Sonar/SonarSurface"
             void geom(triangle GeoInput IN[3], inout TriangleStream<Varyings> stream)
             {
                 Varyings O;
-                O.posHCS = IN[0].posHCS; O.posWS = IN[0].posWS; O.bary = float3(1,0,0); stream.Append(O);
-                O.posHCS = IN[1].posHCS; O.posWS = IN[1].posWS; O.bary = float3(0,1,0); stream.Append(O);
-                O.posHCS = IN[2].posHCS; O.posWS = IN[2].posWS; O.bary = float3(0,0,1); stream.Append(O);
+                O.posHCS = IN[0].posHCS; O.posWS = IN[0].posWS; O.bary = float3(1,0,0); O.inCone = IN[0].inCone; stream.Append(O);
+                O.posHCS = IN[1].posHCS; O.posWS = IN[1].posWS; O.bary = float3(0,1,0); O.inCone = IN[1].inCone; stream.Append(O);
+                O.posHCS = IN[2].posHCS; O.posWS = IN[2].posWS; O.bary = float3(0,0,1); O.inCone = IN[2].inCone; stream.Append(O);
             }
 
             half4 frag(Varyings IN) : SV_Target

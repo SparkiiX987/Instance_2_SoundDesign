@@ -10,7 +10,7 @@ namespace Player.Scripts
     /// </summary>
     public class PlayerLook : PlayerAbility
     {
-        [SerializeField] private Camera playerCamera;
+        [SerializeField] private Transform cameraRoot;
         [SerializeField] private float lookSpeed = 2f;
         [SerializeField] private float lookXLimit = 80f;
 
@@ -23,7 +23,7 @@ namespace Player.Scripts
         public override void Init(PlayerController _playerController)
         {
             base.Init(_playerController);
-            Assert.IsNotNull(playerCamera, $"[{GetType().Name}] PlayerCamera reference is null.");
+            Assert.IsNotNull(cameraRoot, $"[{GetType().Name}] PlayerCamera reference is null.");
         }
 
         /// <summary>
@@ -32,14 +32,17 @@ namespace Player.Scripts
         /// <param name="_context">The InputAction callback context.</param>
         public override void Execute(InputAction.CallbackContext _context)
         {
-            base.Execute(_context);
+            if (!CanExecute()) return;
+
+            if (!enabled)
+                return;
 
             Vector2 lookInput = _context.ReadValue<Vector2>();
 
             rotationX -= lookInput.y * lookSpeed;
             rotationX = Mathf.Clamp(rotationX, -lookXLimit, lookXLimit);
-            
-            playerCamera.transform.localRotation = Quaternion.Euler(rotationX, 0f, 0f);
+
+            cameraRoot.transform.localRotation = Quaternion.Euler(rotationX, 0f, 0f);
             transform.Rotate(Vector3.up * lookInput.x * lookSpeed);
         }
     }

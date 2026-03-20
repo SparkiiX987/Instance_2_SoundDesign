@@ -26,11 +26,15 @@ namespace Player.Scripts
         /// Callback executed on an input event. Checks that inputs are enabled before proceeding.
         /// </summary>
         /// <param name="_context">The InputAction callback context.</param>
-        public virtual void Execute(InputAction.CallbackContext _context)
+        public virtual void Execute(InputAction.CallbackContext _context) { }
+
+        protected bool CanExecute()
         {
-            //Debug.Log("Executing ability: " + GetType().Name);
-            if (!controller.IsInputValid)
-                return;
+            if (!enabled || !controller.IsInputValid)
+            {
+                return false;
+            }
+            return true;
         }
     }
 }
