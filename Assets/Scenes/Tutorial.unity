@@ -816,6 +816,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1437462781641678844, guid: 8eb6d01b6bbea8e4c897aa826dd726a4, type: 3}
+      propertyPath: m_RenderMode
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2495828229778127949, guid: 8eb6d01b6bbea8e4c897aa826dd726a4, type: 3}
       propertyPath: loot.Array.size
       value: 4
@@ -951,6 +955,18 @@ PrefabInstance:
     - target: {fileID: 5880941168014513575, guid: 8eb6d01b6bbea8e4c897aa826dd726a4, type: 3}
       propertyPath: m_Name
       value: TutorialCanvaFading
+      objectReference: {fileID: 0}
+    - target: {fileID: 6707207534537511276, guid: 8eb6d01b6bbea8e4c897aa826dd726a4, type: 3}
+      propertyPath: m_UiScaleMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6707207534537511276, guid: 8eb6d01b6bbea8e4c897aa826dd726a4, type: 3}
+      propertyPath: m_ReferenceResolution.x
+      value: 1920
+      objectReference: {fileID: 0}
+    - target: {fileID: 6707207534537511276, guid: 8eb6d01b6bbea8e4c897aa826dd726a4, type: 3}
+      propertyPath: m_ReferenceResolution.y
+      value: 1080
       objectReference: {fileID: 0}
     - target: {fileID: 6864959894987425040, guid: 8eb6d01b6bbea8e4c897aa826dd726a4, type: 3}
       propertyPath: m_AnchorMax.y
