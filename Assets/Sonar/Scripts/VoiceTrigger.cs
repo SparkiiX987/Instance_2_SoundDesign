@@ -260,7 +260,7 @@ public class VoiceTrigger : PlayerAbility
         // Capture un extrait PCM du buffer actuel pour EnemyVoiceCapture
         EmitPCMSnapshot(normalizedVolume);
 
-        sonar.TriggerWaveWithVolume(normalizedVolume);
+        //sonar.TriggerWaveWithVolume(normalizedVolume);
     }
 
     /// <summary>
