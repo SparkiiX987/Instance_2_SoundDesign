@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1001 &7297462124843926176
+--- !u!1001 &3497781304856534301
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -9,24 +9,12 @@ PrefabInstance:
     m_TransformParent: {fileID: 7666526324503708265}
     m_Modifications:
     - target: {fileID: 197689836458865675, guid: b9675f3f5b81c0249903b37add5dec66, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 197689836458865675, guid: b9675f3f5b81c0249903b37add5dec66, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 2.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 197689836458865675, guid: b9675f3f5b81c0249903b37add5dec66, type: 3}
-      propertyPath: m_LocalScale.z
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 197689836458865675, guid: b9675f3f5b81c0249903b37add5dec66, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 197689836458865675, guid: b9675f3f5b81c0249903b37add5dec66, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 4.61
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 197689836458865675, guid: b9675f3f5b81c0249903b37add5dec66, type: 3}
       propertyPath: m_LocalPosition.z
@@ -38,15 +26,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 197689836458865675, guid: b9675f3f5b81c0249903b37add5dec66, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 197689836458865675, guid: b9675f3f5b81c0249903b37add5dec66, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 197689836458865675, guid: b9675f3f5b81c0249903b37add5dec66, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 197689836458865675, guid: b9675f3f5b81c0249903b37add5dec66, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -68,24 +56,8 @@ PrefabInstance:
       propertyPath: m_Name
       value: GroundTrap
       objectReference: {fileID: 0}
-    - target: {fileID: 1554676566760413640, guid: b9675f3f5b81c0249903b37add5dec66, type: 3}
-      propertyPath: m_Layer
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 1554676566760413640, guid: b9675f3f5b81c0249903b37add5dec66, type: 3}
-      propertyPath: m_StaticEditorFlags
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2279739425809365521, guid: b9675f3f5b81c0249903b37add5dec66, type: 3}
-      propertyPath: m_LocalScale.z
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6750738025898985962, guid: b9675f3f5b81c0249903b37add5dec66, type: 3}
-      propertyPath: m_Layer
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 6750738025898985962, guid: b9675f3f5b81c0249903b37add5dec66, type: 3}
-      propertyPath: m_StaticEditorFlags
+    - target: {fileID: 8741789266609637644, guid: b9675f3f5b81c0249903b37add5dec66, type: 3}
+      propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -93,10 +65,10 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b9675f3f5b81c0249903b37add5dec66, type: 3}
---- !u!4 &7492757194340136619 stripped
+--- !u!4 &3617736626411415830 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 197689836458865675, guid: b9675f3f5b81c0249903b37add5dec66, type: 3}
-  m_PrefabInstance: {fileID: 7297462124843926176}
+  m_PrefabInstance: {fileID: 3497781304856534301}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &7921339643424204162
 PrefabInstance:
@@ -211,7 +183,7 @@ PrefabInstance:
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 7dc1c18990dc5bf48b2113f1ea6a1956, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 7492757194340136619}
+      addedObject: {fileID: 3617736626411415830}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: -516098083770646512, guid: 7dc1c18990dc5bf48b2113f1ea6a1956, type: 3}
       insertIndex: -1

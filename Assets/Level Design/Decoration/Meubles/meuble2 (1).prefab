@@ -51,7 +51,7 @@ PrefabInstance:
     - target: {fileID: -7511558181221131132, guid: 546c04c5cc3bc7a47a73266a55440a8e, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 4249480d250efd940a359f4a64eda713, type: 2}
+      objectReference: {fileID: 2100000, guid: 1d28a40fdda42084082a8a34b3ffa331, type: 2}
     - target: {fileID: 919132149155446097, guid: 546c04c5cc3bc7a47a73266a55440a8e, type: 3}
       propertyPath: m_Name
       value: meuble2 (1)

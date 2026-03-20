@@ -29,9 +29,9 @@ Material:
     - _EdgeFadeMult: 4
     - _FadeDuration: 15
     - _RingThickness: 0.15
-    - _SilhouetteCull: 0.1
+    - _SilhouetteCull: 0
     - _WaveThickness: 0.8
-    - _WireThickness: 1
+    - _WireThickness: 2
     m_Colors:
     - _EdgeColor: {r: 0.80188674, g: 0.9833664, b: 1, a: 1}
     - _EdgeWaveColor: {r: 0.8, g: 1, b: 1, a: 1}

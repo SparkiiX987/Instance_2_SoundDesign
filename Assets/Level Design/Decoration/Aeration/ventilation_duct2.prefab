@@ -197,7 +197,7 @@ PrefabInstance:
     - target: {fileID: -3097340288434626328, guid: 141217aace2ff5e4aa6916f313e516f2, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: a75c12c0d9f41824b9f7ed92c49ca95a, type: 2}
+      objectReference: {fileID: 2100000, guid: a4902a57db239cc4185bdc9351fde392, type: 2}
     - target: {fileID: 919132149155446097, guid: 141217aace2ff5e4aa6916f313e516f2, type: 3}
       propertyPath: m_Name
       value: ventilation_duct2
@@ -205,11 +205,11 @@ PrefabInstance:
     - target: {fileID: 2821655904238734759, guid: 141217aace2ff5e4aa6916f313e516f2, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: a75c12c0d9f41824b9f7ed92c49ca95a, type: 2}
+      objectReference: {fileID: 2100000, guid: a4902a57db239cc4185bdc9351fde392, type: 2}
     - target: {fileID: 7653977287501116505, guid: 141217aace2ff5e4aa6916f313e516f2, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: a75c12c0d9f41824b9f7ed92c49ca95a, type: 2}
+      objectReference: {fileID: 2100000, guid: a4902a57db239cc4185bdc9351fde392, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
