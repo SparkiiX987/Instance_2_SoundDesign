@@ -59,10 +59,13 @@ public class Sonar : MonoBehaviour
 
     public void TriggerWave()
     {
-        if (_cooldownTimer > 0f) return;
-        _isMovementWave = false;
-        EmitWave(settings.range, settings.GetWaveDuration(settings.range));
-        _cooldownTimer = settings.cooldown;
+        if (!CanExecute()) return;
+        base.Execute(_context);
+        EventBus.Publish(new OnPlayerInputEnter
+        {
+            input = "echolocation"
+        });
+        TriggerWave();
     }
 
     public void TriggerWaveWithVolume(float normalizedVolume)

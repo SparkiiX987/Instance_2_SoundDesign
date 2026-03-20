@@ -17,7 +17,7 @@ public class GameManager : MonoBehaviour
         Cursor.visible = false;
 
         EventBus.Subscribe<OnTrapEnter>(KillPlayer);
-        EventBus.Subscribe<OnDefaite>(Defaite);
+        EventBus.Subscribe<OnDefeat>(Defaite);
         EventBus.Subscribe<OnVictory>(Victory);
 
         player = Instantiate(playerPrefab, playerSpawnPoint.position, playerSpawnPoint.rotation);
@@ -26,7 +26,7 @@ public class GameManager : MonoBehaviour
     private void OnDestroy()
     {
         EventBus.Unsubscribe<OnTrapEnter>(KillPlayer);
-        EventBus.Unsubscribe<OnDefaite>(Defaite);
+        EventBus.Unsubscribe<OnDefeat>(Defaite);
         EventBus.Unsubscribe<OnVictory>(Victory);
     }
 
@@ -34,10 +34,10 @@ public class GameManager : MonoBehaviour
     {
         print("player killed");
 
-        EventBus.Publish(new OnDefaite());
+        EventBus.Publish(new OnDefeat());
     }
 
-    private void Defaite(OnDefaite defaite)
+    private void Defaite(OnDefeat defaite)
     {
         print("defaite");
         //SceneManager.LoadScene(0);
