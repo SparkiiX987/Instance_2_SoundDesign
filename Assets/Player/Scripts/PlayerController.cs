@@ -9,7 +9,7 @@ namespace Player.Scripts
     /// </summary>
     public class PlayerController : MonoBehaviour
     {
-        [SerializeField] private CapsuleCollider bodyCollider;
+        [SerializeField] private Collider bodyCollider;
         private Rigidbody rb;
         private bool canInput;
 
@@ -51,6 +51,7 @@ namespace Player.Scripts
         public void DisableInput()
         {
             canInput = false;
+            Debug.Log("Player input disabled.");
         }
         
         /// <summary>Whether the player inputs are currently active.</summary>
@@ -60,6 +61,6 @@ namespace Player.Scripts
         public Rigidbody Rb => rb;
 
         /// <summary>Reference to the player's body CapsuleCollider.</summary>
-        public CapsuleCollider BodyCollider => bodyCollider;
+        public Collider BodyCollider => bodyCollider;
     }
 }

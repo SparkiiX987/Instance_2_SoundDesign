@@ -187,6 +187,9 @@ public class VoiceTrigger : PlayerAbility
 
     private void StartRecordingOnDriver(int _driverIndex, int _rate, int _channels)
     {
+        if (_volumeHistory == null)
+            _volumeHistory = new float[smoothFrames];
+        
         StopRecording();
 
         FMOD.System core = FMODUnity.RuntimeManager.CoreSystem;
@@ -260,7 +263,7 @@ public class VoiceTrigger : PlayerAbility
         // Capture un extrait PCM du buffer actuel pour EnemyVoiceCapture
         EmitPCMSnapshot(normalizedVolume);
 
-        sonar.TriggerWaveWithVolume(normalizedVolume);
+        //sonar.TriggerWaveWithVolume(normalizedVolume);
     }
 
     /// <summary>
@@ -367,6 +370,10 @@ public class VoiceTrigger : PlayerAbility
         foreach (float v in _volumeHistory) { sum += v; }
         return sum / smoothFrames;
     }
+    
+    public int  GetActiveDriverIndex() => _activeDriverIndex;
+    public void SelectMicrophone(int index, int rate, int channels)
+        => StartRecordingOnDriver(index, rate, channels);
 
     private void OnDestroy() { StopRecording(); }
 

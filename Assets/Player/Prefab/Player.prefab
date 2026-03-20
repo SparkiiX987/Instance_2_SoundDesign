@@ -185,7 +185,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1419428141154948861}
-  - component: {fileID: 4936258935366062123}
+  - component: {fileID: 1048908493737238015}
   m_Layer: 6
   m_Name: Corps - Capsule
   m_TagString: Untagged
@@ -208,14 +208,14 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2428196376661474785}
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
---- !u!136 &4936258935366062123
-CapsuleCollider:
+--- !u!64 &1048908493737238015
+MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2817946632191565404}
-  m_Material: {fileID: 13400000, guid: 606a2bcca9c1bea5eac97a7282ccd2a0, type: 2}
+  m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -226,11 +226,10 @@ CapsuleCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
+  serializedVersion: 5
+  m_Convex: 1
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1 &3238826335146715193
 GameObject:
   m_ObjectHideFlags: 0
@@ -336,6 +335,7 @@ GameObject:
   - component: {fileID: 6497665006139214408}
   - component: {fileID: 5804936052691532636}
   - component: {fileID: 4369203399664267969}
+  - component: {fileID: 6647301995817762499}
   - component: {fileID: 82036979122223303}
   - component: {fileID: 8512829847286032187}
   - component: {fileID: 7384705160287058495}
@@ -377,7 +377,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5baa361a0ac3c94d967a744f7b16273, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
-  bodyCollider: {fileID: 4936258935366062123}
+  bodyCollider: {fileID: 1048908493737238015}
 --- !u!114 &4789176217274739346
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -419,9 +419,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03a70aba3ebe493409ffe34b27a17db1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCrouch
-  defaultHeight: 1
-  crouchHeight: 0.5
   crouchDuration: 0.25
+  crouchPercentage: 2
 --- !u!114 &5804936052691532636
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -434,7 +433,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f331e3a26ba715c449423bf369c1e865, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerLook
-  playerCamera: {fileID: 6390567357980119463}
+  cameraRoot: {fileID: 4319829264616014411}
   lookSpeed: 0.3
   lookXLimit: 80
 --- !u!114 &4369203399664267969
@@ -450,6 +449,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player.Scripts.PlayerRun
   runSpeedMultiplier: 2
+--- !u!114 &6647301995817762499
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6585705549612740297}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f03d048340dd46a9c82770be18cc4c35, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Player.Scripts.PlayerLeap
+  maxDistance: 5
+  maxHeight: 2
+  launchAngle: 45
+  leapCooldown: 0.5
 --- !u!114 &82036979122223303
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -474,7 +489,7 @@ MonoBehaviour:
   raycastDrawDuration: 0.5
   raycastHitColor: {r: 0, g: 1, b: 1, a: 1}
   raycastToWallColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  raycastWallToTargetColor: {r: 1, g: 0, b: 0, a: 1}
+  raycastWallToTargetColor: {r: 1, g: 0, b: 0.11809349, a: 1}
 --- !u!114 &8512829847286032187
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -628,6 +643,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 6647301995817762499}
+        m_TargetAssemblyTypeName: Player.Scripts.PlayerLeap, Assembly-CSharp
+        m_MethodName: Execute
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: f1ba0d36-48eb-4cd5-b651-1c94a6531f70
     m_ActionName: 'Player/Jump[/Keyboard/space]'
   - m_PersistentCalls:
@@ -770,12 +797,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f80f4ce36a2429c938708c19ae43834, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player.Scripts.PlayerGroundChecker
-  groundMask:
+  masks:
     serializedVersion: 2
-    m_Bits: 8
-  objectMask:
-    serializedVersion: 2
-    m_Bits: 384
+    m_Bits: 136
 --- !u!114 &430797880866526772
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -783,7 +807,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8422393609135186145}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cbc0e06b96d599144a97afa1450092a2, type: 3}
   m_Name: 

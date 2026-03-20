@@ -30,7 +30,7 @@ namespace Player.Scripts
         /// <param name="_context">The InputAction callback context.</param>
         public override void Execute(InputAction.CallbackContext _context)
         {
-            base.Execute(_context);
+            if (!CanExecute()) return;
 
             if (_context.started)
                 playerMove.SetRunning(true, runSpeedMultiplier);

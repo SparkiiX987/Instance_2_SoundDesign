@@ -1,6 +1,8 @@
 using DG.Tweening;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Windows;
 
 namespace Player.Scripts
 {
@@ -35,9 +37,14 @@ namespace Player.Scripts
         /// <param name="_context">The InputAction callback context.</param>
         public override void Execute(InputAction.CallbackContext _context)
         {
-            base.Execute(_context);
-            
+            if (!CanExecute()) return;
+
             inputDirection = _context.ReadValue<Vector2>();
+            EventBus.Publish(new OnPlayerInputEnter
+            {
+                input = TutorialVerifState.movement,
+                moveDirection = new Vector2(inputDirection.x, inputDirection.y)
+            });
         }
 
         /// <summary>

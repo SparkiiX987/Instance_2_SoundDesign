@@ -12,13 +12,16 @@ namespace Player.Scripts
     /// </summary>
     public class PlayerCrouch : PlayerAbility
     {
-        [SerializeField] private float defaultHeight = 2f;
-        [SerializeField] private float crouchHeight = 1f;
         [SerializeField] private float crouchDuration = 0.25f;
+        [SerializeField, Tooltip("Par rapport à la scale du transform"), Range(1f, 5f)]
+        private float crouchPercentage = 2f;
+
+        private float defaultHeight;
+        private float crouchHeight;
 
         private Transform playerTransform;
-        private CapsuleCollider capsuleCollider;
         private bool isCrouching;
+        private bool isInConduit;
         private Tween crouchTween;
 
         /// <summary>
@@ -27,7 +30,7 @@ namespace Player.Scripts
         /// <param name="_collider">The player's body CapsuleCollider.</param>
         public void SetCapsuleCollider(CapsuleCollider _collider)
         {
-            capsuleCollider = _collider;
+            //capsuleCollider = _collider;
         }
 
         /// <summary>
@@ -38,12 +41,11 @@ namespace Player.Scripts
         {
             base.Init(_playerController);
 
-            capsuleCollider = controller.BodyCollider;
-            defaultHeight = capsuleCollider.height;
-
             playerTransform = controller.transform;
+            defaultHeight = playerTransform.localScale.y;
+            
+            crouchHeight = defaultHeight / crouchPercentage;
 
-            Assert.IsNotNull(capsuleCollider, $"[{GetType().Name}] CapsuleCollider reference is null.");
             Assert.IsNotNull(playerTransform, $"[{GetType().Name}] PlayerTransform is null.");
         }
 
@@ -54,39 +56,104 @@ namespace Player.Scripts
         /// <param name="_context">The InputAction callback context.</param>
         public override void Execute(InputAction.CallbackContext _context)
         {
-            base.Execute(_context);
-
-            if (_context.performed)
-            {
-                isCrouching = !isCrouching;
-            }
-            else
+            if (!CanExecute())
                 return;
 
-            if (isCrouching)
+            if (_context.started)
+            {
+                isCrouching = true;
                 EventBus.Publish(new OnPlayerCrouch());
-            else
-                EventBus.Publish(new OnPlayerUnCrouch());
-
-            float targetHeight = isCrouching ? crouchHeight : defaultHeight;
-
-            crouchTween?.Kill();
-
-            crouchTween = DOTween.To(
-                () => playerTransform.localScale.y * defaultHeight,
-                h =>
+                EventBus.Publish(new OnPlayerInputEnter
                 {
-                    float scaleY = h / defaultHeight;
-                    playerTransform.localScale = new Vector3(1f, scaleY, 1f);
-                    capsuleCollider.transform.parent.localScale = new Vector3(scaleY, scaleY, 1f);
-                },
+                    input = TutorialVerifState.crouch
+                });
+                AnimateCrouch(crouchHeight);
+            }
+            else if (_context.canceled)
+            {
+                if (isInConduit)
+                    return;
+
+                isCrouching = false;
+                EventBus.Publish(new OnPlayerUnCrouch());
+                AnimateCrouch(defaultHeight);
+            }
+        }
+
+        /// <summary>
+        /// Animates the player's Y scale to the target height using DOTween.
+        /// </summary>
+        /// <param name="targetHeight">The target Y scale value.</param>
+        private void AnimateCrouch(float targetHeight)
+        {
+            crouchTween?.Kill();
+            crouchTween = DOTween.To(
+                () => playerTransform.localScale.y,
+                scaleY => playerTransform.localScale = new Vector3(playerTransform.localScale.x, scaleY, playerTransform.localScale.z),
                 targetHeight,
                 crouchDuration
             ).SetEase(AnimationHelper.IN_SMOOTH);
         }
 
         /// <summary>
-        /// Kills the active tween on component destruction to prevent leaks.
+        /// Forces the player back to standing if currently crouching.
+        /// </summary>
+        private void ForceUnCrouch()
+        {
+            if (!isCrouching)
+                return;
+
+            isCrouching = false;
+            EventBus.Publish(new OnPlayerUnCrouch());
+            AnimateCrouch(defaultHeight);
+        }
+
+        /// <summary>
+        /// Manually sets the conduit state. When true, the player cannot uncrouch.
+        /// </summary>
+        /// <param name="_value">Whether the player is inside a conduit.</param>
+        public void SetInConduit(bool _value)
+        {
+            isInConduit = _value;
+        }
+
+        /// <summary>
+        /// Called when the player enters a conduit. Locks crouch state.
+        /// </summary>
+        private void OnEnterConduit(OnPlayerEnterConduit _event)
+        {
+            isInConduit = true;
+        }
+
+        /// <summary>
+        /// Called when the player exits a conduit. Unlocks crouch and forces uncrouch.
+        /// </summary>
+        private void OnExitConduit(OnPlayerExitConduit _event)
+        {
+            isInConduit = false;
+            ForceUnCrouch();
+        }
+
+        /// <summary>
+        /// Subscribes to conduit enter/exit events.
+        /// </summary>
+        private void OnEnable()
+        {
+            EventBus.Subscribe<OnPlayerEnterConduit>(OnEnterConduit);
+            EventBus.Subscribe<OnPlayerExitConduit>(OnExitConduit);
+        }
+
+        /// <summary>
+        /// Unsubscribes from conduit events.
+        /// </summary>
+        private void OnDisable()
+        {
+            EventBus.Unsubscribe<OnPlayerEnterConduit>(OnEnterConduit);
+            EventBus.Unsubscribe<OnPlayerExitConduit>(OnExitConduit);
+        }
+
+        /// <summary>
+        /// Kills the active tween on destruction to prevent leaks.
         /// </summary>
         private void OnDestroy()
         {
