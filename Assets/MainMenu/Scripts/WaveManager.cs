@@ -10,7 +10,7 @@ public class WaveManager : MonoBehaviour
 
     void Start()
     {
-        DOVirtual.DelayedCall(2, StartCheckLoop);
+        DOVirtual.DelayedCall(0.25f, StartCheckLoop);
     }
 
     private void StartCheckLoop()
