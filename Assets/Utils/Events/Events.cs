@@ -55,6 +55,6 @@ public struct OnDisableInput
 }
 public struct OnPlayerInputEnter
 {
-    public string input;
+    public TutorialVerifState input;
     public Vector2 moveDirection;
 }

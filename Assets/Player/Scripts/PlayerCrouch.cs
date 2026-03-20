@@ -63,7 +63,7 @@ namespace Player.Scripts
                 EventBus.Publish(new OnPlayerCrouch());
                 EventBus.Publish(new OnPlayerInputEnter
                 {
-                    input = "crouch"
+                    input = TutorialVerifState.crouch
                 });
                 AnimateCrouch(crouchHeight);
             }

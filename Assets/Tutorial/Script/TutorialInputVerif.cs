@@ -1,47 +1,25 @@
 using DG.Tweening;
-using TMPro;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class TutorialInputVerif : MonoBehaviour
 {
-    bool keyZPressed = false;
-    bool keySPressed = false;
-    bool keyQPressed = false;
-    bool keyDPressed = false;
-    bool keyEPressed = false;
-    bool keyCPressed = false;
-    bool keyJumpPressed = false;
-    bool fadeFinish = false;
-    bool movementDone = false;
-    [SerializeField] int fadeValue;
-    [SerializeField] int fadeDuration;
-    Vector2 upDirection = new Vector2 (0, 1);
-    Vector2 downDirection = new Vector2(0, -1);
-    Vector2 leftDirection = new Vector2(-1, 0);
-    Vector2 rightDirection = new Vector2(1, 0);
-    [SerializeField] Image upButton;
-    [SerializeField] Image downButton;
-    [SerializeField] Image leftButton;
-    [SerializeField] Image rightButton;
-    [SerializeField] Sprite z;
-    [SerializeField] Sprite q;
-    [SerializeField] Sprite s;
-    [SerializeField] Sprite d;
-    [SerializeField] Sprite e;
-    [SerializeField] Sprite space;
-    [SerializeField] Sprite c;
-    [SerializeField] Sprite plus;
+    [SerializeField] public List<Image> imagesList = new List<Image>();
+    [SerializeField] public List<Sprite> spritesList = new List<Sprite>();
+    private bool fadeFinish = false;
 
+    TutorialVerifState state;
     public void Start()
     {
         EventBus.Subscribe<OnPlayerInputEnter>(TutorialButton);
-        upButton.CrossFadeAlpha(0, 0, false);
-        downButton.CrossFadeAlpha(0, 0, false);
-        rightButton.CrossFadeAlpha(0, 0, false);
-        leftButton.CrossFadeAlpha(0, 0, false);
-        UnFade(upButton, e);
-        DOVirtual.DelayedCall(3, () => fadeFinish =true);
+        imagesList[0].CrossFadeAlpha(0, 0, false);
+        imagesList[1].CrossFadeAlpha(0, 0, false);
+        imagesList[2].CrossFadeAlpha(0, 0, false);
+        imagesList[3].CrossFadeAlpha(0, 0, false);
+        UnFade(imagesList[0], spritesList[0]);
+        DOVirtual.DelayedCall(3, () => fadeFinish = true);
     }
 
     public void OnDestroy()
@@ -51,77 +29,101 @@ public class TutorialInputVerif : MonoBehaviour
 
     void TutorialButton(OnPlayerInputEnter _InputEnter)
     {
-        if(_InputEnter.input == "echolocation" && keyEPressed ==false && fadeFinish==true)
+        switch (state)
         {
-            Fade(upButton, true, space);
+            case TutorialVerifState.echolocation:
+                {
+                    TestAbilities(_InputEnter.input);
+                    break;
+                }
+            case TutorialVerifState.jump:
+                {
+                    TestAbilities(_InputEnter.input);
+                    break;
+                }
+            case TutorialVerifState.crouch:
+                {
+                    TestAbilities(_InputEnter.input);
+                    break;
+                }
+            case TutorialVerifState.movement:
+                {
+                    TestMovement(_InputEnter.moveDirection);
+                    break;
+                }
+            case TutorialVerifState.leap:
+                {
+                    TestAbilities(_InputEnter.input);
+                    break;
+                }
+        }
+    }
+    void TestAbilities(TutorialVerifState _input)
+    {
+        if (_input == state && fadeFinish == true && (int)state < 4)
+        {
+            int i = (int)state + 1;
+            Fade(imagesList[0], true, spritesList[i]);
             fadeFinish = false;
-            keyEPressed = true;
             DOVirtual.DelayedCall(5, () => fadeFinish = true);
+            if ((int)state == 2)
+            {
+                for (int j = 1; j <= 3; j++)
+                {
+                    UnFade(imagesList[j], spritesList[i + j]);
+                }
+            }
+            state++;
         }
-        if(_InputEnter.input == "jump" && keyEPressed ==true && fadeFinish==true)
+        else if (_input == state && fadeFinish == true)
         {
-            Fade(upButton, true, c);
-            fadeFinish = false;
-            keyJumpPressed = true;
-            DOVirtual.DelayedCall(5, () => fadeFinish = true);
-        }
-        if(_InputEnter.input == "crouch" && keyJumpPressed == true  && fadeFinish == true)
-        {
-            Fade(upButton, true, z);
-            fadeFinish = false;
-            DOVirtual.DelayedCall(5, () => fadeFinish = true);
-            keyCPressed = true;
-            UnFade(leftButton, q);
-            UnFade(downButton, s);
-            UnFade(rightButton, d);
-        }
-        if (_InputEnter.moveDirection.Equals(upDirection) && keyCPressed == true && fadeFinish == true)
-        {
-            keyZPressed = true;
-            upButton.color = Color.green;
-        }
-        if (_InputEnter.moveDirection.Equals(downDirection) && keyCPressed == true && fadeFinish == true)
-        {
-            keySPressed = true;
-            downButton.color = Color.green;
-        }
-        if (_InputEnter.moveDirection.Equals(leftDirection) && keyCPressed == true && fadeFinish == true)
-        {
-            keyQPressed = true;
-            leftButton.color = Color.green;
-        }
-        if (_InputEnter.moveDirection.Equals(rightDirection) && keyCPressed == true && fadeFinish == true)
-        {
-            keyDPressed = true;
-            rightButton.color = Color.green;
-        }
-        if (keyZPressed && keySPressed && keyQPressed && keyDPressed && movementDone == false)
-        {
-            DOVirtual.DelayedCall(3, () => downButton.color = Color.white);
-            DOVirtual.DelayedCall(3, () => upButton.color = Color.white);
-            DOVirtual.DelayedCall(3, () => leftButton.color = Color.white);
-            DOVirtual.DelayedCall(3, () => rightButton.color = Color.white);
-            Fade(upButton, false, null);
-            Fade(leftButton, true, c);
-            Fade(downButton, true, plus);
-            Fade(rightButton, true, space);
-            DOVirtual.DelayedCall(5, () => fadeFinish = true);
-            movementDone = true;
-        }
-        if (_InputEnter.input == "leap" && movementDone == true && fadeFinish == true)
-        {
-            Fade(leftButton, false, c);
-            Fade(downButton, false, plus);
-            Fade(rightButton, false, space);
+            Fade(imagesList[1], false, spritesList[2]);
+            Fade(imagesList[2], false, spritesList[7]);
+            Fade(imagesList[3], false, spritesList[1]);
             DOVirtual.DelayedCall(3, () => EventBus.Publish(new OnTutorialFinish
             {
 
             }));
-            Destroy(gameObject);
+            DOVirtual.DelayedCall(3, () => Destroy(gameObject));
         }
     }
 
-    private void Fade(Image _inputImage, bool _reappear,Sprite _newSprite)
+    void TestMovement(Vector2 _input)
+    {
+        if (_input == Vector2.up)
+        {
+            imagesList[0].color = Color.green;
+        }
+        if (_input == Vector2.left)
+        {
+            imagesList[1].color = Color.green;
+        }
+        if (_input == Vector2.down)
+        {
+            imagesList[2].color = Color.green;
+        }
+        if (_input == Vector2.right)
+        {
+            imagesList[3].color = Color.green;
+        }
+        if (imagesList.All((Image image) => image.color == Color.green))
+        {
+            List<bool> boolListe = new List<bool>();
+            fadeFinish = false;
+            DOVirtual.DelayedCall(5, () => fadeFinish = true);
+            Fade(imagesList[0], false, null);
+            Fade(imagesList[1], true, spritesList[2]);
+            Fade(imagesList[2], true, spritesList[7]);
+            Fade(imagesList[3], true, spritesList[1]);
+            DOVirtual.DelayedCall(3, () => imagesList[0].color = Color.white);
+            DOVirtual.DelayedCall(3, () => imagesList[1].color = Color.white);
+            DOVirtual.DelayedCall(3, () => imagesList[2].color = Color.white);
+            DOVirtual.DelayedCall(3, () => imagesList[3].color = Color.white);
+            state++;
+        }
+    }
+
+    private void Fade(Image _inputImage, bool _reappear, Sprite _newSprite)
     {
         _inputImage.CrossFadeAlpha(0, 2, false);
         if (_reappear == true)
@@ -132,7 +134,12 @@ public class TutorialInputVerif : MonoBehaviour
     }
     private void UnFade(Image _inputImage, Sprite _newSprite)
     {
-        DOVirtual.DelayedCall(3,() => _inputImage.sprite = _newSprite);
-        DOVirtual.DelayedCall(3,() => _inputImage.CrossFadeAlpha(1, 2, false));
+        DOVirtual.DelayedCall(3, () => _inputImage.sprite = _newSprite);
+        DOVirtual.DelayedCall(3, () => _inputImage.CrossFadeAlpha(1, 2, false));
     }
+}
+
+public enum TutorialVerifState
+{
+    echolocation, jump, crouch, movement, leap
 }

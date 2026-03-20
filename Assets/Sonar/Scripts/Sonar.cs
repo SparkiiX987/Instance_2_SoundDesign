@@ -76,7 +76,7 @@ public class Sonar : PlayerAbility
         base.Execute(_context);
         EventBus.Publish(new OnPlayerInputEnter
         {
-            input = "echolocation"
+            input = TutorialVerifState.echolocation
         });
         TriggerWave();
     }
