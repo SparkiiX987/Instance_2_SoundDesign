@@ -1,13 +1,24 @@
 using UnityEngine;
 
+[DefaultExecutionOrder(-10)]
 public class GameManager : MonoBehaviour
 {
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private Transform playerSpawnPoint;
 
-    private GameObject player;
+    public GameObject player { get ; private set; }
+
+    public static GameManager instance;
+
     private void Start()
     {
+        if(instance == null)
+        {
+            Destroy(this);
+        }
+
+        instance = this;
+
         SpawnPlayer();
     }
 

@@ -409,6 +409,7 @@ GameObject:
   - component: {fileID: 6647301995817762499}
   - component: {fileID: 82036979122223303}
   - component: {fileID: 8512829847286032187}
+  - component: {fileID: 1485946798422442459}
   - component: {fileID: 7384705160287058495}
   - component: {fileID: 96766279338221178}
   m_Layer: 0
@@ -556,11 +557,7 @@ MonoBehaviour:
   obstacleMask:
     serializedVersion: 2
     m_Bits: 904
-  showRaycasts: 1
-  raycastDrawDuration: 0.5
-  raycastHitColor: {r: 0, g: 1, b: 1, a: 1}
-  raycastToWallColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  raycastWallToTargetColor: {r: 0, g: 0.23634386, b: 1, a: 1}
+  activationKey: 101
 --- !u!114 &8512829847286032187
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -580,6 +577,18 @@ MonoBehaviour:
   chargeMaxDuration: 1.5
   chargeMinDuration: 0.1
   driverCheckInterval: 2
+--- !u!114 &1485946798422442459
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6585705549612740297}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80bfcffaa37aa104ba28d52dd9ed6b22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PauseActivation
 --- !u!54 &7384705160287058495
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -796,6 +805,22 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: 84aa85bd-77bb-448a-9689-15f507d7e298
     m_ActionName: 'UI/Sonar[/Keyboard/e]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1485946798422442459}
+        m_TargetAssemblyTypeName: PauseActivation, Assembly-CSharp
+        m_MethodName: Execute
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 78caf02d-d467-45cc-b465-fed938fa83c5
+    m_ActionName: 'Player/Pause[/Keyboard/escape]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: Keyboard&Mouse
   m_DefaultActionMap: Player
