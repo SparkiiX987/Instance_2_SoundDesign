@@ -1,8 +1,10 @@
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using Player.Scripts;
 
-public class Sonar : MonoBehaviour
+public class Sonar : PlayerAbility
 {
     [Header("Parametres")]
     [SerializeField] private SO_SonarSettings settings;
@@ -41,16 +43,15 @@ public class Sonar : MonoBehaviour
     private float _waveMaxRadius;
     private float _waveFadeDuration;
 
-    // Colliders du joueur a ignorer dans le raycast
     private Collider[] _selfColliders;
 
-    private void Awake()
+    public override void Init(PlayerController _playerController)
     {
+        base.Init(_playerController);
         if (coneOrigin == null) coneOrigin = transform;
         _lastPosition      = transform.position;
         _frozenConeForward = coneOrigin.forward;
-        // Recuperer tous les colliders du joueur pour les ignorer
-        _selfColliders = GetComponentsInChildren<Collider>();
+        _selfColliders     = GetComponentsInChildren<Collider>();
     }
 
     private void Update()
@@ -60,11 +61,22 @@ public class Sonar : MonoBehaviour
         if (_cooldownTimer <= 0f && !_isMovementWave)
             _coneIsFrozen = false;
 
+        // Fallback clavier si pas d'input system
         if (Input.GetKeyDown(activationKey) && _cooldownTimer <= 0f)
             TriggerWave();
 
         HandleMovementWave();
         PushShaderGlobals();
+    }
+
+    /// <summary>
+    /// Execute via PlayerAbility — appele par le PlayerController via InputAction.
+    /// </summary>
+    public override void Execute(InputAction.CallbackContext _context)
+    {
+        if (!CanExecute()) return;
+        if (_context.phase != InputActionPhase.Started) return;
+        TriggerWave();
     }
 
     public void TriggerWave()
@@ -114,7 +126,6 @@ public class Sonar : MonoBehaviour
         Shader.SetGlobalFloat(ID_WaveFadeDuration, _waveFadeDuration);
 
         Vector3 originPos = coneOrigin.position;
-        // On capture la direction du cone AU MOMENT du tir
         Vector3 originFwd = coneOrigin.forward;
         bool    isMvt     = _isMovementWave;
 
@@ -139,13 +150,26 @@ public class Sonar : MonoBehaviour
 
     private void OnWaveStep(Vector3 originPos, Vector3 originFwd, bool isMovementWave)
     {
-        float halfCos = Mathf.Cos(settings.coneHalfAngle * Mathf.Deg2Rad);
-
-        // On scanne TOUS les objets dans le rayon actuel
-        // _hitObjects evite les doublons — pas besoin de _previousWaveRadius
+        float halfCos    = Mathf.Cos(settings.coneHalfAngle * Mathf.Deg2Rad);
         float scanRadius = Mathf.Max(_currentWaveRadius, 0.5f);
-        Collider[] hits = Physics.OverlapSphere(originPos, scanRadius, detectableLayerMask);
 
+        // Debug visuel OverlapSphere
+        int segs = 24;
+        for (int i = 0; i < segs; i++)
+        {
+            float a0 = (i / (float)segs) * Mathf.PI * 2f;
+            float a1 = ((i + 1) / (float)segs) * Mathf.PI * 2f;
+            Debug.DrawLine(
+                originPos + new Vector3(Mathf.Cos(a0), 0, Mathf.Sin(a0)) * scanRadius,
+                originPos + new Vector3(Mathf.Cos(a1), 0, Mathf.Sin(a1)) * scanRadius,
+                Color.yellow, 0.15f);
+            Debug.DrawLine(
+                originPos + new Vector3(Mathf.Cos(a0), Mathf.Sin(a0), 0) * scanRadius,
+                originPos + new Vector3(Mathf.Cos(a1), Mathf.Sin(a1), 0) * scanRadius,
+                Color.yellow, 0.15f);
+        }
+
+        Collider[] hits = Physics.OverlapSphere(originPos, scanRadius, detectableLayerMask);
         Debug.Log($"[Sonar] OverlapSphere radius={scanRadius:F2} => {hits.Length} colliders trouves");
 
         foreach (Collider hit in hits)
@@ -184,7 +208,7 @@ public class Sonar : MonoBehaviour
 
             Vector3 dir = (position - originPos).normalized;
 
-            // Raycast en ignorant les colliders du joueur lui-meme
+            // Raycast en ignorant les colliders du joueur
             bool blocked = false;
             RaycastHit[] rayHits = Physics.RaycastAll(originPos, dir, distance, obstacleMask);
             foreach (RaycastHit rh in rayHits)
@@ -203,7 +227,7 @@ public class Sonar : MonoBehaviour
             _hitObjects.Add(detectable);
             float proximity = Mathf.Clamp01(1f - (distance / _activeRange));
             detectable.OnProb(proximity);
-            Debug.Log($"[Sonar] >>> DETECTE {hit.name} proximity={proximity:F2} volume attendu");
+            Debug.Log($"[Sonar] >>> DETECTE {hit.name} proximity={proximity:F2}");
         }
     }
 
