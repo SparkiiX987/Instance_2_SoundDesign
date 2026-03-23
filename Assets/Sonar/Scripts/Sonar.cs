@@ -35,20 +35,20 @@ public class Sonar : PlayerAbility
     private static readonly int ID_WaveFadeDuration = Shader.PropertyToID("_WaveFadeDuration");
 
     // Etat
-    private float   _currentWaveRadius;
-    private float   _previousWaveRadius;
-    private float   _activeRange;
-    private float   _cooldownTimer;
-    private Vector3 _frozenConeForward;
-    private bool    _coneIsFrozen;
+    private float      _currentWaveRadius;
+    private float      _previousWaveRadius;
+    private float      _activeRange;
+    private float      _cooldownTimer;
+    private Vector3    _frozenConeForward;
+    private bool       _coneIsFrozen;
     private HashSet<IDetectable> _hitObjects = new();
-    private Tween   _waveTween;
-    private Vector3 _lastPosition;
-    private float   _movementTimer;
-    private bool    _isMovementWave;
-    private float   _waveFireTime;
-    private float   _waveMaxRadius;
-    private float   _waveFadeDuration;
+    private Tween      _waveTween;
+    private Vector3    _lastPosition;
+    private float      _movementTimer;
+    private bool       _isMovementWave;
+    private float      _waveFireTime;
+    private float      _waveMaxRadius;
+    private float      _waveFadeDuration;
     private Collider[] _selfColliders;
 
     // ── Init ─────────────────────────────────────────────────────────
@@ -67,6 +67,14 @@ public class Sonar : PlayerAbility
         _lastPosition      = transform.position;
         _frozenConeForward = coneOrigin.forward;
         _selfColliders     = GetComponentsInChildren<Collider>();
+
+        // S'abonner au VoiceTrigger — pas de reference directe, pas de conflit
+        VoiceTrigger.OnSoundFired += OnVoiceFired;
+    }
+
+    private void OnDestroy()
+    {
+        VoiceTrigger.OnSoundFired -= OnVoiceFired;
     }
 
     // ── Update ───────────────────────────────────────────────────────
@@ -102,6 +110,17 @@ public class Sonar : PlayerAbility
             return;
         }
         TriggerWave();
+    }
+
+    // ── VoiceTrigger → Sonar (via event, zero couplage) ──────────────
+
+    /// <summary>
+    /// Recu quand VoiceTrigger.Fire() est appele.
+    /// normalizedVolume : 0 = cri faible, 1 = cri fort.
+    /// </summary>
+    private void OnVoiceFired(float normalizedVolume)
+    {
+        TriggerWaveWithVolume(normalizedVolume);
     }
 
     // ── API publique ─────────────────────────────────────────────────
@@ -268,10 +287,10 @@ public class Sonar : PlayerAbility
                     }
                 }
                 if (!isSelf)
-                    {
-                        blocked = true;
-                        break;
-                    }
+                {
+                    blocked = true;
+                    break;
+                }
             }
 
             Debug.DrawLine(originPos, originPos + dir * distance,
