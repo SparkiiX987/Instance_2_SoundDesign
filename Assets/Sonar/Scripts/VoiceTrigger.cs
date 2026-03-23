@@ -254,21 +254,23 @@ public class VoiceTrigger : PlayerAbility
 
     // ── Fire ─────────────────────────────────────────────────────────
 
+    // Dans VoiceTrigger, ajouter cet event SOUS OnSoundCaptured :
+    public static event System.Action<float> OnSoundFired;
+
+// Et dans Fire(), remplacer le commentaire par :
     private void Fire()
     {
         _isCharging = false;
         float normalizedVolume = Mathf.Clamp01(
             Mathf.InverseLerp(volumeThreshold, volumeMax, _chargePeakVolume));
 
-        // Capture un extrait PCM du buffer actuel pour EnemyVoiceCapture
         EmitPCMSnapshot(normalizedVolume);
 
-        //sonar.TriggerWaveWithVolume(normalizedVolume);
+        // Declenche le sonar via event — pas de reference directe
+        OnSoundFired?.Invoke(normalizedVolume);
     }
 
-    /// <summary>
-    /// Lit un extrait du buffer FMOD et le passe a OnSoundCaptured.
-    /// </summary>
+    
     private void EmitPCMSnapshot(float _normalizedVolume)
     {
         if (OnSoundCaptured == null) { return; }
@@ -376,6 +378,7 @@ public class VoiceTrigger : PlayerAbility
         => StartRecordingOnDriver(index, rate, channels);
 
     private void OnDestroy() { StopRecording(); }
+    
 
     // ── Debug GUI ────────────────────────────────────────────────────
 
