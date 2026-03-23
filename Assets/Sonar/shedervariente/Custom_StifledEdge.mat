@@ -15,7 +15,7 @@ Material:
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
-  m_DoubleSidedGI: 0
+  m_DoubleSidedGI: 1
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
@@ -25,10 +25,18 @@ Material:
     m_TexEnvs: []
     m_Ints: []
     m_Floats:
-    - _DepthThreshold: 0.01
+    - _DepthThreshold: 0.036
+    - _EdgeFadeMult: 1
     - _EdgeThickness: 1.5
-    - _NormalThreshold: 0.4
+    - _FadeDuration: 1
+    - _IntersectMax: 0.103
+    - _IntersectMin: 0.0428
+    - _NormalThreshold: 0.82
+    - _WaveBrightness: 1.77
+    - _WaveWidth: 3.79
     m_Colors:
-    - _EdgeColor: {r: 1, g: 1, b: 1, a: 1}
+    - _EdgeColor: {r: 1, g: 0, b: 0, a: 1}
+    - _EdgeWaveColor: {r: 0.81023014, g: 1, b: 0.8, a: 1}
+    - _WaveColor: {r: 0.19999996, g: 0.8, b: 1, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

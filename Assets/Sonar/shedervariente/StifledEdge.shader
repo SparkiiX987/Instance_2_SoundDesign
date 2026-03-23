@@ -1,13 +1,16 @@
-Shader "Custom/StifledEdge"
+Shader "Custom/StifledEdge_Sonar"
 {
     Properties
     {
-        _EdgeColor      ("Edge Color",        Color)        = (1,1,1,1)
-        _EdgeThickness  ("Edge Thickness",    Float)        = 1.2
-        _DepthThreshold ("Depth Threshold",   Range(0,0.1)) = 0.008
-        _NormalThreshold("Normal Threshold",  Range(0,2))   = 0.3
-        _IntersectMin   ("Intersection Min",  Range(0,0.1)) = 0.002
-        _IntersectMax   ("Intersection Max",  Range(0,0.5)) = 0.05
+        _EdgeColor       ("Edge Color",         Color)        = (1,1,1,1)
+        _EdgeWaveColor   ("Edge Wave Color",     Color)        = (0.8,1,1,1)
+        _EdgeThickness   ("Edge Thickness",      Float)        = 1.2
+        _DepthThreshold  ("Depth Threshold",     Range(0,0.1)) = 0.008
+        _NormalThreshold ("Normal Threshold",    Range(0,2))   = 0.3
+        _IntersectMin    ("Intersection Min",    Range(0,0.1)) = 0.002
+        _IntersectMax    ("Intersection Max",    Range(0,0.5)) = 0.05
+        _FadeDuration    ("Duree trace (s)",     Float)        = 15.0
+        _EdgeFadeMult    ("Multiplicateur fade", Float)        = 1.0
     }
 
     SubShader
@@ -26,14 +29,48 @@ Shader "Custom/StifledEdge"
             TEXTURE2D_X(_CameraDepthTexture);
             SAMPLER(sampler_CameraDepthTexture);
 
+            // Globaux sonar joueur
+            float4 _WaveOrigin;
+            float  _WaveRadius;
+            float  _WaveActive;
+            float4 _ConeForward;
+            float  _ConeHalfAngleCos;
+            float  _WaveFireTime;
+            float  _WaveMaxRadius;
+            float  _WaveFadeDuration;
+
+            // Globaux sonar ennemis (8 slots)
+            float4 _EnemyOrigin0; float _EnemyRadius0; float _EnemyActive0; float4 _EnemyColor0; float _EnemyFireTime0; float _EnemyMaxRad0; float _EnemyFadeDur0;
+            float4 _EnemyOrigin1; float _EnemyRadius1; float _EnemyActive1; float4 _EnemyColor1; float _EnemyFireTime1; float _EnemyMaxRad1; float _EnemyFadeDur1;
+            float4 _EnemyOrigin2; float _EnemyRadius2; float _EnemyActive2; float4 _EnemyColor2; float _EnemyFireTime2; float _EnemyMaxRad2; float _EnemyFadeDur2;
+            float4 _EnemyOrigin3; float _EnemyRadius3; float _EnemyActive3; float4 _EnemyColor3; float _EnemyFireTime3; float _EnemyMaxRad3; float _EnemyFadeDur3;
+            float4 _EnemyOrigin4; float _EnemyRadius4; float _EnemyActive4; float4 _EnemyColor4; float _EnemyFireTime4; float _EnemyMaxRad4; float _EnemyFadeDur4;
+            float4 _EnemyOrigin5; float _EnemyRadius5; float _EnemyActive5; float4 _EnemyColor5; float _EnemyFireTime5; float _EnemyMaxRad5; float _EnemyFadeDur5;
+            float4 _EnemyOrigin6; float _EnemyRadius6; float _EnemyActive6; float4 _EnemyColor6; float _EnemyFireTime6; float _EnemyMaxRad6; float _EnemyFadeDur6;
+            float4 _EnemyOrigin7; float _EnemyRadius7; float _EnemyActive7; float4 _EnemyColor7; float _EnemyFireTime7; float _EnemyMaxRad7; float _EnemyFadeDur7;
+
             float4 _EdgeColor;
+            float4 _EdgeWaveColor;
             float  _EdgeThickness;
             float  _DepthThreshold;
             float  _NormalThreshold;
             float  _IntersectMin;
             float  _IntersectMax;
+            float  _FadeDuration;
+            float  _EdgeFadeMult;
 
-            // --- Depth Sobel ---
+            // ── Reconstruction position monde depuis depth ────────────
+            float3 ReconstructWorldPos(float2 uv, float rawDepth)
+            {
+                float4 ndc = float4(uv * 2.0 - 1.0, rawDepth, 1.0);
+                #if UNITY_UV_STARTS_AT_TOP
+                    ndc.y = -ndc.y;
+                #endif
+                float4 worldPos = mul(UNITY_MATRIX_I_VP, ndc);
+                return worldPos.xyz / worldPos.w;
+            }
+
+            // ── Depth Sobel ──────────────────────────────────────────
             float SobelDepth(float2 uv, float2 off)
             {
                 float d00 = SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_CameraDepthTexture, uv + float2(-off.x,  off.y)).r;
@@ -50,21 +87,18 @@ Shader "Custom/StifledEdge"
                 return sqrt(gx*gx + gy*gy);
             }
 
-            // --- Reconstruction normale depuis depth ---
+            // ── Reconstruction normale depuis depth ──────────────────
             float3 ReconstructNormal(float2 uv, float2 off)
             {
                 float dc = SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_CameraDepthTexture, uv).r;
                 float dr = SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_CameraDepthTexture, uv + float2(off.x, 0)).r;
                 float du = SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_CameraDepthTexture, uv + float2(0, off.y)).r;
-
-                float3 c = float3(uv,                    dc);
-                float3 r = float3(uv + float2(off.x, 0), dr);
-                float3 u = float3(uv + float2(0, off.y), du);
-
+                float3 c = float3(uv,                     dc);
+                float3 r = float3(uv + float2(off.x, 0),  dr);
+                float3 u = float3(uv + float2(0, off.y),  du);
                 return normalize(cross(u - c, r - c));
             }
 
-            // --- Sobel sur normales reconstruites ---
             float SobelNormalFromDepth(float2 uv, float2 off)
             {
                 float3 n00 = ReconstructNormal(uv + float2(-off.x,  off.y), off);
@@ -75,22 +109,19 @@ Shader "Custom/StifledEdge"
                 float3 n02 = ReconstructNormal(uv + float2(-off.x, -off.y), off);
                 float3 n12 = ReconstructNormal(uv + float2( 0,      -off.y), off);
                 float3 n22 = ReconstructNormal(uv + float2( off.x, -off.y), off);
-
                 float3 gx = -n00 - 2*n01 - n02 + n20 + 2*n21 + n22;
                 float3 gy = -n00 - 2*n10 - n20 + n02 + 2*n12 + n22;
                 return sqrt(dot(gx,gx) + dot(gy,gy));
             }
 
-            // --- Detection intersection entre objets ---
             float IntersectionEdge(float2 uv, float2 off)
             {
                 float center = SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_CameraDepthTexture, uv).r;
-
                 float maxDelta = 0;
                 for (int x = -1; x <= 1; x++)
                 for (int y = -1; y <= 1; y++)
                 {
-                    if (x == 0 && y == 0) continue;
+                    if (x == 0 && y == 0) { continue; }
                     float neighbor = SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_CameraDepthTexture,
                                      uv + float2(x, y) * off).r;
                     maxDelta = max(maxDelta, abs(center - neighbor));
@@ -98,27 +129,100 @@ Shader "Custom/StifledEdge"
                 return step(_IntersectMin, maxDelta) * step(maxDelta, _IntersectMax);
             }
 
-            // --- Fragment principal ---
+            // ── Fragment principal ────────────────────────────────────
             half4 Frag(Varyings input) : SV_Target
             {
-                float2 uv       = input.texcoord;
+                float2 uv        = input.texcoord;
                 float2 texelSize = float2(1.0 / _ScreenParams.x, 1.0 / _ScreenParams.y);
-                float2 off      = texelSize * _EdgeThickness;
+                float2 off       = texelSize * _EdgeThickness;
 
+                // Detection aretes
                 float depthEdge  = SobelDepth(uv, off);
                 float normalEdge = SobelNormalFromDepth(uv, off);
                 float interEdge  = IntersectionEdge(uv, off);
+                float edge       = saturate(
+                    step(_DepthThreshold, depthEdge) +
+                    step(_NormalThreshold, normalEdge)
+                );
+                float finalEdge  = saturate(edge + interEdge * 2.0);
 
-                // Arete = depth OU normale depasse le seuil
-                float edge = step(_DepthThreshold, depthEdge)
-                           + step(_NormalThreshold, normalEdge);
-                edge = saturate(edge);
+                // Pas une arete = pixel noir pur
+                if (finalEdge < 0.01)
+                {
+                    return half4(0, 0, 0, 1);
+                }
 
-                // Intersection = ligne plus brillante
-                float finalEdge = saturate(edge + interEdge * 2.0);
+                // Position monde du pixel
+                float rawDepth = SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_CameraDepthTexture, uv).r;
+                float3 posWS   = ReconstructWorldPos(uv, rawDepth);
 
-                // Fond noir total, lignes en EdgeColor
-                return half4(_EdgeColor.rgb * finalEdge, 1.0);
+                // ── Onde joueur ───────────────────────────────────────
+                float3 toPixel  = normalize(posWS - _WaveOrigin.xyz);
+                float  angleCos = dot(toPixel, normalize(_ConeForward.xyz));
+                float  inCone   = step(_ConeHalfAngleCos, angleCos);
+                float  dist     = distance(posWS, _WaveOrigin.xyz);
+
+                // Anneau pendant propagation
+                float inner  = smoothstep(_WaveRadius - 0.8, _WaveRadius, dist);
+                float outer  = smoothstep(_WaveRadius + 0.8, _WaveRadius, dist);
+                float wave   = inner * outer * _WaveActive * inCone;
+
+                // Trace residuelle joueur
+                float waveDur     = max(_WaveFadeDuration, 0.001);
+                float delay       = (dist / max(_WaveMaxRadius, 0.001)) * waveDur;
+                float arrivalTime = _WaveFireTime + delay;
+                float firedOnce   = step(0.001, _WaveFireTime);
+                float waveArrived = step(arrivalTime, _Time.y);
+                float inRange     = step(dist, _WaveMaxRadius);
+                float wasSwept    = firedOnce * waveArrived * inRange * inCone;
+                float waveEndTime = _WaveFireTime + waveDur;
+                float fadeDur     = _FadeDuration * _EdgeFadeMult;
+                float elapsed     = max(0.0, _Time.y - waveEndTime);
+                float fadeOut     = 1.0 - smoothstep(fadeDur * 0.8, fadeDur, elapsed);
+                float trailFade   = wasSwept * fadeOut;
+
+                // ── 8 emetteurs ennemis ───────────────────────────────
+                float  eTrailAny = 0;
+                float  eWaveAny  = 0;
+                float3 eTrailCol = float3(0,0,0);
+
+                #define ENEMY_POST(IDX) { \
+                    float ed     = distance(posWS, _EnemyOrigin##IDX.xyz); \
+                    float ewi    = smoothstep(_EnemyRadius##IDX - 0.8, _EnemyRadius##IDX, ed); \
+                    float ewo    = smoothstep(_EnemyRadius##IDX + 0.8, _EnemyRadius##IDX, ed); \
+                    float ew     = ewi * ewo * _EnemyActive##IDX; \
+                    eWaveAny     = saturate(eWaveAny + ew); \
+                    float ewd    = max(_EnemyFadeDur##IDX, 0.001); \
+                    float edel   = (ed / max(_EnemyMaxRad##IDX, 0.001)) * ewd; \
+                    float earr   = _EnemyFireTime##IDX + edel; \
+                    float efire  = step(0.001, _EnemyFireTime##IDX); \
+                    float earriv = step(earr, _Time.y); \
+                    float einr   = step(ed, _EnemyMaxRad##IDX); \
+                    float eswept = efire * earriv * einr; \
+                    float eend   = _EnemyFireTime##IDX + ewd; \
+                    float eelaps = max(0.0, _Time.y - eend); \
+                    float efout  = 1.0 - smoothstep(fadeDur*0.8, fadeDur, eelaps); \
+                    float etf    = eswept * efout; \
+                    eTrailCol    = lerp(eTrailCol, _EnemyColor##IDX.rgb, etf); \
+                    eTrailAny    = saturate(eTrailAny + etf); \
+                }
+                ENEMY_POST(0) ENEMY_POST(1) ENEMY_POST(2) ENEMY_POST(3)
+                ENEMY_POST(4) ENEMY_POST(5) ENEMY_POST(6) ENEMY_POST(7)
+
+                // Rien de revele = noir
+                float revealed = saturate(wave + trailFade + eWaveAny + eTrailAny);
+                if (revealed < 0.01)
+                {
+                    return half4(0, 0, 0, 1);
+                }
+
+                // Composition couleur
+                float3 col = _EdgeColor.rgb * trailFade;
+                col = lerp(col, eTrailCol,           eTrailAny);
+                col = lerp(col, _EdgeWaveColor.rgb,  wave);
+                col = lerp(col, eTrailCol,           eWaveAny);
+
+                return half4(col * finalEdge, 1.0);
             }
             ENDHLSL
         }

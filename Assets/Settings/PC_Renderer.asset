@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b00045f12942b46c698459096c89274e, type: 3}
   m_Name: FullScreenPassRendererFeature
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.FullScreenPassRendererFeature
-  m_Active: 0
+  m_Active: 1
   injectionPoint: 600
   fetchColorBuffer: 0
   requirements: 0
@@ -47,7 +47,8 @@ MonoBehaviour:
   m_RendererFeatures:
   - {fileID: 7833122117494664109}
   - {fileID: -1053928948708403720}
-  m_RendererFeatureMap: ad6b866f10d7b46cf815bc8134b15ff1
+  - {fileID: 1620522956435820308}
+  m_RendererFeatureMap: ad6b866f10d7b46cf815bc8134b15ff1140fb9000b417d16
   m_UseNativeRenderPass: 1
   xrSystemData: {fileID: 0}
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
@@ -90,6 +91,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SonarOutlineFeature
   m_Active: 1
   settings: {sonarMaterial: {fileID: 2100000, guid: bcee0f426b8d25745b7fffc6b027b147, type: 2}, passEvent: 500}
+--- !u!114 &1620522956435820308
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff32650a14f00df40b33247cb6760e52, type: 3}
+  m_Name: StifledRenderFeature
+  m_EditorClassIdentifier: Assembly-CSharp::StifledRenderFeature
+  m_Active: 0
+  settings:
+    edgeMaterial: {fileID: 2100000, guid: 2e5bbf5875c21f041a87a1977ec3068d, type: 2}
+    edgeColor: {r: 1, g: 1, b: 1, a: 1}
+    edgeThickness: 1.02
+    depthThreshold: 0.008
+    normalThreshold: 0.08
 --- !u!114 &7833122117494664109
 MonoBehaviour:
   m_ObjectHideFlags: 0
