@@ -67,7 +67,7 @@ PrefabInstance:
     - target: {fileID: -7511558181221131132, guid: 37a4d0518def5db499ae5ad78f949ebc, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: a75c12c0d9f41824b9f7ed92c49ca95a, type: 2}
+      objectReference: {fileID: 2100000, guid: cc7d451fad60f634dbfef8642dd8dd98, type: 2}
     - target: {fileID: 919132149155446097, guid: 37a4d0518def5db499ae5ad78f949ebc, type: 3}
       propertyPath: m_Name
       value: microscope
