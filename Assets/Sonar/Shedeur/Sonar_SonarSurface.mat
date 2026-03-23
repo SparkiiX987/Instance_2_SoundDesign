@@ -32,7 +32,7 @@ Material:
     - _EdgeBias: 0.5
     - _EdgeBrightness: 2
     - _EdgeFadeMult: 4
-    - _FadeDuration: 15
+    - _FadeDuration: 0.5
     - _RingThickness: 0.15
     - _SilhouetteCull: 0
     - _WaveThickness: 0.8
