@@ -26,11 +26,10 @@ public class WaveManager : MonoBehaviour
         group.alpha = 1;
         transform.position = Input.mousePosition;
         rectTransform.sizeDelta = new Vector2(0, 0);
-        print(group.alpha);
 
         rectTransform.DOSizeDelta(new Vector2(WaveMaxSize, WaveMaxSize), WaveDuration);
 
-        DOVirtual.DelayedCall(WaveDuration, () => group.DOFade(WaveMinimumAlpha, WaveCooldown/3f));
+        DOVirtual.DelayedCall(WaveDuration, () => group.DOFade(WaveMinimumAlpha, WaveCooldown / 3f));
 
         DOVirtual.DelayedCall(WaveCooldown, StartCheckLoop);
     }
