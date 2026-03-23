@@ -38,4 +38,9 @@ public class PauseMenu : MonoBehaviour
         playerPause.SetPlayerInputActive(isActive);
         isActive = !isActive;
     }
+
+    public void ReturnToMainMenu()
+    {
+        SceneManager.LoadScene(0);
+    }
 }

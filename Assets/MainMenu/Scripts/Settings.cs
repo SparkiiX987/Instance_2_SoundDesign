@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class Settings : MonoBehaviour
 {
@@ -16,7 +17,7 @@ public class Settings : MonoBehaviour
         resolutions = Screen.resolutions;
 
         dropdownResolution.ClearOptions();
-        var options = new System.Collections.Generic.List<string>();
+        List<string> options = new List<string>();
 
         int indexResolutionActuelle = 0;
         for (int i = 0; i < resolutions.Length; i++)
@@ -42,14 +43,14 @@ public class Settings : MonoBehaviour
         dropdownResolution.onValueChanged.AddListener(OnChangeResolution);
     }
     
-    void OnToggleFullscreen(bool isFull)
+    void OnToggleFullscreen(bool _isFull)
     {
-        Screen.fullScreen = isFull;
+        Screen.fullScreen = _isFull;
     }
 
-    void OnChangeResolution(int index)
+    void OnChangeResolution(int _index)
     {
-        Resolution res = resolutions[index];
+        Resolution res = resolutions[_index];
         Screen.SetResolution(res.width, res.height, Screen.fullScreen);
     }
 
