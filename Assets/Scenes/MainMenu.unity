@@ -3659,6 +3659,7 @@ MonoBehaviour:
   WaveCooldown: 4
   WaveDuration: 2
   WaveMaxSize: 2000
+  FadeDuration: 2
   WaveMinimumAlpha: 0.1
 --- !u!114 &749596367
 MonoBehaviour:

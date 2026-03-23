@@ -8,6 +8,7 @@ public class WaveManager : MonoBehaviour
     [SerializeField] private float WaveCooldown;
     [SerializeField] private float WaveDuration;
     [SerializeField] private float WaveMaxSize;
+    [SerializeField] private float FadeDuration;
     [SerializeField, Range(0, 1)] private float WaveMinimumAlpha;
 
     private void Awake()
@@ -18,19 +19,18 @@ public class WaveManager : MonoBehaviour
 
     void Start()
     {
-        DOVirtual.DelayedCall(0.25f, StartCheckLoop);
+        DOVirtual.DelayedCall(0.25f, PlayWave);
     }
 
-    private void StartCheckLoop()
+    void PlayWave()
     {
+        rectTransform.sizeDelta = Vector2.zero;
         group.alpha = 1;
-        transform.position = Input.mousePosition;
-        rectTransform.sizeDelta = new Vector2(0, 0);
+        rectTransform.position = Input.mousePosition;
 
-        rectTransform.DOSizeDelta(new Vector2(WaveMaxSize, WaveMaxSize), WaveDuration);
-
-        DOVirtual.DelayedCall(WaveDuration, () => group.DOFade(WaveMinimumAlpha, WaveCooldown / 3f));
-
-        DOVirtual.DelayedCall(WaveCooldown, StartCheckLoop);
+        DOTween.Sequence()
+            .Append(rectTransform.DOSizeDelta(new Vector2(WaveMaxSize, WaveMaxSize), WaveDuration))
+            .Append(group.DOFade(WaveMinimumAlpha, FadeDuration))
+            .OnComplete(PlayWave);
     }
 }
