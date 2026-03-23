@@ -2315,8 +2315,28 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 1710722421459838833, guid: c193dea332e8ed543ad4eb8a482ac14c, type: 3}
-      propertyPath: loopDuration
-      value: 1
+      propertyPath: sound.Path
+      value: event:/alarm/Alarme1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1710722421459838833, guid: c193dea332e8ed543ad4eb8a482ac14c, type: 3}
+      propertyPath: fadeOutDuration
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 1710722421459838833, guid: c193dea332e8ed543ad4eb8a482ac14c, type: 3}
+      propertyPath: sound.Guid.Data1
+      value: 1559050279
+      objectReference: {fileID: 0}
+    - target: {fileID: 1710722421459838833, guid: c193dea332e8ed543ad4eb8a482ac14c, type: 3}
+      propertyPath: sound.Guid.Data2
+      value: 1112034485
+      objectReference: {fileID: 0}
+    - target: {fileID: 1710722421459838833, guid: c193dea332e8ed543ad4eb8a482ac14c, type: 3}
+      propertyPath: sound.Guid.Data3
+      value: 1228229546
+      objectReference: {fileID: 0}
+    - target: {fileID: 1710722421459838833, guid: c193dea332e8ed543ad4eb8a482ac14c, type: 3}
+      propertyPath: sound.Guid.Data4
+      value: 349503919
       objectReference: {fileID: 0}
     - target: {fileID: 3615336597612346911, guid: c193dea332e8ed543ad4eb8a482ac14c, type: 3}
       propertyPath: m_LocalPosition.x
