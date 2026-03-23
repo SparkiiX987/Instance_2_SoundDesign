@@ -1,23 +1,15 @@
+using DG.Tweening;
 using UnityEngine;
 
 public class LaserDetection : MonoBehaviour
 {
     [SerializeField] Collider laser;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private void OnTriggerEnter(Collider other)
     {
-        RaycastHit hit;
-        Vector3 _up = transform.TransformDirection(Vector3.up);
-        if (Physics.Raycast(transform.position, _up, 10))
+        EventBus.Publish(new AlarmeSetActive
         {
-            print("There is something in front of the object!");
-
-        }
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+            playerPosition = other.transform.position,
+        });
+        laser.enabled = false;
     }
 }
