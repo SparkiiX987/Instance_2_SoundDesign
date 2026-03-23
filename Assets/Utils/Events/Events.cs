@@ -74,3 +74,7 @@ public struct OnPlayerInputEnter
     public TutorialVerifState input;
     public Vector2 moveDirection;
 }
+public struct AlarmeSetActive
+{
+    public Vector3 playerPosition;
+}
