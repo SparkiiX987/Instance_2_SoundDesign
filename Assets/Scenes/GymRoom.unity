@@ -3065,6 +3065,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.y
       value: 270
       objectReference: {fileID: 0}
+    - target: {fileID: 623208327066077983, guid: 33bb555877c10234c964b6ba5cc81315, type: 3}
+      propertyPath: playerPrefab
+      value: 
+      objectReference: {fileID: 6585705549612740297, guid: 0fd01100bbe0b58cf8ef342fb9a692eb, type: 3}
     - target: {fileID: 2403634905783544529, guid: 33bb555877c10234c964b6ba5cc81315, type: 3}
       propertyPath: m_Icon
       value: 
