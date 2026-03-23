@@ -13,7 +13,7 @@ namespace Player.Scripts
         protected PlayerController controller;
 
         /// <summary>
-        /// Initializes the ability by assigning its PlayerController. 
+        /// Initializes the ability by assigning its PlayerController.
         /// </summary>
         /// <param name="_playerController">Reference to the parent PlayerController.</param>
         public virtual void Init(PlayerController _playerController)
