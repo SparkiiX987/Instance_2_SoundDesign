@@ -20,7 +20,7 @@ MonoBehaviour:
   minVoiceRange: 3
   maxVoiceRange: 20
   fadeDurationMin: 7
-  fadeDurationMax: 15
+  fadeDurationMax: 100
   chargeMaxDuration: 2
   chargeMinDuration: 0.1
   voiceThreshold: 0.02
