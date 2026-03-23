@@ -5,11 +5,11 @@ public class WaveManager : MonoBehaviour
 {
     private RectTransform rectTransform;
     private CanvasGroup group;
-    [SerializeField] private float WaveCooldown;
-    [SerializeField] private float WaveDuration;
-    [SerializeField] private float WaveMaxSize;
-    [SerializeField] private float FadeDuration;
-    [SerializeField, Range(0, 1)] private float WaveMinimumAlpha;
+    [SerializeField] private float waveCooldown;
+    [SerializeField] private float waveDuration;
+    [SerializeField] private float waveMaxSize;
+    [SerializeField] private float fadeDuration;
+    [SerializeField, Range(0, 1)] private float waveMinimumAlpha;
 
     private void Awake()
     {
@@ -29,8 +29,8 @@ public class WaveManager : MonoBehaviour
         rectTransform.position = Input.mousePosition;
 
         DOTween.Sequence()
-            .Append(rectTransform.DOSizeDelta(new Vector2(WaveMaxSize, WaveMaxSize), WaveDuration))
-            .Append(group.DOFade(WaveMinimumAlpha, FadeDuration))
+            .Append(rectTransform.DOSizeDelta(new Vector2(waveMaxSize, waveMaxSize), waveDuration))
+            .Append(group.DOFade(waveMinimumAlpha, fadeDuration))
             .OnComplete(PlayWave);
     }
 }
