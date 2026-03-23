@@ -989,7 +989,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 197689836458865675, guid: 647eae3db9844594b8bb0da62f9cba18, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 3.14
+      value: 2.63
       objectReference: {fileID: 0}
     - target: {fileID: 197689836458865675, guid: 647eae3db9844594b8bb0da62f9cba18, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1030,6 +1030,26 @@ PrefabInstance:
     - target: {fileID: 1554676566760413640, guid: 647eae3db9844594b8bb0da62f9cba18, type: 3}
       propertyPath: m_Name
       value: Laser
+      objectReference: {fileID: 0}
+    - target: {fileID: 5162238092908399255, guid: 647eae3db9844594b8bb0da62f9cba18, type: 3}
+      propertyPath: sound.Path
+      value: event:/Bad GPE Encounter
+      objectReference: {fileID: 0}
+    - target: {fileID: 5162238092908399255, guid: 647eae3db9844594b8bb0da62f9cba18, type: 3}
+      propertyPath: sound.Guid.Data1
+      value: 805203070
+      objectReference: {fileID: 0}
+    - target: {fileID: 5162238092908399255, guid: 647eae3db9844594b8bb0da62f9cba18, type: 3}
+      propertyPath: sound.Guid.Data2
+      value: 1084855665
+      objectReference: {fileID: 0}
+    - target: {fileID: 5162238092908399255, guid: 647eae3db9844594b8bb0da62f9cba18, type: 3}
+      propertyPath: sound.Guid.Data3
+      value: -182505563
+      objectReference: {fileID: 0}
+    - target: {fileID: 5162238092908399255, guid: 647eae3db9844594b8bb0da62f9cba18, type: 3}
+      propertyPath: sound.Guid.Data4
+      value: 1395056263
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2314,10 +2334,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1710722421459838833, guid: c193dea332e8ed543ad4eb8a482ac14c, type: 3}
-      propertyPath: loopDuration
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 3615336597612346911, guid: c193dea332e8ed543ad4eb8a482ac14c, type: 3}
       propertyPath: m_LocalPosition.x
       value: 3.19582

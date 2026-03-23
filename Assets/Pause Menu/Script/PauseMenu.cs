@@ -7,12 +7,16 @@ public class PauseMenu : MonoBehaviour
 
     private bool isActive;
 
-    private void OnEnable()
+    PlayerPause playerPause;
+
+    private void Start()
     {
         EventBus.Subscribe<OnPaused>(AnimsPauseMenu);
+
+        playerPause = GameManager.instance.player.GetComponent<PlayerPause>();
     }
     
-    private void OnDisable()
+    private void OnDestroy()
     {
         EventBus.Unsubscribe<OnPaused>(AnimsPauseMenu);
     }
@@ -24,19 +28,14 @@ public class PauseMenu : MonoBehaviour
 
     public void AnimsPauseMenu(OnPaused _onPaused)
     {
-        if (!isActive)
-        {
-            animator.SetBool("IsOpen", true);
-            animator.SetBool("IsClose", false);
-            isActive = true;
-            return;
-        }
+        ChangePauseState();
+    }
 
-        if (isActive)
-        {
-            animator.SetBool("IsClose", true);
-            animator.SetBool("IsOpen", false);
-            isActive = false;
-        }
+    public void ChangePauseState()
+    {
+        animator.SetBool("IsClose", isActive);
+        animator.SetBool("IsOpen", !isActive);
+        playerPause.SetPlayerInputActive(isActive);
+        isActive = !isActive;
     }
 }
