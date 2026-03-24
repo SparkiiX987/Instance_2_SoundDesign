@@ -1865,7 +1865,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1029053604}
   - component: {fileID: 1029053603}
-  m_Layer: 9
+  m_Layer: 0
   m_Name: AssetCategoryManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
