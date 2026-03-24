@@ -888,7 +888,7 @@ GameObject:
   - component: {fileID: 2052296737824674740}
   - component: {fileID: 5864307829325704268}
   - component: {fileID: 430797880866526772}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Feets - BoxCollider
   m_TagString: Untagged
   m_Icon: {fileID: 0}

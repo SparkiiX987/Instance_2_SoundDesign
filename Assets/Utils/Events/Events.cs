@@ -34,6 +34,11 @@ public struct OnPlayerDetectGround
 
 }
 
+public struct OnPlayerLeaveGround
+{
+
+}
+
 public struct OnPlayerCrouch
 {
     
