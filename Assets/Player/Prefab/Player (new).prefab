@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2428196376661474785}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Collisions
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -46,7 +46,7 @@ GameObject:
   - component: {fileID: 6390567357980119463}
   - component: {fileID: 6175385412715135720}
   - component: {fileID: 3929314552699895031}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Main Camera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
@@ -186,7 +186,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3706988050089285194}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: CameraRoot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -328,7 +328,7 @@ GameObject:
   - component: {fileID: 557918341562204626}
   - component: {fileID: 3083880830315173958}
   - component: {fileID: 6567904383834033050}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: visuel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -416,7 +416,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6213629652923588162}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: SonarOrigine
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -459,7 +459,7 @@ GameObject:
   - component: {fileID: 1485946798422442459}
   - component: {fileID: 7384705160287058495}
   - component: {fileID: 96766279338221178}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Player (new)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -604,6 +604,9 @@ MonoBehaviour:
   obstacleMask:
     serializedVersion: 2
     m_Bits: 520
+  movementWaveRange: 3
+  movementWaveInterval: 0.5
+  movementThreshold: 0.05
   activationKey: 101
 --- !u!114 &8512829847286032187
 MonoBehaviour:
@@ -885,7 +888,7 @@ GameObject:
   - component: {fileID: 2052296737824674740}
   - component: {fileID: 5864307829325704268}
   - component: {fileID: 430797880866526772}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Feets - BoxCollider
   m_TagString: Untagged
   m_Icon: {fileID: 0}

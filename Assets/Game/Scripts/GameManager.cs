@@ -41,22 +41,24 @@ public class GameManager : MonoBehaviour
         EventBus.Unsubscribe<OnVictory>(Victory);
     }
 
-    private void KillPlayer(OnTrapEnter enter)
+    private void KillPlayer(OnTrapEnter _enter)
     {
-        print("player killed");
-
         EventBus.Publish(new OnDefeat());
     }
 
-    private void Defaite(OnDefeat defaite)
+    private void Defaite(OnDefeat _defaite)
     {
         print("defaite");
-        //SceneManager.LoadScene(0);
         player.transform.position = playerSpawnPoint.position;
     }
 
-    private void Victory(OnVictory victory)
+    private void Victory(OnVictory _victory)
     {
         print("victory");
+    }
+
+    private void ChangePlayerSpawnPoint(OnLevelEnd _evt)
+    {
+        playerSpawnPoint.position = _evt.newSpawnPoint;
     }
 }
