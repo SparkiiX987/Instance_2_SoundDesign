@@ -16,15 +16,15 @@ public class Sonar : PlayerAbility
     [SerializeField] private LayerMask detectableLayerMask = ~0;
     [SerializeField] private LayerMask obstacleMask;
 
-    // [Header("Ondes de mouvement")]
-    // [SerializeField] private float movementWaveRange    = 3f;
-    // [SerializeField] private float movementWaveInterval = 0.35f;
-    // [SerializeField] private float movementThreshold    = 0.05f;
+    [Header("Onde de mouvement")]
+    [SerializeField] private float movementWaveRange    = 3f;
+    [SerializeField] private float movementWaveInterval = 0.5f;
+    [SerializeField] private float movementThreshold    = 0.05f;
 
     [Header("Debug")]
     [SerializeField] private KeyCode activationKey = KeyCode.E;
 
-    // Shader IDs
+    // ── Shader IDs cri ───────────────────────────────────────────────
     private static readonly int ID_WaveOrigin       = Shader.PropertyToID("_WaveOrigin");
     private static readonly int ID_WaveRadius       = Shader.PropertyToID("_WaveRadius");
     private static readonly int ID_WaveActive       = Shader.PropertyToID("_WaveActive");
@@ -34,41 +34,49 @@ public class Sonar : PlayerAbility
     private static readonly int ID_WaveMaxRadius    = Shader.PropertyToID("_WaveMaxRadius");
     private static readonly int ID_WaveFadeDuration = Shader.PropertyToID("_WaveFadeDuration");
 
-    // Etat
+    // ── Shader IDs mouvement (variables separees) ────────────────────
+    private static readonly int ID_MoveOrigin       = Shader.PropertyToID("_MoveWaveOrigin");
+    private static readonly int ID_MoveRadius       = Shader.PropertyToID("_MoveWaveRadius");
+    private static readonly int ID_MoveActive       = Shader.PropertyToID("_MoveWaveActive");
+    private static readonly int ID_MoveFireTime     = Shader.PropertyToID("_MoveWaveFireTime");
+    private static readonly int ID_MoveMaxRadius    = Shader.PropertyToID("_MoveWaveMaxRadius");
+    private static readonly int ID_MoveFadeDuration = Shader.PropertyToID("_MoveWaveFadeDuration");
+
+    // ── Etat cri ─────────────────────────────────────────────────────
     private float      _currentWaveRadius;
     private float      _previousWaveRadius;
     private float      _activeRange;
     private float      _cooldownTimer;
     private Vector3    _frozenConeForward;
+    private Vector3    _frozenConeOrigin;  // origine figee au moment du tir
     private bool       _coneIsFrozen;
     private HashSet<IDetectable> _hitObjects = new();
     private Tween      _waveTween;
-    // private Vector3    _lastPosition;
-    // private float      _movementTimer;
-    // private bool       _isMovementWave;
     private float      _waveFireTime;
     private float      _waveMaxRadius;
     private float      _waveFadeDuration;
     private Collider[] _selfColliders;
+
+    // ── Etat mouvement ───────────────────────────────────────────────
+    private float  _moveCurrentRadius;
+    private float  _movePreviousRadius;
+    private Tween  _moveTween;
+    private float  _movementTimer;
+    private Vector3 _lastPosition;
 
     // ── Init ─────────────────────────────────────────────────────────
 
     public override void Init(PlayerController _playerController)
     {
         base.Init(_playerController);
-        if (coneOrigin == null)
-        {
-            coneOrigin = transform;
-        }
-        if (settings == null)
-        {
-            Debug.LogError("[Sonar] SO_SonarSettings non assigne !");
-        }
-        // _lastPosition      = transform.position;
-        _frozenConeForward = coneOrigin.forward;
-        _selfColliders     = GetComponentsInChildren<Collider>();
+        if (coneOrigin == null) { coneOrigin = transform; }
+        if (settings == null)  { Debug.LogError("[Sonar] SO_SonarSettings non assigne !"); }
 
-        // S'abonner au VoiceTrigger — pas de reference directe, pas de conflit
+        _frozenConeForward = coneOrigin.forward;
+        _frozenConeOrigin  = coneOrigin.position;
+        _selfColliders     = GetComponentsInChildren<Collider>();
+        _lastPosition      = transform.position;
+
         VoiceTrigger.OnSoundFired += OnVoiceFired;
     }
 
@@ -83,17 +91,18 @@ public class Sonar : PlayerAbility
     {
         _cooldownTimer -= Time.deltaTime;
 
-        // if (_cooldownTimer <= 0f && !_isMovementWave)
-        // {
-        //     _coneIsFrozen = false;
-        // }
+        // Defreeze cone quand cooldown termine
+        if (_cooldownTimer <= 0f && _coneIsFrozen)
+        {
+            _coneIsFrozen = false;
+        }
 
         if (Input.GetKeyDown(activationKey) && _cooldownTimer <= 0f)
         {
             TriggerWave();
         }
 
-        // HandleMovementWave();
+        HandleMovementWave();
         PushShaderGlobals();
     }
 
@@ -101,23 +110,13 @@ public class Sonar : PlayerAbility
 
     public override void Execute(InputAction.CallbackContext _context)
     {
-        if (!CanExecute())
-        {
-            return;
-        }
-        if (_context.phase != InputActionPhase.Started)
-        {
-            return;
-        }
+        if (!CanExecute()) { return; }
+        if (_context.phase != InputActionPhase.Started) { return; }
         TriggerWave();
     }
 
-    // ── VoiceTrigger → Sonar (via event, zero couplage) ──────────────
+    // ── VoiceTrigger ─────────────────────────────────────────────────
 
-    /// <summary>
-    /// Recu quand VoiceTrigger.Fire() est appele.
-    /// normalizedVolume : 0 = cri faible, 1 = cri fort.
-    /// </summary>
     private void OnVoiceFired(float normalizedVolume)
     {
         TriggerWaveWithVolume(normalizedVolume);
@@ -127,42 +126,70 @@ public class Sonar : PlayerAbility
 
     public void TriggerWave()
     {
-        if (_cooldownTimer > 0f)
-        {
-            return;
-        }
-       // _isMovementWave = false;
+        if (_cooldownTimer > 0f) { return; }
         EmitWave(settings.range, settings.GetWaveDuration(settings.range), 1f);
         _cooldownTimer = settings.cooldown;
     }
 
     public void TriggerWaveWithVolume(float _normalizedVolume)
     {
-        if (_cooldownTimer > 0f)
-        {
-            return;
-        }
-        //_isMovementWave = false;
+        if (_cooldownTimer > 0f) { return; }
         float range = settings.GetVoiceRange(_normalizedVolume);
         EmitWave(range, settings.GetWaveDuration(range), _normalizedVolume);
         _cooldownTimer = settings.cooldown;
     }
 
-    // ── Onde de mouvement (DESACTIVEE) ──────────────────────────────
+    // ── Onde de mouvement ────────────────────────────────────────────
 
-    // private void HandleMovementWave()
-    // {
-    //     float moved = Vector3.Distance(transform.position, _lastPosition);
-    //     _lastPosition = transform.position;
-    //     if (moved < movementThreshold) { return; }
-    //     _movementTimer -= Time.deltaTime;
-    //     if (_movementTimer > 0f) { return; }
-    //     _movementTimer  = movementWaveInterval;
-    //     _isMovementWave = true;
-    //     EmitWave(movementWaveRange, 0.4f, 0f);
-    // }
+    private void HandleMovementWave()
+    {
+        float moved = Vector3.Distance(transform.position, _lastPosition);
+        _lastPosition = transform.position;
+        if (moved < movementThreshold) { return; }
 
-    // ── Emission ─────────────────────────────────────────────────────
+        _movementTimer -= Time.deltaTime;
+        if (_movementTimer > 0f) { return; }
+        _movementTimer = movementWaveInterval;
+
+        EmitMovementWave();
+    }
+
+    private void EmitMovementWave()
+    {
+        float duration = movementWaveRange / Mathf.Max(settings.ondeSpeed, 0.1f);
+
+        // Figer l'origine AU MOMENT du pas
+        Vector3 originPos = coneOrigin.position;
+
+        Shader.SetGlobalFloat(ID_MoveFireTime,     Time.time);
+        Shader.SetGlobalFloat(ID_MoveMaxRadius,    movementWaveRange);
+        Shader.SetGlobalFloat(ID_MoveFadeDuration, duration);
+
+        _moveCurrentRadius  = 0f;
+        _movePreviousRadius = 0f;
+
+        _moveTween?.Kill();
+        _moveTween = DOTween.To(
+            () => _moveCurrentRadius,
+            r =>
+            {
+                _movePreviousRadius = _moveCurrentRadius;
+                _moveCurrentRadius  = r;
+                // Pousse le rayon chaque frame
+                Shader.SetGlobalVector(ID_MoveOrigin, originPos);
+                Shader.SetGlobalFloat(ID_MoveRadius,  _moveCurrentRadius);
+                Shader.SetGlobalFloat(ID_MoveActive,  _moveCurrentRadius > 0f ? 1f : 0f);
+            },
+            movementWaveRange, duration
+        ).SetEase(Ease.Linear)
+         .OnComplete(() =>
+         {
+             _moveCurrentRadius = 0f;
+             Shader.SetGlobalFloat(ID_MoveActive, 0f);
+         });
+    }
+
+    // ── Emission cri ─────────────────────────────────────────────────
 
     private void EmitWave(float _range, float _duration, float _normalizedVolume)
     {
@@ -170,8 +197,11 @@ public class Sonar : PlayerAbility
         _currentWaveRadius  = 0f;
         _previousWaveRadius = 0f;
         _hitObjects.Clear();
-        _frozenConeForward  = coneOrigin.forward;
-        _coneIsFrozen       = true;
+
+        // Figer direction ET origine au moment du tir
+        _frozenConeForward = coneOrigin.forward;
+        _frozenConeOrigin  = coneOrigin.position;
+        _coneIsFrozen      = true;
 
         _waveFireTime     = Time.time;
         _waveMaxRadius    = _range;
@@ -183,7 +213,6 @@ public class Sonar : PlayerAbility
 
         Vector3 originPos = coneOrigin.position;
         Vector3 originFwd = coneOrigin.forward;
-        bool    isMvt     = false; // _isMovementWave desactive
 
         _waveTween?.Kill();
         _waveTween = DOTween.To(
@@ -192,26 +221,25 @@ public class Sonar : PlayerAbility
             {
                 _previousWaveRadius = _currentWaveRadius;
                 _currentWaveRadius  = r;
-                OnWaveStep(originPos, originFwd, isMvt);
+                OnWaveStep(originPos, originFwd);
             },
             _range, _duration
         ).SetEase(Ease.Linear)
          .OnComplete(() =>
          {
              _currentWaveRadius = 0f;
-             // _isMovementWave = false; // desactive
              Shader.SetGlobalFloat(ID_WaveActive, 0f);
          });
     }
 
     // ── Detection ────────────────────────────────────────────────────
 
-    private void OnWaveStep(Vector3 originPos, Vector3 originFwd, bool isMovementWave)
+    private void OnWaveStep(Vector3 originPos, Vector3 originFwd)
     {
         float halfCos    = Mathf.Cos(settings.coneHalfAngle * Mathf.Deg2Rad);
         float scanRadius = Mathf.Max(_currentWaveRadius, 0.5f);
 
-        // Debug visuel OverlapSphere
+        // Debug visuel
         int segs = 24;
         for (int i = 0; i < segs; i++)
         {
@@ -221,84 +249,63 @@ public class Sonar : PlayerAbility
                 originPos + new Vector3(Mathf.Cos(a0), 0, Mathf.Sin(a0)) * scanRadius,
                 originPos + new Vector3(Mathf.Cos(a1), 0, Mathf.Sin(a1)) * scanRadius,
                 Color.yellow, 0.15f);
-            Debug.DrawLine(
-                originPos + new Vector3(Mathf.Cos(a0), Mathf.Sin(a0), 0) * scanRadius,
-                originPos + new Vector3(Mathf.Cos(a1), Mathf.Sin(a1), 0) * scanRadius,
-                Color.yellow, 0.15f);
         }
 
         Collider[] hits = Physics.OverlapSphere(originPos, scanRadius, detectableLayerMask);
-        Debug.Log($"[Sonar] OverlapSphere radius={scanRadius:F2} => {hits.Length} colliders trouves");
+        Debug.Log($"[Sonar] radius={scanRadius:F2} hits={hits.Length}");
 
         foreach (Collider hit in hits)
         {
             IDetectable detectable = hit.GetComponent<IDetectable>();
-
             if (detectable == null)
             {
-                Debug.Log($"[Sonar] SKIP {hit.name} (layer={LayerMask.LayerToName(hit.gameObject.layer)}) : pas de IDetectable");
+                Debug.Log($"[Sonar] SKIP {hit.name} : pas IDetectable");
                 continue;
             }
             if (!detectable.IsActive())
             {
-                Debug.Log($"[Sonar] SKIP {hit.name} : IDetectable inactif");
+                Debug.Log($"[Sonar] SKIP {hit.name} : inactif");
                 continue;
             }
             if (_hitObjects.Contains(detectable))
             {
-                Debug.Log($"[Sonar] SKIP {hit.name} : deja detecte cette onde");
+                Debug.Log($"[Sonar] SKIP {hit.name} : deja detecte");
                 continue;
             }
 
             Vector3 position = detectable.GetPosition();
             float   distance = Vector3.Distance(originPos, position);
 
-            if (!isMovementWave)
-            {
-                Vector3 dir2obj  = (position - originPos).normalized;
-                float   cosAngle = Vector3.Dot(dir2obj, originFwd.normalized);
-                bool    inCone   = cosAngle >= halfCos;
-                Debug.Log($"[Sonar] CONE {hit.name} : cosAngle={cosAngle:F3} halfCos={halfCos:F3} => {(inCone ? "DANS le cone" : "HORS cone")}");
-                if (!inCone)
-                {
-                    continue;
-                }
-            }
+            // Verification cone
+            Vector3 dir2obj  = (position - originPos).normalized;
+            float   cosAngle = Vector3.Dot(dir2obj, originFwd.normalized);
+            bool    inCone   = cosAngle >= halfCos;
+            Debug.Log($"[Sonar] CONE {hit.name} : {(inCone ? "DANS" : "HORS")} (cos={cosAngle:F2} vs {halfCos:F2})");
+            if (!inCone) { continue; }
 
-            Vector3 dir = (position - originPos).normalized;
-
-            bool blocked = false;
-            RaycastHit[] rayHits = Physics.RaycastAll(originPos, dir, distance, obstacleMask);
-            foreach (RaycastHit rh in rayHits)
+            // Raycast obstacle en ignorant le joueur
+            Vector3      dir     = dir2obj;
+            bool         blocked = false;
+            RaycastHit[] rhs     = Physics.RaycastAll(originPos, dir, distance, obstacleMask);
+            foreach (RaycastHit rh in rhs)
             {
                 bool isSelf = false;
                 foreach (Collider sc in _selfColliders)
                 {
-                    if (rh.collider == sc)
-                    {
-                        isSelf = true;
-                        break;
-                    }
+                    if (rh.collider == sc) { isSelf = true; break; }
                 }
-                if (!isSelf)
-                {
-                    blocked = true;
-                    break;
-                }
+                if (!isSelf) { blocked = true; break; }
             }
 
             Debug.DrawLine(originPos, originPos + dir * distance,
                 blocked ? Color.red : Color.green, 0.5f);
-            Debug.Log($"[Sonar] RAYCAST {hit.name} : distance={distance:F2} blocked={blocked}");
-            if (blocked)
-            {
-                continue;
-            }
+            Debug.Log($"[Sonar] RAYCAST {hit.name} : blocked={blocked}");
+            if (blocked) { continue; }
 
             _hitObjects.Add(detectable);
             float proximity = Mathf.Clamp01(1f - (distance / _activeRange));
             detectable.OnProb(proximity);
-            Debug.Log($"[Sonar] >>> DETECTE {hit.name} proximity={proximity:F2}");
+            Debug.Log($"[Sonar] >>> DETECTE {hit.name} prox={proximity:F2}");
         }
     }
 
@@ -306,24 +313,33 @@ public class Sonar : PlayerAbility
 
     private void PushShaderGlobals()
     {
-        Shader.SetGlobalVector(ID_WaveOrigin, coneOrigin.position);
-        Shader.SetGlobalFloat(ID_WaveRadius,  _currentWaveRadius);
-        Shader.SetGlobalFloat(ID_WaveActive,  _currentWaveRadius > 0f ? 1f : 0f);
-
-        // _isMovementWave desactive — cone toujours actif
-        Shader.SetGlobalVector(ID_ConeForward, _frozenConeForward);
-        Shader.SetGlobalFloat(ID_ConeHalfAngleCos,
-            Mathf.Cos(settings.coneHalfAngle * Mathf.Deg2Rad));
+        if (_coneIsFrozen)
+        {
+            // Pendant onde + cooldown : origine et direction figees au tir
+            Shader.SetGlobalVector(ID_WaveOrigin, _frozenConeOrigin);
+            Shader.SetGlobalFloat(ID_WaveRadius,  _currentWaveRadius);
+            Shader.SetGlobalFloat(ID_WaveActive,  _currentWaveRadius > 0f ? 1f : 0f);
+            Shader.SetGlobalVector(ID_ConeForward, _frozenConeForward);
+            Shader.SetGlobalFloat(ID_ConeHalfAngleCos,
+                Mathf.Cos(settings.coneHalfAngle * Mathf.Deg2Rad));
+        }
+        else
+        {
+            // Entre les ondes : origin suit le joueur, cone suit la camera
+            Shader.SetGlobalVector(ID_WaveOrigin, coneOrigin.position);
+            Shader.SetGlobalFloat(ID_WaveRadius,  0f);
+            Shader.SetGlobalFloat(ID_WaveActive,  0f);
+            Shader.SetGlobalVector(ID_ConeForward, coneOrigin.forward);
+            Shader.SetGlobalFloat(ID_ConeHalfAngleCos,
+                Mathf.Cos(settings.coneHalfAngle * Mathf.Deg2Rad));
+        }
     }
 
     // ── Gizmos ───────────────────────────────────────────────────────
 
     private void OnDrawGizmosSelected()
     {
-        if (settings == null)
-        {
-            return;
-        }
+        if (settings == null) { return; }
         Transform origin = coneOrigin != null ? coneOrigin : transform;
 
         Gizmos.color = new Color(0f, 1f, 0.5f, 0.06f);
@@ -337,7 +353,7 @@ public class Sonar : PlayerAbility
         Gizmos.DrawWireSphere(origin.position, settings.minVoiceRange);
 
         Gizmos.color = new Color(0f, 1f, 0.5f, 1f);
-        DrawConeRay(origin.position, origin.forward, settings.coneHalfAngle);
+        DrawConeRay(origin.position, origin.forward,  settings.coneHalfAngle);
         DrawConeRay(origin.position, origin.forward, -settings.coneHalfAngle);
 
         Gizmos.color = Color.yellow;
