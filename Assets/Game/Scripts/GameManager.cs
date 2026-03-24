@@ -43,15 +43,12 @@ public class GameManager : MonoBehaviour
 
     private void KillPlayer(OnTrapEnter _enter)
     {
-        print("player killed");
-
         EventBus.Publish(new OnDefeat());
     }
 
     private void Defaite(OnDefeat _defaite)
     {
         print("defaite");
-        //SceneManager.LoadScene(0);
         player.transform.position = playerSpawnPoint.position;
     }
 
