@@ -1,5 +1,6 @@
 ﻿using DG.Tweening;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Utils
 {
@@ -77,6 +78,33 @@ namespace Utils
             sequence.Append(canvasGroup.DOFade(0f, FAST).SetEase(OUT_SMOOTH));
             sequence.Join(rectTransform.DOAnchorPosX(slideOffset, FAST).SetEase(OUT_FAST));
             sequence.OnComplete(() => canvasGroup.gameObject.SetActive(false));
+
+            return sequence;
+        }
+
+
+        ///<summary>
+        /// Show a new image by fading out CanvasGroup the old one and fading in the new one.
+        /// </summary>
+        public static Sequence FadeImageTransition(CanvasGroup oldCgImage, CanvasGroup newCgImage, Image newImage, float duration = NORMAL)
+        {
+            Sequence sequence = DOTween.Sequence();
+            
+            // Initial state
+            newCgImage.alpha = 0;
+            newCgImage.gameObject.SetActive(true);
+            if (newImage)
+                newImage.gameObject.SetActive(true);
+
+            // Animation
+            sequence.Append(oldCgImage.DOFade(0f, duration).SetEase(OUT_SMOOTH));
+            sequence.Join(newCgImage.DOFade(1f, duration).SetEase(IN_SMOOTH));
+            sequence.OnComplete(() =>
+            {
+                oldCgImage.gameObject.SetActive(false);
+                if (newImage)
+                    newImage.gameObject.SetActive(true);
+            });
 
             return sequence;
         }
