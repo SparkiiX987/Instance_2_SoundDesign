@@ -20,6 +20,7 @@ public class TutorialInputVerif : MonoBehaviour
         imagesList[3].CrossFadeAlpha(0, 0, false);
         UnFade(imagesList[0], spritesList[0]);
         DOVirtual.DelayedCall(3, () => fadeFinish = true);
+        state = TutorialVerifState.echolocation;
     }
 
     public void OnDestroy()
@@ -90,23 +91,23 @@ public class TutorialInputVerif : MonoBehaviour
 
     void TestMovement(Vector2 _input)
     {
-        if (_input == Vector2.up)
+        if (_input == Vector2.up && fadeFinish == true)
         {
             imagesList[0].color = Color.green;
         }
-        if (_input == Vector2.left)
+        if (_input == Vector2.left && fadeFinish == true)
         {
             imagesList[1].color = Color.green;
         }
-        if (_input == Vector2.down)
+        if (_input == Vector2.down && fadeFinish == true)
         {
             imagesList[2].color = Color.green;
         }
-        if (_input == Vector2.right)
+        if (_input == Vector2.right && fadeFinish == true)
         {
             imagesList[3].color = Color.green;
         }
-        if (imagesList.All((Image image) => image.color == Color.green))
+        if (imagesList.All((Image image) => image.color == Color.green) && fadeFinish == true)
         {
             List<bool> boolListe = new List<bool>();
             fadeFinish = false;

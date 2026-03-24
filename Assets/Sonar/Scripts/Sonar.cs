@@ -112,6 +112,10 @@ public class Sonar : PlayerAbility
     {
         if (!CanExecute()) { return; }
         if (_context.phase != InputActionPhase.Started) { return; }
+        EventBus.Publish(new OnPlayerInputEnter
+        {
+            input = TutorialVerifState.echolocation
+        });
         TriggerWave();
     }
 
