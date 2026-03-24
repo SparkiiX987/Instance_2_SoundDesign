@@ -56,6 +56,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: GroundTrap
       objectReference: {fileID: 0}
+    - target: {fileID: 1554676566760413640, guid: b9675f3f5b81c0249903b37add5dec66, type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6750738025898985962, guid: b9675f3f5b81c0249903b37add5dec66, type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 8741789266609637644, guid: b9675f3f5b81c0249903b37add5dec66, type: 3}
       propertyPath: m_Enabled
       value: 0
