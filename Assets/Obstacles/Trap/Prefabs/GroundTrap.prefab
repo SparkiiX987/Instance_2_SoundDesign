@@ -76,7 +76,7 @@ MonoBehaviour:
       Data2: 1084855665
       Data3: -182505563
       Data4: 1395056263
-    Path: event:/Bad GPE Encounter
+    Path: event:/GPE/Danger GPE
   volumeMin: 0.1
   volumeMax: 1
   pitchMin: 0.5
@@ -96,6 +96,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d53ceaf48718d76489484a7db920a25b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Trap
+  sound:
+    Guid:
+      Data1: 1787102638
+      Data2: 1087921034
+      Data3: -229304933
+      Data4: 1414686290
+    Path: event:/Fox Trap/Fox Trap
+  volumeMin: 0.1
+  targetVolume: 0.1
+  volumeMax: 1
+  pitchMin: 0.5
+  targetPitch: 0.5
+  pitchMax: 2
+  fadeInDuration: 0.08
+  sustainDuration: 0.25
+  fadeOutDuration: 0.5
 --- !u!1 &6750738025898985962
 GameObject:
   m_ObjectHideFlags: 0

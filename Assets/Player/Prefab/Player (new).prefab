@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2428196376661474785}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Collisions
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -46,7 +46,7 @@ GameObject:
   - component: {fileID: 6390567357980119463}
   - component: {fileID: 6175385412715135720}
   - component: {fileID: 3929314552699895031}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Main Camera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
@@ -77,8 +77,8 @@ Camera:
   m_GameObject: {fileID: 904787154558894074}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_ClearFlags: 2
+  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -186,7 +186,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3706988050089285194}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: CameraRoot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -328,7 +328,7 @@ GameObject:
   - component: {fileID: 557918341562204626}
   - component: {fileID: 3083880830315173958}
   - component: {fileID: 6567904383834033050}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: visuel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -416,7 +416,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6213629652923588162}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: SonarOrigine
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -459,7 +459,8 @@ GameObject:
   - component: {fileID: 1485946798422442459}
   - component: {fileID: 7384705160287058495}
   - component: {fileID: 96766279338221178}
-  m_Layer: 0
+  - component: {fileID: 4128388794914812668}
+  m_Layer: 6
   m_Name: Player (new)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -604,6 +605,9 @@ MonoBehaviour:
   obstacleMask:
     serializedVersion: 2
     m_Bits: 520
+  movementWaveRange: 3
+  movementWaveInterval: 0.5
+  movementThreshold: 0.05
   activationKey: 101
 --- !u!114 &8512829847286032187
 MonoBehaviour:
@@ -873,6 +877,24 @@ MonoBehaviour:
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
+--- !u!114 &4128388794914812668
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6585705549612740297}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07ec8653ea3132d72bbe4f42b698e3ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Player.Scripts.PlayerConduitChecker
+  playerCollider: {fileID: 1048908493737238015}
+  conduitLayer:
+    serializedVersion: 2
+    m_Bits: 1024
+  checkDelay: 0.2
+  rayDistance: 1.5
 --- !u!1 &8422393609135186145
 GameObject:
   m_ObjectHideFlags: 0

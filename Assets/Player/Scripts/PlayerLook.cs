@@ -11,7 +11,7 @@ namespace Player.Scripts
     public class PlayerLook : PlayerAbility
     {
         [SerializeField] private Transform cameraRoot;
-        [SerializeField] private float lookSpeed = 2f;
+        public float lookSpeed = 2f;
         [SerializeField] private float lookXLimit = 80f;
 
         private float rotationX = 0f;

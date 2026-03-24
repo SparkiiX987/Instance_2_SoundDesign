@@ -55,7 +55,7 @@ MonoBehaviour:
       Data2: 1084855665
       Data3: -182505563
       Data4: 1395056263
-    Path: event:/Bad GPE Encounter
+    Path: event:/GPE/Danger GPE
   volumeMin: 0.1
   volumeMax: 1
   pitchMin: 0.5

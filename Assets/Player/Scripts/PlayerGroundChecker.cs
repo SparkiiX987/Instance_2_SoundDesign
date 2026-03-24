@@ -24,6 +24,19 @@ namespace Player.Scripts
         }
 
         /// <summary>
+        /// Called when a collider exits the ground-check trigger.
+        /// Publishes OnPlayerLeaveGround if the collider matches the ground layer mask.
+        /// </summary>
+        /// <param name="_other">The collider that exited the trigger.</param>
+        private void OnTriggerExit(Collider _other)
+        {
+            if (!IsOnGround(masks, _other))
+                return;
+            
+            EventBus.Publish(new OnPlayerLeaveGround());
+        }
+
+        /// <summary>
         /// Checks if the given collider belongs to a layer included in the specified mask.
         /// </summary>
         /// <param name="_layerMask">The layer mask to test against.</param>

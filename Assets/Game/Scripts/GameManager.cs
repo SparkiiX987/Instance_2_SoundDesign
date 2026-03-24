@@ -12,7 +12,7 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        if(instance == null)
+        if(instance != null)
         {
             Destroy(this);
         }
@@ -30,6 +30,7 @@ public class GameManager : MonoBehaviour
         EventBus.Subscribe<OnTrapEnter>(KillPlayer);
         EventBus.Subscribe<OnDefeat>(Defaite);
         EventBus.Subscribe<OnVictory>(Victory);
+        EventBus.Subscribe<OnLevelEnd>(ChangePlayerSpawnPoint);
 
         player = Instantiate(playerPrefab, playerSpawnPoint.position, playerSpawnPoint.rotation);
     }
@@ -39,24 +40,32 @@ public class GameManager : MonoBehaviour
         EventBus.Unsubscribe<OnTrapEnter>(KillPlayer);
         EventBus.Unsubscribe<OnDefeat>(Defaite);
         EventBus.Unsubscribe<OnVictory>(Victory);
+        EventBus.Unsubscribe<OnLevelEnd>(ChangePlayerSpawnPoint);
+
+        if(instance == this)
+        {
+            instance = null;
+        }
     }
 
-    private void KillPlayer(OnTrapEnter enter)
+    private void KillPlayer(OnTrapEnter _enter)
     {
-        print("player killed");
-
         EventBus.Publish(new OnDefeat());
     }
 
-    private void Defaite(OnDefeat defaite)
+    private void Defaite(OnDefeat _defaite)
     {
         print("defaite");
-        //SceneManager.LoadScene(0);
         player.transform.position = playerSpawnPoint.position;
     }
 
-    private void Victory(OnVictory victory)
+    private void Victory(OnVictory _victory)
     {
         print("victory");
+    }
+
+    private void ChangePlayerSpawnPoint(OnLevelEnd _evt)
+    {
+        playerSpawnPoint.position = _evt.newSpawnPoint;
     }
 }

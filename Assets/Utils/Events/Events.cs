@@ -34,6 +34,11 @@ public struct OnPlayerDetectGround
 
 }
 
+public struct OnPlayerLeaveGround
+{
+
+}
+
 public struct OnPlayerCrouch
 {
     
@@ -77,4 +82,9 @@ public struct OnPlayerInputEnter
 public struct AlarmeSetActive
 {
     public Vector3 playerPosition;
+}
+
+public struct  OnLevelEnd
+{
+    public Vector3 newSpawnPoint;
 }
