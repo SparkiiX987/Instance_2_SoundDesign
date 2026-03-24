@@ -56,6 +56,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: corner_of_ventilation_duct
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: bf206dda86d19d24ba717fdc21b6fed1, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
