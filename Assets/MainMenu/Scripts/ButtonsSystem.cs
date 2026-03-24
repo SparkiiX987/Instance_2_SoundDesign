@@ -12,10 +12,4 @@ public class ButtonsSystem : MonoBehaviour
     {
         Application.Quit();
     }
-
-    public void URLOpen(string url)
-    {
-        Application.OpenURL(url);
-    }
-    
 }
