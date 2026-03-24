@@ -7,11 +7,13 @@ using Utils;
 namespace Player.Scripts
 {
     /// <summary>
-    /// Handles player crouching. Animates the CapsuleCollider height
-    /// and transform scale using DOTween for a smooth transition.
+    /// Handles player crouching. Animates the transform scale
+    /// using DOTween for a smooth transition.
+    /// Supports hold mode and toggle mode.
     /// </summary>
     public class PlayerCrouch : PlayerAbility
     {
+        [Header("Crouch Settings")]
         [SerializeField] private float crouchDuration = 0.25f;
         [SerializeField, Tooltip("Par rapport à la scale du transform"), Range(1f, 5f)]
         private float crouchPercentage = 2f;
@@ -30,11 +32,11 @@ namespace Player.Scripts
         /// <param name="_collider">The player's body CapsuleCollider.</param>
         public void SetCapsuleCollider(CapsuleCollider _collider)
         {
-            //capsuleCollider = _collider;
+            // CapsuleCollider non utilisé actuellement dans cette version.
         }
 
         /// <summary>
-        /// Initializes crouch by retrieving the collider, default height and transform.
+        /// Initializes crouch by retrieving the default values and transform.
         /// </summary>
         /// <param name="_playerController">Reference to the parent PlayerController.</param>
         public override void Init(PlayerController _playerController)
@@ -43,41 +45,93 @@ namespace Player.Scripts
 
             playerTransform = controller.transform;
             defaultHeight = playerTransform.localScale.y;
-            
             crouchHeight = defaultHeight / crouchPercentage;
 
             Assert.IsNotNull(playerTransform, $"[{GetType().Name}] PlayerTransform is null.");
         }
 
         /// <summary>
-        /// Toggles the crouch state. The <c>started</c> phase requires valid input
-        /// (checked via <see cref="PlayerAbility.CanExecute"/>), while the
-        /// <c>canceled</c> phase always processes so that the player can properly
-        /// uncrouch even when inputs were disabled mid-crouch (e.g. during a leap).
-        /// If the player is inside a conduit, uncrouch is blocked.
+        /// Executes crouch input according to the selected input mode.
         /// </summary>
         /// <param name="_context">The InputAction callback context.</param>
         public override void Execute(InputAction.CallbackContext _context)
         {
+            if (!CanExecute())
+                return;
+
+            if (InputPrefs.IsCrouchToggleEnabled)
+            {
+                HandleToggleCrouch(_context);
+                return;
+            }
+
+            HandleHoldCrouch(_context);
+        }
+
+        /// <summary>
+        /// Handles crouch in hold mode.
+        /// </summary>
+        /// <param name="_context">The InputAction callback context.</param>
+        private void HandleHoldCrouch(InputAction.CallbackContext _context)
+        {
             if (_context.started)
             {
-                if (!CanExecute())
-                    return;
-
-                isCrouching = true;
-                EventBus.Publish(new OnPlayerCrouch());
-                EventBus.Publish(new OnPlayerInputEnter
-                {
-                    input = TutorialVerifState.crouch
-                });
-                AnimateCrouch(crouchHeight);
+                SetCrouchState(true);
             }
             else if (_context.canceled)
             {
                 if (isInConduit)
                     return;
 
-                isCrouching = false;
+                SetCrouchState(false);
+            }
+        }
+
+        /// <summary>
+        /// Handles crouch in toggle mode.
+        /// </summary>
+        /// <param name="_context">The InputAction callback context.</param>
+        private void HandleToggleCrouch(InputAction.CallbackContext _context)
+        {
+            if (!_context.started)
+                return;
+
+            if (isCrouching)
+            {
+                if (isInConduit)
+                    return;
+
+                SetCrouchState(false);
+            }
+            else
+            {
+                SetCrouchState(true);
+            }
+        }
+
+        /// <summary>
+        /// Sets crouch state and updates visuals/events.
+        /// </summary>
+        /// <param name="_isCrouching">Target crouch state.</param>
+        private void SetCrouchState(bool _isCrouching)
+        {
+            if (isCrouching == _isCrouching)
+                return;
+
+            isCrouching = _isCrouching;
+
+            if (isCrouching)
+            {
+                EventBus.Publish(new OnPlayerCrouch());
+                EventBus.Publish(new OnPlayerInputEnter
+                {
+                    input = TutorialVerifState.crouch
+                });
+
+                AnimateCrouch(crouchHeight);
+            }
+            else
+            {
                 EventBus.Publish(new OnPlayerUnCrouch());
                 AnimateCrouch(defaultHeight);
             }
@@ -86,14 +140,18 @@ namespace Player.Scripts
         /// <summary>
         /// Animates the player's Y scale to the target height using DOTween.
         /// </summary>
-        /// <param name="targetHeight">The target Y scale value.</param>
-        private void AnimateCrouch(float targetHeight)
+        /// <param name="_targetHeight">The target Y scale value.</param>
+        private void AnimateCrouch(float _targetHeight)
         {
             crouchTween?.Kill();
+
             crouchTween = DOTween.To(
                 () => playerTransform.localScale.y,
-                scaleY => playerTransform.localScale = new Vector3(playerTransform.localScale.x, scaleY, playerTransform.localScale.z),
-                targetHeight,
+                _scaleY => playerTransform.localScale = new Vector3(
+                    playerTransform.localScale.x,
+                    _scaleY,
+                    playerTransform.localScale.z),
+                _targetHeight,
                 crouchDuration
             ).SetEase(AnimationHelper.IN_SMOOTH);
         }
@@ -106,9 +164,7 @@ namespace Player.Scripts
             if (!isCrouching)
                 return;
 
-            isCrouching = false;
-            EventBus.Publish(new OnPlayerUnCrouch());
-            AnimateCrouch(defaultHeight);
+            SetCrouchState(false);
         }
 
         /// <summary>
