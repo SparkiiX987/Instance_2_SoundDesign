@@ -68,6 +68,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c77acb43d3d2c24b8251cc3a0d413aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Switch
+  sound:
+    Guid:
+      Data1: -1121349116
+      Data2: 1264828218
+      Data3: 53489832
+      Data4: -192143761
+    Path: event:/Switch/New Event
+  volumeMin: 0.1
+  targetVolume: 0.1
+  volumeMax: 1
+  pitchMin: 0.5
+  targetPitch: 0.5
+  pitchMax: 2
+  fadeInDuration: 0.08
+  sustainDuration: 0.25
+  fadeOutDuration: 0.5
   switchId: 0
   isActivated: 0
 --- !u!114 &6888005101068021743
