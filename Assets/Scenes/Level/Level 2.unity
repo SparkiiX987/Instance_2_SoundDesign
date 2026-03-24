@@ -119,21 +119,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &438787854 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4648909814468244240, guid: 890d31d8268487a44a660601fa060fef, type: 3}
-  m_PrefabInstance: {fileID: 176847001748560448}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &603954572 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 654978585999893844, guid: 890d31d8268487a44a660601fa060fef, type: 3}
-  m_PrefabInstance: {fileID: 176847001748560448}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &710427805 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3149937929852658577, guid: 890d31d8268487a44a660601fa060fef, type: 3}
-  m_PrefabInstance: {fileID: 176847001748560448}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &749923761
 GameObject:
   m_ObjectHideFlags: 0
@@ -165,97 +150,8 @@ Transform:
   m_Children:
   - {fileID: 898919975}
   - {fileID: 1843276313}
-  - {fileID: 832090947}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &832090946
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 832090947}
-  - component: {fileID: 832090948}
-  m_Layer: 0
-  m_Name: AssetCategoryManagerLVL2
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &832090947
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 832090946}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 10, y: 1, z: 10}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 749923762}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &832090948
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 832090946}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b7da6c83783ae0d49a909a16b37e05ed, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AssetCategoryManager
-  groups:
-  - groupName: Room 3
-    categories:
-    - categoryName: 'Normal Material '
-      categoryMaterial: {fileID: 2100000, guid: 4249480d250efd940a359f4a64eda713, type: 2}
-      assets:
-      - assetName: NouvelAsset
-        sceneObject: {fileID: 0}
-        ignore: 0
-      - assetName: NouvelAsset
-        sceneObject: {fileID: 0}
-        ignore: 0
-      - assetName: NouvelAsset
-        sceneObject: {fileID: 0}
-        ignore: 0
-    - categoryName: 'Door Material '
-      categoryMaterial: {fileID: 2100000, guid: 4ee6b6d6fc66c764fb964d4d2fc9ef37, type: 2}
-      assets:
-      - assetName: NouvelAsset
-        sceneObject: {fileID: 0}
-        ignore: 0
-  - groupName: Room 4
-    categories:
-    - categoryName: Normal Material
-      categoryMaterial: {fileID: 2100000, guid: 4249480d250efd940a359f4a64eda713, type: 2}
-      assets:
-      - assetName: NouvelAsset
-        sceneObject: {fileID: 603954572}
-        ignore: 0
-      - assetName: NouvelAsset
-        sceneObject: {fileID: 710427805}
-        ignore: 0
-      - assetName: NouvelAsset
-        sceneObject: {fileID: 950437334}
-        ignore: 0
-      - assetName: NouvelAsset
-        sceneObject: {fileID: 438787854}
-        ignore: 0
-    - categoryName: 'Door Material '
-      categoryMaterial: {fileID: 2100000, guid: 4ee6b6d6fc66c764fb964d4d2fc9ef37, type: 2}
-      assets:
-      - assetName: NouvelAsset
-        sceneObject: {fileID: 2037324184}
-        ignore: 0
 --- !u!1 &898919974
 GameObject:
   m_ObjectHideFlags: 0
@@ -300,11 +196,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 64a60c93ca3a62174953a25d2f454e99, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AudioSystem.GameAudioManager
---- !u!1 &950437334 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1164586229631960973, guid: 890d31d8268487a44a660601fa060fef, type: 3}
-  m_PrefabInstance: {fileID: 176847001748560448}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1843276312
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -379,11 +270,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8855770317316039848, guid: 33bb555877c10234c964b6ba5cc81315, type: 3}
   m_PrefabInstance: {fileID: 1843276312}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &2037324184 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3703226166607257122, guid: 890d31d8268487a44a660601fa060fef, type: 3}
-  m_PrefabInstance: {fileID: 176847001748560448}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &176847001748560448
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -392,10 +278,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 27452568102579331, guid: 890d31d8268487a44a660601fa060fef, type: 3}
-      propertyPath: m_ConstrainProportionsScale
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 397552907068550249, guid: 890d31d8268487a44a660601fa060fef, type: 3}
       propertyPath: m_LocalPosition.x
       value: -2.00004
@@ -434,10 +316,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 397552907068550249, guid: 890d31d8268487a44a660601fa060fef, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2643759303476026077, guid: 890d31d8268487a44a660601fa060fef, type: 3}
-      propertyPath: m_ConstrainProportionsScale
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5475453098176241288, guid: 890d31d8268487a44a660601fa060fef, type: 3}
