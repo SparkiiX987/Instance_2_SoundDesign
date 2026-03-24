@@ -269,7 +269,7 @@ MonoBehaviour:
       Data2: 1321642082
       Data3: -1646717018
       Data4: 1091581510
-    Path: event:/Good GPE Encounter
+    Path: event:/GPE/Interactible GPE
   volumeMin: 0.1
   volumeMax: 1
   pitchMin: 0.5
