@@ -8,9 +8,7 @@ public class ignoreParentChangements : MonoBehaviour
 
     void Start()
     {
-        lastPosition = transform.position;
-        lastRotation = transform.rotation;
-        lastScale = transform.localScale;
+        SetTransform();
     }
 
     void LateUpdate()
@@ -25,7 +23,11 @@ public class ignoreParentChangements : MonoBehaviour
 
         foreach (Transform child in transform)
         {
-            child.position -= deltaPosition;
+            RectTransform rt = child as RectTransform;
+            if (rt != null)
+            {
+                rt.anchoredPosition -= (Vector2)deltaPosition;
+            }
 
             child.rotation = Quaternion.Inverse(deltaRotation) * child.rotation;
 
@@ -36,6 +38,11 @@ public class ignoreParentChangements : MonoBehaviour
             );
         }
 
+        SetTransform();
+    }
+
+    private void SetTransform()
+    {
         lastPosition = transform.position;
         lastRotation = transform.rotation;
         lastScale = transform.localScale;

@@ -459,6 +459,7 @@ GameObject:
   - component: {fileID: 1485946798422442459}
   - component: {fileID: 7384705160287058495}
   - component: {fileID: 96766279338221178}
+  - component: {fileID: 4128388794914812668}
   m_Layer: 6
   m_Name: Player (new)
   m_TagString: Untagged
@@ -876,6 +877,24 @@ MonoBehaviour:
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
+--- !u!114 &4128388794914812668
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6585705549612740297}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07ec8653ea3132d72bbe4f42b698e3ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Player.Scripts.PlayerConduitChecker
+  playerCollider: {fileID: 1048908493737238015}
+  conduitLayer:
+    serializedVersion: 2
+    m_Bits: 1024
+  checkDelay: 0.2
+  rayDistance: 1.5
 --- !u!1 &8422393609135186145
 GameObject:
   m_ObjectHideFlags: 0

@@ -31,7 +31,7 @@ Material:
     - _FadeDuration: 1
     - _IntersectMax: 0.103
     - _IntersectMin: 0.0428
-    - _NormalThreshold: 0.82
+    - _NormalThreshold: 2
     - _WaveBrightness: 1.77
     - _WaveWidth: 3.79
     m_Colors:
