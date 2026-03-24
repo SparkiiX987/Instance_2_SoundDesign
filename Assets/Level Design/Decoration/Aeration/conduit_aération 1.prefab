@@ -68,9 +68,25 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: d50e510ac4c23b6488a5c0088968ff13, type: 2}
+    - target: {fileID: -7515429101286732190, guid: 75dc56fa10fe03b43b72817d8a95515c, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 75dc56fa10fe03b43b72817d8a95515c, type: 3}
       propertyPath: m_Name
       value: "conduit_a\xE9ration 1"
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 75dc56fa10fe03b43b72817d8a95515c, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3455292422214010178, guid: 75dc56fa10fe03b43b72817d8a95515c, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 9141816029861474070, guid: 75dc56fa10fe03b43b72817d8a95515c, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
