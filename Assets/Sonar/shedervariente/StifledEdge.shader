@@ -29,7 +29,7 @@ Shader "Custom/StifledEdge_Sonar"
             TEXTURE2D_X(_CameraDepthTexture);
             SAMPLER(sampler_CameraDepthTexture);
 
-            // Globaux sonar joueur
+            // Globaux sonar joueur (cri)
             float4 _WaveOrigin;
             float  _WaveRadius;
             float  _WaveActive;
@@ -38,6 +38,14 @@ Shader "Custom/StifledEdge_Sonar"
             float  _WaveFireTime;
             float  _WaveMaxRadius;
             float  _WaveFadeDuration;
+
+            // Globaux onde de mouvement (cercle independant)
+            float4 _MoveWaveOrigin;
+            float  _MoveWaveRadius;
+            float  _MoveWaveActive;
+            float  _MoveWaveFireTime;
+            float  _MoveWaveMaxRadius;
+            float  _MoveWaveFadeDuration;
 
             // Globaux sonar ennemis (8 slots)
             float4 _EnemyOrigin0; float _EnemyRadius0; float _EnemyActive0; float4 _EnemyColor0; float _EnemyFireTime0; float _EnemyMaxRad0; float _EnemyFadeDur0;
@@ -181,6 +189,24 @@ Shader "Custom/StifledEdge_Sonar"
                 float fadeOut     = 1.0 - smoothstep(fadeDur * 0.8, fadeDur, elapsed);
                 float trailFade   = wasSwept * fadeOut;
 
+                // ── Onde de mouvement (cercle autour du joueur) ──────
+                float moveDist    = distance(posWS, _MoveWaveOrigin.xyz);
+                float moveInner   = smoothstep(_MoveWaveRadius - 0.8, _MoveWaveRadius, moveDist);
+                float moveOuter   = smoothstep(_MoveWaveRadius + 0.8, _MoveWaveRadius, moveDist);
+                float moveWave    = moveInner * moveOuter * _MoveWaveActive;
+
+                float mWaveDur    = max(_MoveWaveFadeDuration, 0.001);
+                float mDelay      = (moveDist / max(_MoveWaveMaxRadius, 0.001)) * mWaveDur;
+                float mArrival    = _MoveWaveFireTime + mDelay;
+                float mFired      = step(0.001, _MoveWaveFireTime);
+                float mArrived    = step(mArrival, _Time.y);
+                float mInRange    = step(moveDist, _MoveWaveMaxRadius);
+                float mSwept      = mFired * mArrived * mInRange;
+                float mEnd        = _MoveWaveFireTime + mWaveDur;
+                float mElapsed    = max(0.0, _Time.y - mEnd);
+                float mFadeOut    = 1.0 - smoothstep(fadeDur * 0.8, fadeDur, mElapsed);
+                float moveTrail   = mSwept * mFadeOut;
+
                 // ── 8 emetteurs ennemis ───────────────────────────────
                 float  eTrailAny = 0;
                 float  eWaveAny  = 0;
@@ -198,7 +224,12 @@ Shader "Custom/StifledEdge_Sonar"
                     float efire  = step(0.001, _EnemyFireTime##IDX); \
                     float earriv = step(earr, _Time.y); \
                     float einr   = step(ed, _EnemyMaxRad##IDX); \
-                    float eswept = efire * earriv * einr; \
+                    /* Occlusion : verifier que le pixel est du cote visible de l'onde */ \
+                    /* La surface normale pointe vers l'ennemi si le pixel est expose  */ \
+                    float3 eDir     = normalize(posWS - _EnemyOrigin##IDX.xyz); \
+                    float3 surfNorm = ReconstructNormal(uv, off); \
+                    float  facing   = saturate(dot(-eDir, surfNorm) + 0.5); \
+                    float eswept = efire * earriv * einr * step(0.01, facing); \
                     float eend   = _EnemyFireTime##IDX + ewd; \
                     float eelaps = max(0.0, _Time.y - eend); \
                     float efout  = 1.0 - smoothstep(fadeDur*0.8, fadeDur, eelaps); \
@@ -210,7 +241,7 @@ Shader "Custom/StifledEdge_Sonar"
                 ENEMY_POST(4) ENEMY_POST(5) ENEMY_POST(6) ENEMY_POST(7)
 
                 // Rien de revele = noir
-                float revealed = saturate(wave + trailFade + eWaveAny + eTrailAny);
+                float revealed = saturate(wave + trailFade + moveWave + moveTrail + eWaveAny + eTrailAny);
                 if (revealed < 0.01)
                 {
                     return half4(0, 0, 0, 1);
@@ -218,9 +249,11 @@ Shader "Custom/StifledEdge_Sonar"
 
                 // Composition couleur
                 float3 col = _EdgeColor.rgb * trailFade;
-                col = lerp(col, eTrailCol,           eTrailAny);
-                col = lerp(col, _EdgeWaveColor.rgb,  wave);
-                col = lerp(col, eTrailCol,           eWaveAny);
+                col = lerp(col, _EdgeColor.rgb * moveTrail, moveTrail);
+                col = lerp(col, eTrailCol,              eTrailAny);
+                col = lerp(col, _EdgeWaveColor.rgb,     wave);
+                col = lerp(col, _EdgeWaveColor.rgb,     moveWave);
+                col = lerp(col, eTrailCol,              eWaveAny);
 
                 return half4(col * finalEdge, 1.0);
             }
