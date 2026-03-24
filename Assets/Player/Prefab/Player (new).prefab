@@ -45,6 +45,7 @@ GameObject:
   - component: {fileID: 4319829264616014411}
   - component: {fileID: 6390567357980119463}
   - component: {fileID: 6175385412715135720}
+  - component: {fileID: 3929314552699895031}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -162,6 +163,20 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
+--- !u!114 &3929314552699895031
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 904787154558894074}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 86c6556701af9e04380698b89f691b6e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FMODUnity::FMODUnity.StudioListener
+  nonRigidbodyVelocity: 0
+  attenuationObject: {fileID: 0}
 --- !u!1 &2534813333919053947
 GameObject:
   m_ObjectHideFlags: 0
@@ -191,6 +206,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 6213629652923588162}
   - {fileID: 4319829264616014411}
   m_Father: {fileID: 9201654293095530808}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -391,6 +407,37 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &5546302886298232283
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6213629652923588162}
+  m_Layer: 0
+  m_Name: SonarOrigine
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6213629652923588162
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5546302886298232283}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.409, z: -1.041}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3706988050089285194}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6585705549612740297
 GameObject:
   m_ObjectHideFlags: 0
@@ -409,6 +456,7 @@ GameObject:
   - component: {fileID: 6647301995817762499}
   - component: {fileID: 82036979122223303}
   - component: {fileID: 8512829847286032187}
+  - component: {fileID: 1485946798422442459}
   - component: {fileID: 7384705160287058495}
   - component: {fileID: 96766279338221178}
   m_Layer: 0
@@ -549,18 +597,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Sonar
   settings: {fileID: 11400000, guid: 7a206510d89b8e740b08c7575866747d, type: 2}
-  coneOrigin: {fileID: 0}
+  coneOrigin: {fileID: 6213629652923588162}
   detectableLayerMask:
     serializedVersion: 2
     m_Bits: 4294967295
   obstacleMask:
     serializedVersion: 2
-    m_Bits: 904
-  showRaycasts: 1
-  raycastDrawDuration: 0.5
-  raycastHitColor: {r: 0, g: 1, b: 1, a: 1}
-  raycastToWallColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  raycastWallToTargetColor: {r: 0, g: 0.23634386, b: 1, a: 1}
+    m_Bits: 520
+  activationKey: 101
 --- !u!114 &8512829847286032187
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -580,6 +624,18 @@ MonoBehaviour:
   chargeMaxDuration: 1.5
   chargeMinDuration: 0.1
   driverCheckInterval: 2
+--- !u!114 &1485946798422442459
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6585705549612740297}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80bfcffaa37aa104ba28d52dd9ed6b22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PauseActivation
 --- !u!54 &7384705160287058495
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -796,6 +852,22 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: 84aa85bd-77bb-448a-9689-15f507d7e298
     m_ActionName: 'UI/Sonar[/Keyboard/e]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1485946798422442459}
+        m_TargetAssemblyTypeName: PauseActivation, Assembly-CSharp
+        m_MethodName: Execute
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 78caf02d-d467-45cc-b465-fed938fa83c5
+    m_ActionName: 'Player/Pause[/Keyboard/escape]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: Keyboard&Mouse
   m_DefaultActionMap: Player

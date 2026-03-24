@@ -75,7 +75,7 @@ PrefabInstance:
     - target: {fileID: -4718040791104185828, guid: 42d01417bdde80044a4b8fe81084951b, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: a75c12c0d9f41824b9f7ed92c49ca95a, type: 2}
+      objectReference: {fileID: 2100000, guid: b2ee27cfa9988ab4799fbc3d7dc9c3c6, type: 2}
     - target: {fileID: -2577548232221058511, guid: 42d01417bdde80044a4b8fe81084951b, type: 3}
       propertyPath: m_LocalPosition.y
       value: 4.67
@@ -83,7 +83,7 @@ PrefabInstance:
     - target: {fileID: -1439730007547781893, guid: 42d01417bdde80044a4b8fe81084951b, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: a75c12c0d9f41824b9f7ed92c49ca95a, type: 2}
+      objectReference: {fileID: 2100000, guid: 5a315f17c0c006e4aad50732a75a6ad9, type: 2}
     - target: {fileID: 919132149155446097, guid: 42d01417bdde80044a4b8fe81084951b, type: 3}
       propertyPath: m_Name
       value: incubation_tank
@@ -115,19 +115,19 @@ PrefabInstance:
     - target: {fileID: 6944656104360116776, guid: 42d01417bdde80044a4b8fe81084951b, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: a75c12c0d9f41824b9f7ed92c49ca95a, type: 2}
+      objectReference: {fileID: 2100000, guid: b2ee27cfa9988ab4799fbc3d7dc9c3c6, type: 2}
     - target: {fileID: 7071182760956848314, guid: 42d01417bdde80044a4b8fe81084951b, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: a75c12c0d9f41824b9f7ed92c49ca95a, type: 2}
+      objectReference: {fileID: 2100000, guid: 5a315f17c0c006e4aad50732a75a6ad9, type: 2}
     - target: {fileID: 7202271454713460447, guid: 42d01417bdde80044a4b8fe81084951b, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: a75c12c0d9f41824b9f7ed92c49ca95a, type: 2}
+      objectReference: {fileID: 2100000, guid: 5a315f17c0c006e4aad50732a75a6ad9, type: 2}
     - target: {fileID: 8089062573417005363, guid: 42d01417bdde80044a4b8fe81084951b, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: a75c12c0d9f41824b9f7ed92c49ca95a, type: 2}
+      objectReference: {fileID: 2100000, guid: 5a315f17c0c006e4aad50732a75a6ad9, type: 2}
     - target: {fileID: 8513859187771203891, guid: 42d01417bdde80044a4b8fe81084951b, type: 3}
       propertyPath: m_Layer
       value: 3

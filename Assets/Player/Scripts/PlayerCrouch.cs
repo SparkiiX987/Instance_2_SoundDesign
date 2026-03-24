@@ -50,17 +50,20 @@ namespace Player.Scripts
         }
 
         /// <summary>
-        /// Toggles the crouch state on performed and starts a DOTween animation
-        /// on the collider height and player scale.
+        /// Toggles the crouch state. The <c>started</c> phase requires valid input
+        /// (checked via <see cref="PlayerAbility.CanExecute"/>), while the
+        /// <c>canceled</c> phase always processes so that the player can properly
+        /// uncrouch even when inputs were disabled mid-crouch (e.g. during a leap).
+        /// If the player is inside a conduit, uncrouch is blocked.
         /// </summary>
         /// <param name="_context">The InputAction callback context.</param>
         public override void Execute(InputAction.CallbackContext _context)
         {
-            if (!CanExecute())
-                return;
-
             if (_context.started)
             {
+                if (!CanExecute())
+                    return;
+
                 isCrouching = true;
                 EventBus.Publish(new OnPlayerCrouch());
                 EventBus.Publish(new OnPlayerInputEnter

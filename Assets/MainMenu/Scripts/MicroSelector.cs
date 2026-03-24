@@ -11,6 +11,13 @@ public class MicroSelector : MonoBehaviour
 
     private List<(int fmodIndex, string name, int rate, int channels)> _drivers
         = new List<(int, string, int, int)>();
+    
+    private VoiceTrigger _voiceTrigger;
+    
+    private void Awake()
+    {
+        _voiceTrigger = new GameObject("VoiceTrigger").AddComponent<VoiceTrigger>();
+    }
 
     private void Start()
     {
@@ -53,15 +60,10 @@ public class MicroSelector : MonoBehaviour
         UpdateStatusLabel();
     }
 
-    // ---------------------------------------------------------------
-    //  Synchronisation dropdown / driver actif
-    // ---------------------------------------------------------------
-
     private void SyncDropdownToActive()
     {
-        VoiceTrigger voiceTrigger = new VoiceTrigger();
         
-        int active = voiceTrigger.GetActiveDriverIndex();
+        int active = _voiceTrigger.GetActiveDriverIndex();
 
         for (int i = 0; i < _drivers.Count; i++)
         {
@@ -75,35 +77,24 @@ public class MicroSelector : MonoBehaviour
         micDropdown.SetValueWithoutNotify(0);
     }
 
-    // ---------------------------------------------------------------
-    //  Validation — appelle SelectMicrophone(), repris de StartRecordingOnDriver()
-    // ---------------------------------------------------------------
-
     private void OnApply()
     {
-        VoiceTrigger voiceTrigger = new VoiceTrigger();
-        
         int chosen = micDropdown.value;
         if (chosen < 0 || chosen >= _drivers.Count) { return; }
 
         var (fmodIndex, name, rate, channels) = _drivers[chosen];
-        voiceTrigger.SelectMicrophone(fmodIndex, rate, channels);
+        _voiceTrigger.SelectMicrophone(fmodIndex, rate, channels);
 
         UpdateStatusLabel();
         Debug.Log($"[MicrophoneSelector] Micro appliqué : [{fmodIndex}] {name}");
     }
 
-    // ---------------------------------------------------------------
-    //  Label statut
-    // ---------------------------------------------------------------
-
     private void UpdateStatusLabel()
     {
-        VoiceTrigger voiceTrigger = new VoiceTrigger();
-        
         if (statusLabel == null) { return; }
 
-        int active = voiceTrigger.GetActiveDriverIndex();
+        int active = _voiceTrigger.GetActiveDriverIndex();
+        
         if (active < 0) { statusLabel.text = "Micro actif : aucun"; return; }
 
         FMODUnity.RuntimeManager.CoreSystem.getRecordDriverInfo(

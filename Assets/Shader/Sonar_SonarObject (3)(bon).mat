@@ -30,7 +30,7 @@ Material:
     - _FadeDuration: 15
     - _NoiseScale: 500
     - _NoiseSpeed: 0.01
-    - _NoiseStrength: 0.64
+    - _NoiseStrength: 1
     - _RingThickness: 0.15
     - _SilhouetteCull: 0
     - _WaveThickness: 0.8

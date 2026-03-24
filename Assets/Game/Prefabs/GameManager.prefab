@@ -76,5 +76,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1fd768be0be77e428dacf04218f41aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
-  playerPrefab: {fileID: 6585705549612740297, guid: c3079b9c814788646bcd2a0e16de572f, type: 3}
+  playerPrefab: {fileID: 6585705549612740297, guid: 0fd01100bbe0b58cf8ef342fb9a692eb, type: 3}
   playerSpawnPoint: {fileID: 22062975839751949}

@@ -147,9 +147,9 @@ jobs:
         run: |
           jq -n \
             --arg version "${{ needs.version.outputs.version }}" \
-            --arg msg "${{ github.event.head_commit.message }}" \
+            --arg msg "$(echo "${{ github.event.head_commit.message }}" | tail -n +2)" \
             --arg url "https://github.com/${{ github.repository }}/releases/tag/${{ needs.version.outputs.version }}" \
             '{
               username: "GitHub Bot",
-              content: "@everyone\n🚀 Nouvelle build publiée !\n\n📦 Version: \($version)\n📝 Patch note: \($msg)\n🔗 \($url)"
+              content: "@everyone\n🚀 Nouvelle build publiée !\n\n📦 Version: \($version)\n📝 Patch note: \n \($msg)\n🔗 \($url)"
             }' | curl -H "Content-Type: application/json" -X POST -d @- ${{ secrets.DISCORD_WEBHOOK_URL }}
