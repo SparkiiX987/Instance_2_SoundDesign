@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
+using Player.Scripts;
 
 [System.Serializable]
 public class Cinematic
@@ -17,35 +19,56 @@ public class CinematicManager : MonoBehaviour
     [Header("Liste des cinématiques")]
     public List<Cinematic> Cinematics = new List<Cinematic>();
 
-    private Image displayImage;
+    [Header("Image UI qui affiche la cinématique")]
+    public Image DisplayImage;
+
+    private PlayerController playerController;
+    private PlayerInput playerInput;
+    private InputAction cinematicAction;
 
     public static event Action<Cinematic> OnCinematicStart;
     public static event Action<Cinematic> OnCinematicEnd;
 
     private void Awake()
     {
-        displayImage = FindObjectOfType<Image>();
-
-        if (displayImage == null)
+        if (DisplayImage == null)
         {
-            Debug.LogError("S_Cinematic : aucune Image UI trouvée dans la scène.");
+            Debug.LogError("CinematicManager : aucune Image UI assignée dans l'inspecteur.");
+        }
+
+        playerController = FindObjectOfType<PlayerController>();
+        if (playerController == null)
+        {
+            Debug.LogWarning("CinematicManager : aucun PlayerController trouvé dans la scène.");
+        }
+
+        playerInput = FindObjectOfType<PlayerInput>();
+        if (playerInput == null)
+        {
+            Debug.LogWarning("CinematicManager : aucun PlayerInput trouvé dans la scène.");
+        }
+        else
+        {
+            cinematicAction = playerInput.actions["cinematique"];
+
+            if (cinematicAction == null)
+            {
+                Debug.LogWarning("CinematicManager : aucune action 'cinematique' trouvée.");
+            }
         }
     }
 
-    /// <summary>
-    /// Lance une cinématique par son index.
-    /// </summary>
     public void PlayCinematic(int _Index)
     {
-        if (displayImage == null)
+        if (DisplayImage == null)
         {
-            Debug.LogError("S_Cinematic : impossible de lancer la cinématique, aucune Image UI trouvée.");
+            Debug.LogError("CinematicManager : aucune Image UI assignée.");
             return;
         }
 
         if (_Index < 0 || _Index >= Cinematics.Count)
         {
-            Debug.LogWarning("S_Cinematic : index de cinématique invalide.");
+            Debug.LogWarning("CinematicManager : index invalide.");
             return;
         }
 
@@ -53,9 +76,6 @@ public class CinematicManager : MonoBehaviour
         StartCoroutine(CPlayCinematic(Cinematics[_Index]));
     }
 
-    /// <summary>
-    /// Lance une cinématique par son nom.
-    /// </summary>
     public void PlayCinematic(string _Name)
     {
         for (int i = 0; i < Cinematics.Count; i++)
@@ -67,29 +87,56 @@ public class CinematicManager : MonoBehaviour
             }
         }
 
-        Debug.LogWarning("S_Cinematic : aucune cinématique trouvée avec le nom " + _Name);
+        Debug.LogWarning("CinematicManager : aucune cinématique trouvée avec le nom " + _Name);
     }
 
     private IEnumerator CPlayCinematic(Cinematic _Cinematic)
     {
+        if (playerController != null)
+        {
+            playerController.DisableInput();
+        }
+
+        DisplayImage.enabled = true;
+
         OnCinematicStart?.Invoke(_Cinematic);
         Debug.Log("Début de la cinématique : " + _Cinematic.Name);
 
         for (int i = 0; i < _Cinematic.Images.Count; i++)
         {
-            if (_Cinematic.Images[i] == null)
+            Sprite _CurrentSprite = _Cinematic.Images[i];
+
+            if (_CurrentSprite == null)
             {
-                Debug.LogWarning("S_Cinematic : image nulle à l'index " + i + " dans la cinématique " + _Cinematic.Name);
+                Debug.LogWarning("CinematicManager : image nulle à l'index " + i);
                 continue;
             }
 
-            displayImage.sprite = _Cinematic.Images[i];
-            Debug.Log("Image affichée : " + _Cinematic.Images[i].name);
+            DisplayImage.sprite = _CurrentSprite;
 
-            yield return new WaitForSeconds(_Cinematic.ImageDuration);
+            float _Timer = 0f;
+
+            while (_Timer < _Cinematic.ImageDuration)
+            {
+                if (cinematicAction != null && cinematicAction.triggered)
+                {
+                    break;
+                }
+
+                _Timer += Time.deltaTime;
+                yield return null;
+            }
         }
+
+        DisplayImage.sprite = null;
+        DisplayImage.enabled = false;
 
         Debug.Log("Fin de la cinématique : " + _Cinematic.Name);
         OnCinematicEnd?.Invoke(_Cinematic);
+
+        if (playerController != null)
+        {
+            playerController.EnableInput();
+        }
     }
 }

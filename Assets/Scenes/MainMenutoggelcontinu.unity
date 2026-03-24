@@ -3061,7 +3061,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &653714693
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6844,6 +6844,10 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: 78caf02d-d467-45cc-b465-fed938fa83c5
     m_ActionName: 'Player/Pause[/Keyboard/escape]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 68ba678d-144c-49c4-ba1a-96f28a0a8d5e
+    m_ActionName: 'Player/cinematique[/Keyboard/e]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: UI
@@ -6905,7 +6909,8 @@ MonoBehaviour:
     - {fileID: 21300000, guid: f5049c61a0a300f43b1bac14ac790a44, type: 3}
     - {fileID: 21300000, guid: 2e3d564434122c84f9a7f02db4ac9bdc, type: 3}
     - {fileID: 21300000, guid: 2e3d564434122c84f9a7f02db4ac9bdc, type: 3}
-    ImageDuration: 10
+    ImageDuration: 1
+  DisplayImage: {fileID: 653714693}
 --- !u!1 &1324925261
 GameObject:
   m_ObjectHideFlags: 0
