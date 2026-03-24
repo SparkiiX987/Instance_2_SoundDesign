@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 1308236553811657173}
   - component: {fileID: 8741789266609637644}
   m_Layer: 8
-  m_Name: GroundTrap
+  m_Name: RoofTrap
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -28,7 +28,7 @@ Transform:
   m_GameObject: {fileID: 1554676566760413640}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3.584, y: 0.5, z: -0.137}
+  m_LocalPosition: {x: -3.584, y: 0.021, z: -0.137}
   m_LocalScale: {x: 1, y: 0.25, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -54,8 +54,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 0.33954644, z: 1}
-  m_Center: {x: 0, y: 0.3, z: 0}
+  m_Size: {x: 1, y: 3.108511, z: 1}
+  m_Center: {x: 0, y: -10.937867, z: 0}
 --- !u!114 &1308236553811657173
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -72,11 +72,11 @@ MonoBehaviour:
   isActiveOnStart: 1
   sound:
     Guid:
-      Data1: 805203070
-      Data2: 1084855665
-      Data3: -182505563
-      Data4: 1395056263
-    Path: event:/Bad GPE Encounter
+      Data1: -1200075183
+      Data2: 1202389492
+      Data3: 881704870
+      Data4: -2050376858
+    Path: event:/Fox Walk
   volumeMin: 0.1
   volumeMax: 1
   pitchMin: 0.5
