@@ -13,7 +13,7 @@ public class S_ToySonarEmitter : MonoBehaviour
     [SerializeField] private bool  autoTrigger = true;
     [SerializeField] private float interval    = 3f;
 
-    // Index unique attribue par le manager
+
     [HideInInspector] public int emitterIndex = 0;
 
     private float _currentRadius;
@@ -22,7 +22,7 @@ public class S_ToySonarEmitter : MonoBehaviour
 
     private void Start()
     {
-        // S'enregistrer aupres du manager
+
         SonarEmitterManager.Register(this);
 
         if (autoTrigger)

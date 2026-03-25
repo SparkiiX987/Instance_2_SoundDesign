@@ -5,16 +5,13 @@ using Player.Scripts;
 
 namespace UI.Scripts
 {
-    /// <summary>
-    /// Toggle menu pour activer/désactiver le FullScreenPassRendererFeature
-    /// </summary>
+  
     public class S_RendererMenuPrefs : MonoBehaviour
     {
         [Header("Renderer Toggle")]
         [SerializeField] private Toggle rendererToggle;
-        [SerializeField] private UniversalRendererData pcRendererData; // ton PC_Renderer
-        [SerializeField] private string featureName = "FullScreenPass"; // nom exact du RendererFeature
-
+        [SerializeField] private UniversalRendererData pcRendererData; 
+        [SerializeField] private string featureName = "FullScreenPass"; 
         private void Start()
         {
             if (rendererToggle != null)

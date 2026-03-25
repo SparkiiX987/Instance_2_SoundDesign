@@ -1,20 +1,6 @@
 using UnityEngine;
 using UnityEngine.AI;
 
-/// <summary>
-/// State machine de l'ennemi.
-/// States : Wander → Investigate → Stalk → Chase
-///
-/// Transitions :
-///   Wander      → Investigate  : entend le sonar
-///   Wander      → Chase        : voit le joueur (courte portee)
-///   Investigate → Chase        : voit le joueur (courte portee)
-///   Investigate → Wander       : fin du temps de recherche
-///   Chase       → Stalk        : perd le joueur de vue
-///   Stalk       → Investigate  : entend le sonar
-///   Stalk       → Chase        : revoit le joueur (longue portee)
-///   Stalk       → Wander       : memoire expiree
-/// </summary>
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(EnemyPerception))]
 public class EnemyBrain : MonoBehaviour
@@ -26,42 +12,39 @@ public class EnemyBrain : MonoBehaviour
     [Tooltip("Vide = trouve automatiquement le GameObject tague 'Player'.")]
     [SerializeField] private Transform playerTransform;
 
-    // ── Etat ─────────────────────────────────────────────────────────
-
+   
     private enum State { Wander, Investigate, Stalk, Chase }
 
     private State          _state = State.Wander;
     private NavMeshAgent   _agent;
     private EnemyPerception _perception;
 
-    // Agressivite [0..1] — augmente avec le temps
+    
     private EnemyEcholocation _echolocation;
     private float _aggressionLevel;
     private float _aggressionTimer;
 
-    // Wander
+    
     private Vector3 _wanderTarget;
     private float   _wanderWaitTimer;
     private bool    _waitingAtPoint;
 
-    // Investigate
+    
     private Vector3 _investigateTarget;
     private float   _investigateTimer;
     private bool    _investigateSearching;
 
-    // Stalk / Chase
+    
     private Vector3 _lastKnownPlayerPos;
     private float   _lostPlayerTimer;
-
-    // ---------------------------------------------------------------
-
+    
     private void Awake()
     {
         _agent         = GetComponent<NavMeshAgent>();
         _perception    = GetComponent<EnemyPerception>();
         _echolocation  = GetComponent<EnemyEcholocation>();
 
-        // Recupere le joueur automatiquement si non assigne
+        
         if (playerTransform == null)
         {
             GameObject player = GameObject.FindWithTag("Player");
@@ -94,10 +77,7 @@ public class EnemyBrain : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Appele quand l'onde de l'ennemi touche le joueur.
-    /// Passe en Chase depuis n'importe quel etat.
-    /// </summary>
+   
     private void OnEchoDetectedPlayer(Vector3 _playerPos)
     {
         _lastKnownPlayerPos = _playerPos;
@@ -121,7 +101,7 @@ public class EnemyBrain : MonoBehaviour
         }
     }
 
-    // ── Agressivite ──────────────────────────────────────────────────
+   
 
     private void UpdateAggression()
     {
@@ -130,11 +110,10 @@ public class EnemyBrain : MonoBehaviour
             _aggressionTimer / settings.aggressionRampDuration);
     }
 
-    // ── Wander ───────────────────────────────────────────────────────
-
+   
     private void UpdateWander()
     {
-        // Transitions
+        
         if (_perception.CanSeePlayer)  { SetState(State.Chase);       return; }
         if (_perception.HeardSound)    { SetState(State.Investigate);  return; }
 
@@ -145,7 +124,7 @@ public class EnemyBrain : MonoBehaviour
             return;
         }
 
-        // Arrive a destination
+     
         if (!_agent.pathPending && _agent.remainingDistance <= settings.wanderPointReachedDist)
         {
             _waitingAtPoint  = true;
@@ -153,7 +132,7 @@ public class EnemyBrain : MonoBehaviour
             return;
         }
 
-        // Cherche un nouveau point si pas de destination
+       
         if (!_agent.hasPath || _agent.pathStatus == NavMeshPathStatus.PathInvalid)
         {
             SetNewWanderPoint();
@@ -162,7 +141,7 @@ public class EnemyBrain : MonoBehaviour
 
     private void SetNewWanderPoint()
     {
-        // Legere tendance vers le joueur selon l'agressivite
+        
         Vector3 biasDir = Vector3.zero;
         if (playerTransform != null)
         {
@@ -171,7 +150,7 @@ public class EnemyBrain : MonoBehaviour
 
         for (int attempt = 0; attempt < 10; attempt++)
         {
-            // Direction aleatoire biaisee vers le joueur
+           
             Vector3 randDir  = Random.insideUnitSphere;
             randDir.y        = 0f;
             randDir          = Vector3.Lerp(randDir.normalized, biasDir, _aggressionLevel * 0.4f)
@@ -187,11 +166,10 @@ public class EnemyBrain : MonoBehaviour
         }
     }
 
-    // ── Investigate ──────────────────────────────────────────────────
+   
 
     private void UpdateInvestigate()
     {
-        // Transitions
         if (_perception.CanSeePlayer) { SetState(State.Chase); return; }
 
         _investigateTimer -= Time.deltaTime;
@@ -202,7 +180,7 @@ public class EnemyBrain : MonoBehaviour
             return;
         }
 
-        // Arrive au point du son — commence a chercher autour
+        
         if (!_investigateSearching &&
             !_agent.pathPending &&
             _agent.remainingDistance <= settings.wanderPointReachedDist)
@@ -212,7 +190,7 @@ public class EnemyBrain : MonoBehaviour
 
         if (_investigateSearching)
         {
-            // Se balade dans un petit rayon autour du point
+            
             if (!_agent.hasPath || _agent.remainingDistance <= settings.wanderPointReachedDist)
             {
                 Vector3 searchPoint = _investigateTarget
@@ -226,7 +204,7 @@ public class EnemyBrain : MonoBehaviour
             }
         }
 
-        // Nouveau son entendu pendant l'investigation → repart vers ce point
+       
         if (_perception.HeardSound)
         {
             _agent.SetDestination(_perception.LastSoundOrigin);
@@ -237,11 +215,11 @@ public class EnemyBrain : MonoBehaviour
         }
     }
 
-    // ── Stalk ────────────────────────────────────────────────────────
+   
 
     private void UpdateStalk()
     {
-        // Transitions
+     
         if (_perception.CanSeePlayer) { SetState(State.Chase); return; }
         if (_perception.HeardSound)   { SetState(State.Investigate); return; }
 
@@ -252,37 +230,37 @@ public class EnemyBrain : MonoBehaviour
             return;
         }
 
-        // Va vers la derniere position connue
+       
         if (!_agent.pathPending &&
             _agent.remainingDistance <= settings.wanderPointReachedDist)
         {
-            // Arrive — attend un peu puis wander
+           
             _lostPlayerTimer = Mathf.Min(_lostPlayerTimer, 2f);
         }
     }
 
-    // ── Chase ────────────────────────────────────────────────────────
+   
 
     private void UpdateChase()
     {
         if (_perception.CanSeePlayer)
         {
-            // Poursuit directement le joueur
+            
             _lastKnownPlayerPos = playerTransform.position;
             _agent.SetDestination(_lastKnownPlayerPos);
         }
         else
         {
-            // Perd le joueur → Stalk
+            
             SetState(State.Stalk);
         }
     }
 
-    // ── SetState ─────────────────────────────────────────────────────
+    
 
     private void SetState(State _newState)
     {
-        // Stop echolocation si on quitte Chase
+        
         if (_state == State.Chase && _newState != State.Chase && _echolocation != null)
         {
             _echolocation.StopEcholocation();
@@ -297,7 +275,7 @@ public class EnemyBrain : MonoBehaviour
                 _agent.speed        = settings.wanderSpeed
                     * Mathf.Lerp(1f, settings.aggressionSpeedMult, _aggressionLevel);
                 _agent.acceleration = settings.acceleration;
-                // Echo lent en wander pour chercher le joueur
+                
                 if (_echolocation != null) { _echolocation.StartEcholocation(settings.echoIntervalSearch); }
                 SetNewWanderPoint();
                 break;
@@ -330,7 +308,7 @@ public class EnemyBrain : MonoBehaviour
         }
     }
 
-    // ── Gizmos ───────────────────────────────────────────────────────
+    
 
     private void OnDrawGizmosSelected()
     {

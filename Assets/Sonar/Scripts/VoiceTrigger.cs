@@ -51,12 +51,12 @@ public class VoiceTrigger : PlayerAbility
     private float _driverCheckTimer;
     private bool _isMuted = false;
 
-    // -------------------------------------------------
+   
     public override void Init(PlayerController _playerController)
     {
         base.Init(_playerController);
 
-        // ✅ récupère PlayerPrefs
+        
         isEnabled = PlayerPrefs.GetInt(PREF_KEY, 1) == 1;
 
         _volumeHistory = new float[smoothFrames];
@@ -109,7 +109,7 @@ public class VoiceTrigger : PlayerAbility
         }
     }
 
-    // ── FIRE
+   
     private void Fire()
     {
         _isCharging = false;
@@ -158,7 +158,7 @@ public class VoiceTrigger : PlayerAbility
         OnSoundCaptured?.Invoke(pcm,_driverRate,_driverChannels,normalizedVolume);
     }
 
-    // ── RMS
+
     private float ComputeRMSDelta()
     {
         FMODUnity.RuntimeManager.CoreSystem.getRecordPosition(_activeDriverIndex,out uint writePos);
@@ -211,7 +211,7 @@ public class VoiceTrigger : PlayerAbility
         return sum/smoothFrames;
     }
 
-    // ── DRIVER
+
     private void CheckDriverState()
     {
         FMOD.System core = FMODUnity.RuntimeManager.CoreSystem;
@@ -283,7 +283,7 @@ public class VoiceTrigger : PlayerAbility
         _isCharging=false;
     }
 
-    // ── PUBLIC CONTROL
+
     public void SetMuted(bool muted)=>_isMuted=muted;
     public bool IsMuted=>_isMuted;
 

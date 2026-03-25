@@ -9,13 +9,13 @@ public class RendererFeatureManager : MonoBehaviour
     public string featureName = "FullScreenPassRendererFeature";
 
     [Header("UI")]
-    public Toggle toggleUI; // Ton toggle dans les options
+    public Toggle toggleUI;
 
     private string playerPrefKey = "FullScreenPassEnabled";
 
     void Start()
     {
-        // Assure que le listener est bien ajouté au toggle
+       
         if (toggleUI != null)
         {
             toggleUI.onValueChanged.AddListener(OnToggleChanged);
@@ -37,10 +37,10 @@ public class RendererFeatureManager : MonoBehaviour
 
     public void OnToggleChanged(bool isOn)
     {
-        // Active ou désactive la feature seulement quand tu cliques sur le toggle
+        
         SetFeatureActive(isOn);
 
-        // Sauvegarde l'état dans PlayerPrefs pour la prochaine session
+        
         PlayerPrefs.SetInt(playerPrefKey, isOn ? 1 : 0);
         PlayerPrefs.Save();
     }

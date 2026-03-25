@@ -26,7 +26,7 @@ public class Cinematic
     public List<CinematicImage> Images = new List<CinematicImage>();
 }
 
-public class CinematicManager : MonoBehaviour
+public class CinematicManager : PlayerAbility
 {
     [Header("Liste des cinematiques")]
     public List<Cinematic> Cinematics = new List<Cinematic>();
@@ -42,7 +42,7 @@ public class CinematicManager : MonoBehaviour
 
     private bool _skipRequested;
 
-    // ───────── INIT ─────────
+    
 
     private void Start()
     {
@@ -51,15 +51,15 @@ public class CinematicManager : MonoBehaviour
             Debug.LogError("CinematicManager : aucune Image UI assignée.");
         }
 
-        // 🔥 Récup auto du player
-        _playerController = FindObjectOfType<PlayerController>();
+       
+     
 
         if (_playerController == null)
         {
             Debug.LogWarning("CinematicManager : PlayerController introuvable.");
         }
 
-        // 🔥 Input
+       
         PlayerInput pi = FindObjectOfType<PlayerInput>();
         if (pi != null)
         {
@@ -71,7 +71,7 @@ public class CinematicManager : MonoBehaviour
     {
         if (_cinematicAction != null)
         {
-            _cinematicAction.performed += OnSkip;
+            _cinematicAction.performed += Execute;
             _cinematicAction.Enable();
         }
     }
@@ -80,16 +80,17 @@ public class CinematicManager : MonoBehaviour
     {
         if (_cinematicAction != null)
         {
-            _cinematicAction.performed -= OnSkip;
+            _cinematicAction.performed -= Execute;
         }
     }
 
-    private void OnSkip(InputAction.CallbackContext _ctx)
+    public override void Execute(InputAction.CallbackContext _context)
     {
         _skipRequested = true;
+        Debug.Log("passsseee");
     }
 
-    // ───────── API ─────────
+  
 
     public void PlayCinematic(int _index)
     {
@@ -114,11 +115,11 @@ public class CinematicManager : MonoBehaviour
         Debug.LogWarning($"Cinematic '{_name}' introuvable.");
     }
 
-    // ───────── CINEMATIQUE ─────────
+   
 
     private IEnumerator CPlayCinematic(Cinematic _cinematic)
     {
-        // 🔒 Bloque le joueur
+       
         if (_playerController != null)
         {
             _playerController.DisableInput();
@@ -142,13 +143,12 @@ public class CinematicManager : MonoBehaviour
 
             DisplayImage.sprite = ci.Image;
 
-            // 🔊 SON FMOD
             if (!ci.Sound.IsNull)
             {
                 RuntimeManager.PlayOneShot(ci.Sound);
             }
 
-            // 🎬 Fade IN
+            
             cg.DOFade(1f, ci.Fade);
 
             float timer = 0f;
@@ -166,12 +166,12 @@ public class CinematicManager : MonoBehaviour
                 yield return null;
             }
 
-            // 🎬 Fade OUT
+        
             cg.DOFade(0f, ci.Fade);
             yield return new WaitForSeconds(ci.Fade);
         }
 
-        // 🧹 Fin
+
         DisplayImage.sprite  = null;
         DisplayImage.enabled = false;
         cg.alpha             = 0f;
@@ -179,7 +179,7 @@ public class CinematicManager : MonoBehaviour
         Debug.Log($"[Cinematic] Fin : {_cinematic.Name}");
         OnCinematicEnd?.Invoke(_cinematic);
 
-        // 🔓 Redonne le contrôle
+   
         if (_playerController != null)
         {
             _playerController.EnableInput();
