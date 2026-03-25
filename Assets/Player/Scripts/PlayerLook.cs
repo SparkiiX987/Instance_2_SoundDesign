@@ -24,7 +24,7 @@ namespace Player.Scripts
         {
             base.Init(_playerController);
             Assert.IsNotNull(cameraRoot, $"[{GetType().Name}] PlayerCamera reference is null.");
-            lookSpeed = PlayerPrefs.GetFloat("MouseSensitivity");
+            lookSpeed = PlayerPrefs.GetFloat("MouseSensitivity", 1f);
         }
 
         /// <summary>
