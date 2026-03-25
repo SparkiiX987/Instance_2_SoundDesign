@@ -3,22 +3,14 @@ using System.Linq;
     
 namespace Player.Scripts
 {
-    /// <summary>
-    /// Main player controller. Initializes all PlayerAbility components
-    /// and manages input state (enable/disable).
-    /// </summary>
+   
     public class PlayerController : MonoBehaviour
     {
         [SerializeField] private Collider bodyCollider;
         private Rigidbody rb;
         private bool canInput;
 
-        /*private PlayerLook look;
-        private PlayerMove move;*/
-
-        /// <summary>
-        /// Retrieves required components and initializes all abilities attached to the GameObject.
-        /// </summary>
+       
         void Awake()
         {
             gameObject.SetActive(true);
@@ -30,37 +22,32 @@ namespace Player.Scripts
             {
                 ability.Init(this);
                 
-                /*if (ability is PlayerCrouch crouch)
-                    crouch.SetCapsuleCollider(bodyCollider);*/
+               
             });
             
             EnableInput();
         }
         
-        /// <summary>
-        /// Enables player input reception.
-        /// </summary>
+       
         public void EnableInput()
         {
             canInput = true;
         }
 
-        /// <summary>
-        /// Disables player input reception.
-        /// </summary>
+        
         public void DisableInput()
         {
             canInput = false;
             Debug.Log("Player input disabled.");
         }
         
-        /// <summary>Whether the player inputs are currently active.</summary>
+       
         public bool IsInputValid => canInput;
         
-        /// <summary>Reference to the player's Rigidbody.</summary>
+       
         public Rigidbody Rb => rb;
 
-        /// <summary>Reference to the player's body CapsuleCollider.</summary>
+        
         public Collider BodyCollider => bodyCollider;
     }
 }

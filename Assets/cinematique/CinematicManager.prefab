@@ -52,53 +52,165 @@ MonoBehaviour:
     - Image: {fileID: -109139787, guid: a4fd2cf124a758c46ba1fcb0f753138e, type: 3}
       Duration: 3
       Fade: 0.5
+      Sound:
+        Guid:
+          Data1: -1624919923
+          Data2: 1212395759
+          Data3: 654253726
+          Data4: -1582831016
+        Path: event:/Intro Planche/Planche 1
     - Image: {fileID: 134718151, guid: 1c6bcfe95b86269419499042a1b4b864, type: 3}
       Duration: 3
       Fade: 0.5
+      Sound:
+        Guid:
+          Data1: -1040614872
+          Data2: 1167153172
+          Data3: -128678774
+          Data4: 946496597
+        Path: event:/Intro Planche/Planche 2
     - Image: {fileID: -1728083037, guid: 058493796d0427e4f8274094a6931a09, type: 3}
       Duration: 3
       Fade: 0.5
+      Sound:
+        Guid:
+          Data1: -1100336596
+          Data2: 1223001296
+          Data3: -60978527
+          Data4: 1997030933
+        Path: event:/Intro Planche/Planche 3
     - Image: {fileID: 1517793742, guid: 8ba5e470e747bd048b1a3ed407f300de, type: 3}
       Duration: 3
       Fade: 0.5
+      Sound:
+        Guid:
+          Data1: -1205084475
+          Data2: 1206109917
+          Data3: -280917602
+          Data4: -433311954
+        Path: event:/Intro Planche/Planche 4
     - Image: {fileID: 1466337063, guid: e07258d1578ce31429d2ce6a61a9a59f, type: 3}
-      Duration: 3
+      Duration: 5
       Fade: 0.5
+      Sound:
+        Guid:
+          Data1: -1731010059
+          Data2: 1321174500
+          Data3: 939193269
+          Data4: 1755858593
+        Path: event:/Intro Planche/Planche 5
     - Image: {fileID: 2031080832, guid: 5a387ff3ff2bd0046b273d7de6238bcf, type: 3}
       Duration: 3
       Fade: 0.5
+      Sound:
+        Guid:
+          Data1: -1443223917
+          Data2: 1134805940
+          Data3: 1196286607
+          Data4: 614448962
+        Path: event:/Intro Planche/Planche 6
     - Image: {fileID: 360843627, guid: 54a535ed17103134fb34ab26b4ee4d35, type: 3}
       Duration: 1
       Fade: 0.3
+      Sound:
+        Guid:
+          Data1: -965192127
+          Data2: 1143243785
+          Data3: -603082320
+          Data4: 583889401
+        Path: event:/Intro Planche/Planche 7
     - Image: {fileID: 582599636, guid: 191b5952057145744a7d320a03d0ca61, type: 3}
       Duration: 1
       Fade: 0.3
+      Sound:
+        Guid:
+          Data1: 1302930968
+          Data2: 1117724730
+          Data3: 324473788
+          Data4: -58891715
+        Path: event:/Intro Planche/Planche 8
   - Name: 
     Images:
     - Image: {fileID: -109139787, guid: a4fd2cf124a758c46ba1fcb0f753138e, type: 3}
       Duration: 1
       Fade: 2
+      Sound:
+        Guid:
+          Data1: 0
+          Data2: 0
+          Data3: 0
+          Data4: 0
+        Path: 
     - Image: {fileID: -109139787, guid: a4fd2cf124a758c46ba1fcb0f753138e, type: 3}
       Duration: 1
       Fade: 2
+      Sound:
+        Guid:
+          Data1: 0
+          Data2: 0
+          Data3: 0
+          Data4: 0
+        Path: 
     - Image: {fileID: -109139787, guid: a4fd2cf124a758c46ba1fcb0f753138e, type: 3}
       Duration: 1
       Fade: 2
+      Sound:
+        Guid:
+          Data1: 0
+          Data2: 0
+          Data3: 0
+          Data4: 0
+        Path: 
     - Image: {fileID: -109139787, guid: a4fd2cf124a758c46ba1fcb0f753138e, type: 3}
       Duration: 1
       Fade: 2
+      Sound:
+        Guid:
+          Data1: 0
+          Data2: 0
+          Data3: 0
+          Data4: 0
+        Path: 
     - Image: {fileID: -109139787, guid: a4fd2cf124a758c46ba1fcb0f753138e, type: 3}
       Duration: 1
       Fade: 2
+      Sound:
+        Guid:
+          Data1: 0
+          Data2: 0
+          Data3: 0
+          Data4: 0
+        Path: 
     - Image: {fileID: -109139787, guid: a4fd2cf124a758c46ba1fcb0f753138e, type: 3}
       Duration: 1
       Fade: 2
+      Sound:
+        Guid:
+          Data1: 0
+          Data2: 0
+          Data3: 0
+          Data4: 0
+        Path: 
     - Image: {fileID: -109139787, guid: a4fd2cf124a758c46ba1fcb0f753138e, type: 3}
       Duration: 1
       Fade: 1
+      Sound:
+        Guid:
+          Data1: 0
+          Data2: 0
+          Data3: 0
+          Data4: 0
+        Path: 
     - Image: {fileID: -109139787, guid: a4fd2cf124a758c46ba1fcb0f753138e, type: 3}
       Duration: 1
       Fade: 1
+      Sound:
+        Guid:
+          Data1: 0
+          Data2: 0
+          Data3: 0
+          Data4: 0
+        Path: 
   DisplayImage: {fileID: 8726972976519970872}
 --- !u!114 &8301574778384953965
 MonoBehaviour:

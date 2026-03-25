@@ -1,10 +1,6 @@
 using DG.Tweening;
 using UnityEngine;
 
-/// <summary>
-/// Parametres du sonar selon le GDD Echo Maze.
-/// Valeurs definitives marquees, valeurs test en commentaire.
-/// </summary>
 [CreateAssetMenu(fileName = "SO_SonarSettings", menuName = "Sonar/SO_SonarSettings")]
 public class SO_SonarSettings : ScriptableObject
 {
@@ -48,17 +44,14 @@ public class SO_SonarSettings : ScriptableObject
     [Range(0f, 1f)] public float voiceMax         = 0.3f;
     [Range(1, 30)]  public int   voiceSmoothFrames = 10;
 
-    // ── Methodes ─────────────────────────────────────────────────────
+
 
     public float GetWaveDuration(float _range) => _range / ondeSpeed;
 
     public float GetVoiceRange(float _normalizedVolume)
         => Mathf.Lerp(minVoiceRange, maxVoiceRange, _normalizedVolume);
 
-    /// <summary>
-    /// Duree de revelation interpolee selon le volume normalise [0..1].
-    /// 0 = fadeDurationMin, 1 = fadeDurationMax.
-    /// </summary>
+    
     public float GetFadeDuration(float _normalizedVolume)
         => Mathf.Lerp(fadeDurationMin, fadeDurationMax, _normalizedVolume);
 }
