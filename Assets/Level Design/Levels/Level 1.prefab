@@ -20502,11 +20502,10 @@ GameObject:
   - component: {fileID: 1249482862545434986}
   - component: {fileID: 3891563958029436961}
   - component: {fileID: 8359781304631515783}
-  - component: {fileID: 6263698837329674208}
-  - component: {fileID: 2124177185773512401}
-  - component: {fileID: 4545395862925583011}
-  - component: {fileID: 6620291964304831304}
-  - component: {fileID: 644637130883232290}
+  - component: {fileID: 988993694155023695}
+  - component: {fileID: 4345663687217875395}
+  - component: {fileID: 2626570913771889096}
+  - component: {fileID: 4578612056469686475}
   m_Layer: 3
   m_Name: Cube.025
   m_TagString: Untagged
@@ -20586,7 +20585,7 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &6263698837329674208
+--- !u!65 &988993694155023695
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -20605,9 +20604,9 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.01955428, y: 0.020000003, z: 1.1139479}
-  m_Center: {x: -0.0002684295, y: 0.0000000018384929, z: -0.001741365}
---- !u!65 &2124177185773512401
+  m_Size: {x: 0.019794323, y: 0.02, z: 1.1139479}
+  m_Center: {x: -0.0001485408, y: 0.0000000068943478, z: -0.0017413781}
+--- !u!65 &4345663687217875395
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -20626,9 +20625,9 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.023135569, y: 0.020000003, z: 1.1139479}
-  m_Center: {x: 0.610337, y: 0.0000000018384929, z: -0.001741365}
---- !u!65 &4545395862925583011
+  m_Size: {x: 0.015473834, y: 0.02, z: 1.1139479}
+  m_Center: {x: 0.6186535, y: 0.0000000068943478, z: -0.0017413781}
+--- !u!65 &2626570913771889096
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -20647,9 +20646,9 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.6354652, y: 0.020000003, z: 0}
-  m_Center: {x: 0.30768707, y: 0.0000000018384929, z: -0.5350112}
---- !u!65 &6620291964304831304
+  m_Size: {x: 0.6364357, y: 0.02, z: 0.023440752}
+  m_Center: {x: 0.30817223, y: 0.000000006894348, z: 0.54351234}
+--- !u!65 &4578612056469686475
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -20668,29 +20667,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.6328957, y: 0.020000003, z: 0.020839421}
-  m_Center: {x: 0.30640233, y: 0.0000000018384929, z: 0.5448103}
---- !u!65 &644637130883232290
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5201509596304438881}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 0.6364355, y: 0.020000003, z: 1.1139479}
-  m_Center: {x: 0.30817217, y: 0.000000005122274, z: -0.0017411113}
+  m_Size: {x: 0.6364357, y: 0.02, z: 0.021016723}
+  m_Center: {x: 0.30817223, y: 0.0000000068943473, z: -0.54820716}
 --- !u!1 &5220804083036084480
 GameObject:
   m_ObjectHideFlags: 0
@@ -29561,7 +29539,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5528388956804408924}
   m_Layer: 0
-  m_Name: Cages
+  m_Name: CAges
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -31009,7 +30987,7 @@ MonoBehaviour:
         sceneObject: {fileID: 6697015211668775246}
         ignore: 0
       - assetName: NouvelAsset
-        sceneObject: {fileID: 5337991399868298640}
+        sceneObject: {fileID: 0}
         ignore: 0
       - assetName: NouvelAsset
         sceneObject: {fileID: 0}
@@ -31860,8 +31838,8 @@ Transform:
   m_GameObject: {fileID: 7718530515806293618}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -3.295352, y: -2.3751602, z: -6.970659}
-  m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
+  m_LocalPosition: {x: -3.295352, y: -3.83, z: -6.09}
+  m_LocalScale: {x: 0.2, y: 0.2, z: 0.2}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 6879056998079457934}

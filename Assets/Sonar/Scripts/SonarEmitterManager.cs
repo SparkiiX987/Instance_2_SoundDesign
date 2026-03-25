@@ -10,7 +10,7 @@ public class SonarEmitterManager : MonoBehaviour
     private static SonarEmitterManager _instance;
     private static readonly List<S_ToySonarEmitter> _emitters = new();
 
-    private const int MAX = 8;
+    private const int MAX = 15;
 
     // Shader property IDs — tableaux de 8
     private static readonly int[] ID_Origin   = new int[MAX];

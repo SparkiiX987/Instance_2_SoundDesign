@@ -28,7 +28,7 @@ Material:
     - _DepthThreshold: 0.036
     - _EdgeFadeMult: 1
     - _EdgeThickness: 1.5
-    - _FadeDuration: 1
+    - _FadeDuration: 2.5
     - _IntersectMax: 0.103
     - _IntersectMin: 0.0428
     - _NormalThreshold: 2
