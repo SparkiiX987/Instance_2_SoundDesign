@@ -13,6 +13,9 @@ Shader "Sonar/SonarSurface"
         _ConeEdgeSoftness ("Douceur bord cone",          Float)  = 0.05
         _FadeDuration     ("Duree trace (s)",            Float)  = 15.0
         _EdgeFadeMult     ("Multiplicateur duree",       Float)  = 1.0
+
+        // 🔹 Nouvelle propriété pour les ennemis
+        [Range(0.1, 3.0)] _EnemyWaveThickness ("Epaisseur onde ennemis", Float) = 0.8
     }
 
     SubShader
@@ -37,6 +40,7 @@ Shader "Sonar/SonarSurface"
             float4 _ConeForward; float _ConeHalfAngleCos; float _ConeEdgeSoftness;
             float4 _RingColor; float4 _SurfaceColor;
             float  _WaveThickness; float _RingThickness;
+            float  _EnemyWaveThickness; // ✅ variable réglable pour les ennemis
 
             float4 _EnemyOrigin0; float _EnemyRadius0; float _EnemyActive0; float4 _EnemyColor0;
             float4 _EnemyOrigin1; float _EnemyRadius1; float _EnemyActive1; float4 _EnemyColor1;
@@ -73,10 +77,12 @@ Shader "Sonar/SonarSurface"
 
                 float3 eCol = float3(0,0,0);
                 float  eAny = 0;
+
+                // 🔹 Utilisation de _EnemyWaveThickness ici pour les ennemis
                 #define ENEMY_RING(IDX) { \
                     float ed = distance(IN.posWS, _EnemyOrigin##IDX.xyz); \
-                    float ei = smoothstep(_EnemyRadius##IDX - _WaveThickness, _EnemyRadius##IDX, ed); \
-                    float eo = smoothstep(_EnemyRadius##IDX + _WaveThickness, _EnemyRadius##IDX, ed); \
+                    float ei = smoothstep(_EnemyRadius##IDX - _EnemyWaveThickness, _EnemyRadius##IDX, ed); \
+                    float eo = smoothstep(_EnemyRadius##IDX + _EnemyWaveThickness, _EnemyRadius##IDX, ed); \
                     float ew = ei * eo * _EnemyActive##IDX; \
                     eCol = lerp(eCol, _EnemyColor##IDX.rgb, ew); \
                     eAny = saturate(eAny + ew); \
@@ -119,6 +125,7 @@ Shader "Sonar/SonarSurface"
             float4 _EdgeColor; float4 _EdgeWaveColor; float4 _RingColor;
             float  _WaveThickness; float _RingThickness; float _WireThickness;
             float  _FadeDuration; float _EdgeFadeMult;
+            float  _EnemyWaveThickness; // ✅ ajout pour la passe wire
 
             float4 _EnemyOrigin0; float _EnemyRadius0; float _EnemyActive0; float4 _EnemyColor0; float _EnemyFireTime0; float _EnemyMaxRad0; float _EnemyFadeDur0;
             float4 _EnemyOrigin1; float _EnemyRadius1; float _EnemyActive1; float4 _EnemyColor1; float _EnemyFireTime1; float _EnemyMaxRad1; float _EnemyFadeDur1;
@@ -191,8 +198,8 @@ Shader "Sonar/SonarSurface"
 
                 #define ENEMY_WIRE(IDX) { \
                     float ed     = distance(IN.posWS, _EnemyOrigin##IDX.xyz); \
-                    float ewi    = smoothstep(_EnemyRadius##IDX - _WaveThickness, _EnemyRadius##IDX, ed); \
-                    float ewo    = smoothstep(_EnemyRadius##IDX + _WaveThickness, _EnemyRadius##IDX, ed); \
+                    float ewi    = smoothstep(_EnemyRadius##IDX - _EnemyWaveThickness, _EnemyRadius##IDX, ed); \
+                    float ewo    = smoothstep(_EnemyRadius##IDX + _EnemyWaveThickness, _EnemyRadius##IDX, ed); \
                     float ew     = ewi * ewo * _EnemyActive##IDX; \
                     eWaveAny     = saturate(eWaveAny + ew); \
                     float ewd    = max(_EnemyFadeDur##IDX, 0.001); \
