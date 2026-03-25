@@ -75,8 +75,8 @@ MonoBehaviour:
       Data3: 53489832
       Data4: -192143761
     Path: event:/Switch/New Event
-  volumeMin: 0.1
-  targetVolume: 0.1
+  volumeMin: 1
+  targetVolume: 1
   volumeMax: 1
   pitchMin: 0.5
   targetPitch: 0.5

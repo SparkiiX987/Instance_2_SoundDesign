@@ -172,11 +172,12 @@ public class CinematicManager : PlayerAbility
         Debug.Log($"[Cinematic] Fin : {_cinematic.Name}");
         OnCinematicEnd?.Invoke(_cinematic);
 
-        SceneManager.LoadScene(2);
+      
    
         if (_playerController != null)
         {
             _playerController.EnableInput();
         }
+        SceneManager.LoadScene(2);
     }
 }
