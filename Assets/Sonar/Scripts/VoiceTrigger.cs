@@ -225,7 +225,7 @@ public class VoiceTrigger : PlayerAbility
         if (!_recording) TryStartRecording();
     }
 
-    private void TryStartRecording()
+    public void TryStartRecording()
     {
         FMOD.System core = FMODUnity.RuntimeManager.CoreSystem;
         core.getRecordNumDrivers(out int numDrivers, out int _);
@@ -270,7 +270,7 @@ public class VoiceTrigger : PlayerAbility
         _volumeHistoryIndex = 0;
     }
 
-    private void StopRecording()
+    public void StopRecording()
     {
         if (_recording && _activeDriverIndex >= 0)
             FMODUnity.RuntimeManager.CoreSystem.recordStop(_activeDriverIndex);
