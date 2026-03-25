@@ -9,11 +9,11 @@ EditorBuildSettings:
     path: Assets/Scenes/MainMenu.unity
     guid: 17f03cc27ad4c6e479e0550010cd3522
   - enabled: 1
+    path: Assets/Scenes/Cinematique.unity
+    guid: 7611b9161659b91478eb71dda2a2359c
+  - enabled: 1
     path: Assets/Scenes/Level/All Level.unity
     guid: 4063b27e5dd2cc24586be20c8084ecb9
-  - enabled: 1
-    path: Assets/Scenes/Level/Level 1.unity
-    guid: 3b1d1d9c1fa56e345b85b6ab1b231f09
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

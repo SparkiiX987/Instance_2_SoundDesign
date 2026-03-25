@@ -7,6 +7,7 @@ using UnityEngine.InputSystem;
 using DG.Tweening;
 using Player.Scripts;
 using FMODUnity;
+using UnityEngine.SceneManagement;
 
 [System.Serializable]
 public class CinematicImage
@@ -51,20 +52,7 @@ public class CinematicManager : MonoBehaviour
             Debug.LogError("CinematicManager : aucune Image UI assignée.");
         }
 
-        // 🔥 Récup auto du player
-        _playerController = FindObjectOfType<PlayerController>();
-
-        if (_playerController == null)
-        {
-            Debug.LogWarning("CinematicManager : PlayerController introuvable.");
-        }
-
-        // 🔥 Input
-        PlayerInput pi = FindObjectOfType<PlayerInput>();
-        if (pi != null)
-        {
-            _cinematicAction = pi.actions["cinematique"];
-        }
+        PlayCinematic(0);
     }
 
     private void OnEnable()
@@ -118,7 +106,6 @@ public class CinematicManager : MonoBehaviour
 
     private IEnumerator CPlayCinematic(Cinematic _cinematic)
     {
-        // 🔒 Bloque le joueur
         if (_playerController != null)
         {
             _playerController.DisableInput();
@@ -142,13 +129,11 @@ public class CinematicManager : MonoBehaviour
 
             DisplayImage.sprite = ci.Image;
 
-            // 🔊 SON FMOD
             if (!ci.Sound.IsNull)
             {
                 RuntimeManager.PlayOneShot(ci.Sound);
             }
 
-            // 🎬 Fade IN
             cg.DOFade(1f, ci.Fade);
 
             float timer = 0f;
@@ -166,12 +151,10 @@ public class CinematicManager : MonoBehaviour
                 yield return null;
             }
 
-            // 🎬 Fade OUT
             cg.DOFade(0f, ci.Fade);
             yield return new WaitForSeconds(ci.Fade);
         }
 
-        // 🧹 Fin
         DisplayImage.sprite  = null;
         DisplayImage.enabled = false;
         cg.alpha             = 0f;
@@ -179,10 +162,6 @@ public class CinematicManager : MonoBehaviour
         Debug.Log($"[Cinematic] Fin : {_cinematic.Name}");
         OnCinematicEnd?.Invoke(_cinematic);
 
-        // 🔓 Redonne le contrôle
-        if (_playerController != null)
-        {
-            _playerController.EnableInput();
-        }
+        SceneManager.LoadScene(2);
     }
 }
