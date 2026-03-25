@@ -35,6 +35,11 @@ namespace Player.Scripts
             if (!CanExecute())
                 return;
 
+            EventBus.Publish(new OnPlayerInputEnter
+            {
+                input = TutorialVerifState.sprint
+            });
+
             if (InputPrefs.IsSprintToggleEnabled)
             {
                 HandleToggleSprint(_context);
