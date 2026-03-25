@@ -87,6 +87,7 @@ public class VoiceTrigger : PlayerAbility
         }
 
         if (!_recording) { return; }
+        if (_isMuted)    { return; }
 
         _lastRaw    = ComputeRMSDelta();
         _lastSmooth = GetSmoothedVolume(_lastRaw);
@@ -376,6 +377,15 @@ public class VoiceTrigger : PlayerAbility
     public int  GetActiveDriverIndex() => _activeDriverIndex;
     public void SelectMicrophone(int index, int rate, int channels)
         => StartRecordingOnDriver(index, rate, channels);
+
+    private bool _isMuted = false;
+
+    public void SetMuted(bool muted)
+    {
+        _isMuted = muted;
+    }
+
+    public bool IsMuted => _isMuted;
 
     private void OnDestroy() { StopRecording(); }
     
