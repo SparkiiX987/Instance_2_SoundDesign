@@ -15,7 +15,7 @@ public class TutorialInputVerif : MonoBehaviour
     [SerializeField] private List<Sprite> spritesList = new();
     [SerializeField] private InputActionAsset inputActions;
     [SerializeField] private float fadeDuration = 0.5f;
-    [SerializeField] private Color goodColor = Color.green;
+    [SerializeField] private Color goodColor = Color.gray;
     [SerializeField] private bool resetTutorial;
 
     private TutorialVerifState state;
@@ -68,19 +68,18 @@ public class TutorialInputVerif : MonoBehaviour
     private void CacheBindingNames()
     {
         InputActionMap playerMap = inputActions.FindActionMap("Player");
-        InputActionMap uiMap = inputActions.FindActionMap("UI");
 
-        sonarKey = FormatKey(uiMap?.FindAction("Sonar"));
+        sonarKey = FormatKey(playerMap?.FindAction("Interact"));
         jumpKey = FormatKey(playerMap?.FindAction("Jump"));
         crouchKey = FormatKey(playerMap?.FindAction("Crouch"));
 
         InputAction moveAction = playerMap?.FindAction("Move");
         if (moveAction != null && moveAction.bindings.Count > 4)
         {
-            moveUpKey = FormatKeyPath(moveAction.bindings[1].effectivePath);
-            moveDownKey = FormatKeyPath(moveAction.bindings[2].effectivePath);
-            moveLeftKey = FormatKeyPath(moveAction.bindings[3].effectivePath);
-            moveRightKey = FormatKeyPath(moveAction.bindings[4].effectivePath);
+            moveUpKey = FormatKeyPath(moveAction.GetBindingDisplayString(1));
+            moveDownKey = FormatKeyPath(moveAction.GetBindingDisplayString(2));
+            moveLeftKey = FormatKeyPath(moveAction.GetBindingDisplayString(3));
+            moveRightKey = FormatKeyPath(moveAction.GetBindingDisplayString(4));
         }
         else
         {
@@ -91,37 +90,42 @@ public class TutorialInputVerif : MonoBehaviour
         }
     }
 
-    private static string FormatKey(InputAction action)
+    private static string FormatKey(InputAction _action)
     {
-        if (action == null) return "?";
-        string display = action.GetBindingDisplayString(0);
+        if (_action == null) return "?";
+        string display = _action.GetBindingDisplayString(0);
+        display = display.Replace("Press ", string.Empty);
         return NormalizeKeyName(display);
     }
 
-    private static string FormatKeyPath(string path)
+    private static string FormatKeyPath(string _path)
     {
-        string display = InputControlPath.ToHumanReadableString(path);
+        string display = InputControlPath.ToHumanReadableString(_path);
+        display = display.Replace(" [Keyboard]", string.Empty);
+        display = display.Replace("[", string.Empty);
+        display = display.Replace("]", string.Empty);
+        display = display.Replace(" ", string.Empty);
         return NormalizeKeyName(display);
     }
 
-    private static string NormalizeKeyName(string key)
+    private static string NormalizeKeyName(string _key)
     {
-        if (string.IsNullOrEmpty(key)) return "?";
+        if (string.IsNullOrEmpty(_key)) return "?";
 
-        string lower = key.ToLower();
+        string lower = _key.ToLower();
         if (lower == "space" || lower == "espace")
             return "ESP";
 
         // Return uppercase single letter
-        if (key.Length == 1)
-            return key.ToUpper();
+        if (_key.Length == 1)
+            return _key.ToUpper();
 
-        return key;
+        return _key;
     }
 
-    private void SetTextForState(TutorialVerifState tutorialState)
+    private void SetTextForState(TutorialVerifState _tutorialState)
     {
-        switch (tutorialState)
+        switch (_tutorialState)
         {
             case TutorialVerifState.echolocation:
                 if (textList.Count > 0) textList[0].text = sonarKey;
@@ -146,17 +150,17 @@ public class TutorialInputVerif : MonoBehaviour
         }
     }
 
-    private void TutorialButton(OnPlayerInputEnter inputEnter)
+    private void TutorialButton(OnPlayerInputEnter _inputEnter)
     {
         if (state == TutorialVerifState.movement)
-            TestMovement(inputEnter.moveDirection);
+            TestMovement(_inputEnter.moveDirection);
         else
-            TestAbilities(inputEnter.input);
+            TestAbilities(_inputEnter.input);
     }
 
-    private void TestAbilities(TutorialVerifState input)
+    private void TestAbilities(TutorialVerifState _input)
     {
-        if (input != state)
+        if (_input != state)
             return;
 
         if (!canProgress)
@@ -178,14 +182,16 @@ public class TutorialInputVerif : MonoBehaviour
             bool isMovementNext = stateIndex == 2;
 
             state++;
-            SetTextForState(state);
-
+            
             Sequence seq = DOTween.Sequence();
 
             seq.Append(canvasGroups[0].DOFade(0, fadeDuration));
 
+            seq.AppendInterval(fadeDuration);
+            
             seq.AppendCallback(() =>
             {
+                SetTextForState(state);
                 imagesList[0].sprite = spritesList[nextSprite];
 
                 if (isMovementNext)
@@ -248,7 +254,7 @@ public class TutorialInputVerif : MonoBehaviour
                 img.color = Color.white;
 
             imagesList[1].sprite = spritesList[2];
-            imagesList[2].sprite = spritesList[7];
+            imagesList[2].sprite = spritesList[2];
             imagesList[3].sprite = spritesList[1];
         });
 
