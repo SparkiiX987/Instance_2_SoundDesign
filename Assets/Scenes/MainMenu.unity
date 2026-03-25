@@ -1246,12 +1246,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 160586633}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bd18bac989d940f4ebcf6c0d31a56e77, type: 3}
+  m_Script: {fileID: 11500000, guid: 559c1f55be1f19e48a00967feb9f8800, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RendererFeatureManager
-  rendererData: {fileID: 11400000, guid: f288ae1f4751b564a96ac7587541f7a2, type: 2}
-  featureName: FullScreenPassRendererFeature
-  toggleUI: {fileID: 1635444900}
+  m_EditorClassIdentifier: Assembly-CSharp::UI.Scripts.S_RendererMenuPrefs
+  rendererToggle: {fileID: 1635444900}
+  pcRendererData: {fileID: 11400000, guid: f288ae1f4751b564a96ac7587541f7a2, type: 2}
+  featureName: FullScreenPass
 --- !u!1 &180557330
 GameObject:
   m_ObjectHideFlags: 0
