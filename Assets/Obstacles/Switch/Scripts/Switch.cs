@@ -12,14 +12,12 @@ public class Switch : Interactible
 
         isActivated = !isActivated;
 
-        if(isActivated)
+        if (!isActivated)
         {
-            SwitchOn();
+            return;
         }
-        else
-        {
-            SwitchOff();
-        }
+
+        SwitchOn();
     }
 
     private void OnTriggerEnter(Collider other)
