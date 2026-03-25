@@ -23,7 +23,7 @@ namespace Utils
 
         public const float INSTANT = 0.1f;
         public const float FAST = 0.2f;
-        public const float NORMAL = 0.3f;
+        public const float NORMAL = 0.8f;
         public const float MEDIUM = 0.4f;
         public const float SLOW = 0.5f;
         public const float VERY_SLOW = 0.8f;
@@ -145,7 +145,7 @@ namespace Utils
             Sequence sequence = DOTween.Sequence();
             
             // Fade out old image
-            sequence.Append(cgImage.DOFade(0f, duration * 0.5f).SetEase(OUT_SMOOTH));
+            sequence.Append(cgImage.DOFade(0f, duration * 0.8f).SetEase(OUT_SMOOTH));
             // Change sprite when old image is fully faded out
             sequence.AppendCallback(() => cgImage.GetComponent<Image>().sprite = newImage.sprite);
             // Fade in new image
