@@ -485,11 +485,10 @@ MonoBehaviour:
   obstacleMask:
     serializedVersion: 2
     m_Bits: 904
-  showRaycasts: 1
-  raycastDrawDuration: 0.5
-  raycastHitColor: {r: 0, g: 1, b: 1, a: 1}
-  raycastToWallColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  raycastWallToTargetColor: {r: 1, g: 0, b: 0.11809349, a: 1}
+  movementWaveRange: 3
+  movementWaveInterval: 0.5
+  movementThreshold: 0.05
+  activationKey: 101
 --- !u!114 &8512829847286032187
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -725,6 +724,14 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: 84aa85bd-77bb-448a-9689-15f507d7e298
     m_ActionName: 'UI/Sonar[/Keyboard/e]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 78caf02d-d467-45cc-b465-fed938fa83c5
+    m_ActionName: 'Player/Pause[/Keyboard/escape]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 68ba678d-144c-49c4-ba1a-96f28a0a8d5e
+    m_ActionName: 'Player/cinematique[/Keyboard/e]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: Keyboard&Mouse
   m_DefaultActionMap: Player
