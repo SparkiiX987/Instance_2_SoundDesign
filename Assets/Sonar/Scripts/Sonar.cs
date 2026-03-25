@@ -112,10 +112,6 @@ public class Sonar : PlayerAbility
     {
         if (!CanExecute()) { return; }
         if (_context.phase != InputActionPhase.Started) { return; }
-        EventBus.Publish(new OnPlayerInputEnter
-        {
-            input = TutorialVerifState.echolocation
-        });
         TriggerWave();
     }
 
@@ -287,24 +283,54 @@ public class Sonar : PlayerAbility
             Debug.Log($"[Sonar] CONE {hit.name} : {(inCone ? "DANS" : "HORS")} (cos={cosAngle:F2} vs {halfCos:F2})");
             if (!inCone) { continue; }
 
-            // Raycast obstacle en ignorant le joueur
-            Vector3      dir     = dir2obj;
-            bool         blocked = false;
-            RaycastHit[] rhs     = Physics.RaycastAll(originPos, dir, distance, obstacleMask);
-            foreach (RaycastHit rh in rhs)
+            // Raycasts en eventail : centre + 4 coins du collider
+            // Si AU MOINS UN passe, l'objet est detecte meme s'il depasse un peu d'un mur
+            Vector3 dir = dir2obj;
+
+            // Points de visee : centre + decalages lateraux/verticaux
+            Vector3 right = Vector3.Cross(dir, Vector3.up).normalized * 0.3f;
+            Vector3 up    = Vector3.up * 0.3f;
+            Vector3[] targets = new Vector3[]
             {
-                bool isSelf = false;
-                foreach (Collider sc in _selfColliders)
+                position,           // centre
+                position + right,   // droite
+                position - right,   // gauche
+                position + up,      // haut
+                position - up,      // bas
+            };
+
+            bool anyUnblocked = false;
+            foreach (Vector3 target in targets)
+            {
+                Vector3 toTarget  = (target - originPos);
+                float   targetDist = toTarget.magnitude;
+                Vector3 toTargetDir = toTarget.normalized;
+
+                bool thisBlocked = false;
+                RaycastHit[] rhs = Physics.RaycastAll(originPos, toTargetDir, targetDist, obstacleMask);
+                System.Array.Sort(rhs, (a, b) => a.distance.CompareTo(b.distance));
+                foreach (RaycastHit rh in rhs)
                 {
-                    if (rh.collider == sc) { isSelf = true; break; }
+                    bool isSelf = false;
+                    foreach (Collider sc in _selfColliders)
+                    {
+                        if (rh.collider == sc) { isSelf = true; break; }
+                    }
+                    if (!isSelf) { thisBlocked = true; break; }
                 }
-                if (!isSelf) { blocked = true; break; }
+
+                Debug.DrawLine(originPos, target,
+                    thisBlocked ? Color.red : Color.green, 0.5f);
+
+                if (!thisBlocked)
+                {
+                    anyUnblocked = true;
+                    break; // Un seul rayon libre suffit
+                }
             }
 
-            Debug.DrawLine(originPos, originPos + dir * distance,
-                blocked ? Color.red : Color.green, 0.5f);
-            Debug.Log($"[Sonar] RAYCAST {hit.name} : blocked={blocked}");
-            if (blocked) { continue; }
+            Debug.Log($"[Sonar] RAYCAST {hit.name} : anyUnblocked={anyUnblocked}");
+            if (!anyUnblocked) { continue; }
 
             _hitObjects.Add(detectable);
             float proximity = Mathf.Clamp01(1f - (distance / _activeRange));
