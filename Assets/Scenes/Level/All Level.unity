@@ -373,11 +373,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 64a60c93ca3a62174953a25d2f454e99, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AudioSystem.GameAudioManager
---- !u!1 &820118045 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7485662868514560593, guid: df5bde61b2dfda74c8398bb0f4df73ef, type: 3}
-  m_PrefabInstance: {fileID: 836841651}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &836841651
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -386,18 +381,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1318086164}
     m_Modifications:
-    - target: {fileID: 3005370921618132191, guid: df5bde61b2dfda74c8398bb0f4df73ef, type: 3}
-      propertyPath: m_OnValueChanged.m_PersistentCalls.m_Calls.Array.size
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3005370921618132191, guid: df5bde61b2dfda74c8398bb0f4df73ef, type: 3}
-      propertyPath: m_OnValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Target
-      value: 
-      objectReference: {fileID: 820118045}
-    - target: {fileID: 3005370921618132191, guid: df5bde61b2dfda74c8398bb0f4df73ef, type: 3}
-      propertyPath: m_OnValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: 
-      objectReference: {fileID: 0}
     - target: {fileID: 3998824917028089739, guid: df5bde61b2dfda74c8398bb0f4df73ef, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -478,18 +461,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5204549879478674372, guid: df5bde61b2dfda74c8398bb0f4df73ef, type: 3}
-      propertyPath: m_OnValueChanged.m_PersistentCalls.m_Calls.Array.size
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5204549879478674372, guid: df5bde61b2dfda74c8398bb0f4df73ef, type: 3}
-      propertyPath: m_OnValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Target
-      value: 
-      objectReference: {fileID: 836841655}
-    - target: {fileID: 5204549879478674372, guid: df5bde61b2dfda74c8398bb0f4df73ef, type: 3}
-      propertyPath: m_OnValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: ChangeGraphicsQuality
-      objectReference: {fileID: 0}
     - target: {fileID: 7485662868514560593, guid: df5bde61b2dfda74c8398bb0f4df73ef, type: 3}
       propertyPath: m_Name
       value: PauseMenu
@@ -504,17 +475,6 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 3998824917028089739, guid: df5bde61b2dfda74c8398bb0f4df73ef, type: 3}
   m_PrefabInstance: {fileID: 836841651}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &836841655 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5211985901124830844, guid: df5bde61b2dfda74c8398bb0f4df73ef, type: 3}
-  m_PrefabInstance: {fileID: 836841651}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 820118045}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f916cfbea1185244ea83e89c4b4cbf53, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Settings
 --- !u!1001 &904697213
 PrefabInstance:
   m_ObjectHideFlags: 0
