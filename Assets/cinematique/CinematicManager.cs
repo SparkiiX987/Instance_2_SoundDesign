@@ -7,6 +7,7 @@ using UnityEngine.InputSystem;
 using DG.Tweening;
 using Player.Scripts;
 using FMODUnity;
+using UnityEngine.SceneManagement;
 
 [System.Serializable]
 public class CinematicImage
@@ -51,20 +52,12 @@ public class CinematicManager : PlayerAbility
             Debug.LogError("CinematicManager : aucune Image UI assignée.");
         }
 
-       
-     
-
         if (_playerController == null)
         {
             Debug.LogWarning("CinematicManager : PlayerController introuvable.");
         }
 
-       
-        PlayerInput pi = FindObjectOfType<PlayerInput>();
-        if (pi != null)
-        {
-            _cinematicAction = pi.actions["cinematique"];
-        }
+        PlayCinematic(0);
     }
 
     private void OnEnable()
@@ -179,6 +172,7 @@ public class CinematicManager : PlayerAbility
         Debug.Log($"[Cinematic] Fin : {_cinematic.Name}");
         OnCinematicEnd?.Invoke(_cinematic);
 
+        SceneManager.LoadScene(2);
    
         if (_playerController != null)
         {
