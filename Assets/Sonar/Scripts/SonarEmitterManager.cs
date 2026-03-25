@@ -1,10 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// Singleton qui gere jusqu'a 8 emetteurs ennemis
-/// et pousse leurs donnees au shader chaque frame.
-/// </summary>
+
 public class SonarEmitterManager : MonoBehaviour
 {
     private static SonarEmitterManager _instance;
@@ -12,7 +9,7 @@ public class SonarEmitterManager : MonoBehaviour
 
     private const int MAX = 15;
 
-    // Shader property IDs — tableaux de 8
+
     private static readonly int[] ID_Origin   = new int[MAX];
     private static readonly int[] ID_Radius   = new int[MAX];
     private static readonly int[] ID_Active   = new int[MAX];
@@ -46,7 +43,6 @@ public class SonarEmitterManager : MonoBehaviour
             ID_FadeDur[i]  = Shader.PropertyToID($"_EnemyFadeDur{i}");
         }
 
-        // Initialiser tous les emetteurs a inactif
         for (int i = 0; i < MAX; i++)
         {
             Shader.SetGlobalFloat(ID_Active[i],   0f);
@@ -72,7 +68,7 @@ public class SonarEmitterManager : MonoBehaviour
     public static void Unregister(S_ToySonarEmitter e)
     {
         _emitters.Remove(e);
-        // Desactiver le slot
+
         int i = e.emitterIndex;
         if (i < MAX)
         {
