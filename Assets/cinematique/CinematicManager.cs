@@ -7,7 +7,9 @@ using UnityEngine.InputSystem;
 using DG.Tweening;
 using Player.Scripts;
 using FMODUnity;
+using FMOD.Studio;
 using UnityEngine.SceneManagement;
+using STOP_MODE = FMOD.Studio.STOP_MODE;
 
 [System.Serializable]
 public class CinematicImage
@@ -43,7 +45,8 @@ public class CinematicManager : PlayerAbility
 
     private bool _skipRequested;
 
-    
+    // Stocke le son FMOD en cours
+    private EventInstance _currentSound;
 
     private void Start()
     {
@@ -80,10 +83,16 @@ public class CinematicManager : PlayerAbility
     public override void Execute(InputAction.CallbackContext _context)
     {
         _skipRequested = true;
-        Debug.Log("passsseee");
-    }
 
-  
+        // Stop le son en cours
+        if (_currentSound.isValid())
+        {
+            _currentSound.stop(STOP_MODE.IMMEDIATE);
+            _currentSound.release();
+        }
+
+        Debug.Log("Cinematic skip demandé");
+    }
 
     public void PlayCinematic(int _index)
     {
@@ -108,11 +117,8 @@ public class CinematicManager : PlayerAbility
         Debug.LogWarning($"Cinematic '{_name}' introuvable.");
     }
 
-   
-
     private IEnumerator CPlayCinematic(Cinematic _cinematic)
     {
-       
         if (_playerController != null)
         {
             _playerController.DisableInput();
@@ -134,14 +140,24 @@ public class CinematicManager : PlayerAbility
         {
             if (ci.Image == null) continue;
 
+            // Change l'image
             DisplayImage.sprite = ci.Image;
 
-            if (!ci.Sound.IsNull)
+            // Stop le son précédent si existant
+            if (_currentSound.isValid())
             {
-                RuntimeManager.PlayOneShot(ci.Sound);
+                _currentSound.stop(STOP_MODE.IMMEDIATE);
+                _currentSound.release();
             }
 
-            
+            // Jouer le son actuel
+            if (!ci.Sound.IsNull)
+            {
+                _currentSound = RuntimeManager.CreateInstance(ci.Sound);
+                _currentSound.start();
+            }
+
+            // Fade in
             cg.DOFade(1f, ci.Fade);
 
             float timer = 0f;
@@ -159,11 +175,17 @@ public class CinematicManager : PlayerAbility
                 yield return null;
             }
 
-        
+            // Fade out
             cg.DOFade(0f, ci.Fade);
             yield return new WaitForSeconds(ci.Fade);
         }
 
+        // Stop tout son en cours
+        if (_currentSound.isValid())
+        {
+            _currentSound.stop(STOP_MODE.IMMEDIATE);
+            _currentSound.release();
+        }
 
         DisplayImage.sprite  = null;
         DisplayImage.enabled = false;
@@ -172,12 +194,11 @@ public class CinematicManager : PlayerAbility
         Debug.Log($"[Cinematic] Fin : {_cinematic.Name}");
         OnCinematicEnd?.Invoke(_cinematic);
 
-      
-   
         if (_playerController != null)
         {
             _playerController.EnableInput();
         }
+
         SceneManager.LoadScene(2);
     }
 }
