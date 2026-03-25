@@ -49,6 +49,17 @@ public class MicroSelector : MonoBehaviour
     {
         _voiceTrigger.SetMuted(muted);
 
+        if (muted)
+        {
+            VoiceTrigger voiceTrigger = GameManager.instance.player.GetComponent<VoiceTrigger>();
+            voiceTrigger.StopRecording();
+        }
+        else
+        {
+            VoiceTrigger voiceTrigger = GameManager.instance.player.GetComponent<VoiceTrigger>();
+            voiceTrigger.TryStartRecording();
+        }
+
         if (muteToggle != null)
             muteToggle.SetIsOnWithoutNotify(!muted);
 
