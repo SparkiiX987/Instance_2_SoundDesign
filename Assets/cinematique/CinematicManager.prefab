@@ -58,9 +58,6 @@ MonoBehaviour:
     - Image: {fileID: -1728083037, guid: 058493796d0427e4f8274094a6931a09, type: 3}
       Duration: 3
       Fade: 0.5
-    - Image: {fileID: 21300000, guid: f5049c61a0a300f43b1bac14ac790a44, type: 3}
-      Duration: 0.05
-      Fade: 0.2
     - Image: {fileID: 1517793742, guid: 8ba5e470e747bd048b1a3ed407f300de, type: 3}
       Duration: 3
       Fade: 0.5
@@ -74,7 +71,7 @@ MonoBehaviour:
       Duration: 1
       Fade: 0.3
     - Image: {fileID: 582599636, guid: 191b5952057145744a7d320a03d0ca61, type: 3}
-      Duration: 2
+      Duration: 1
       Fade: 0.3
   - Name: 
     Images:

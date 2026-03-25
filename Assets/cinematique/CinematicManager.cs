@@ -10,9 +10,9 @@ using Player.Scripts;
 [System.Serializable]
 public class CinematicImage
 {
-    public Sprite Image;          // L'image à afficher
-    public float Duration = 1f;   // Durée pendant laquelle elle reste visible
-    public float Fade = 0.5f;     // Durée du fondu d'entrée et de sortie
+    public Sprite Image;
+    public float Duration = 1f;
+    public float Fade     = 0.5f;
 }
 
 [System.Serializable]
@@ -24,101 +24,160 @@ public class Cinematic
 
 public class CinematicManager : MonoBehaviour
 {
-    [Header("Liste des cinématiques")]
+    [Header("Liste des cinematiques")]
     public List<Cinematic> Cinematics = new List<Cinematic>();
 
-    [Header("Image UI qui affiche la cinématique")]
+    [Header("Image UI qui affiche la cinematique")]
     public Image DisplayImage;
-
-    private PlayerController playerController;
-    private PlayerInput playerInput;
-    private InputAction cinematicAction;
 
     public static event Action<Cinematic> OnCinematicStart;
     public static event Action<Cinematic> OnCinematicEnd;
 
-    private void Awake()
-    {
-        if (DisplayImage == null)
-            Debug.LogError("CinematicManager : aucune Image UI assignée dans l'inspecteur.");
+    private PlayerController _playerController;
+    private InputAction      _cinematicAction;
 
-        playerController = FindObjectOfType<PlayerController>();
-        playerInput = FindObjectOfType<PlayerInput>();
-        if (playerInput != null)
-            cinematicAction = playerInput.actions["cinematique"];
+    // Flag mis a true quand le joueur appuie sur E pendant la cinematique
+    private bool _skipRequested;
+
+    // ── Init ─────────────────────────────────────────────────────────
+
+
+    
+        private void Start()
+        {
+            if (DisplayImage == null)
+            {
+                Debug.LogError("CinematicManager : aucune Image UI assignee.");
+            }
+
+            // 🔥 Récupère automatiquement le player
+            _playerController = FindObjectOfType<PlayerController>();
+
+            if (_playerController == null)
+            {
+                Debug.LogWarning("CinematicManager : PlayerController introuvable.");
+            }
+
+            // 🔥 Input system
+            PlayerInput pi = FindObjectOfType<PlayerInput>();
+            if (pi != null)
+            {
+                _cinematicAction = pi.actions["cinematique"];
+            }
+        }
+    
+
+    private void OnEnable()
+    {
+        if (_cinematicAction != null)
+        {
+            _cinematicAction.performed += OnSkip;
+            _cinematicAction.Enable();
+        }
     }
 
-    public void PlayCinematic(int _Index)
+    private void OnDisable()
     {
-        if (DisplayImage == null) return;
-        if (_Index < 0 || _Index >= Cinematics.Count) return;
+        if (_cinematicAction != null)
+        {
+            _cinematicAction.performed -= OnSkip;
+        }
+    }
 
+    // Callback appele quand le joueur appuie sur E
+    private void OnSkip(InputAction.CallbackContext _ctx)
+    {
+        _skipRequested = true;
+    }
+
+    // ── API publique ─────────────────────────────────────────────────
+
+    public void PlayCinematic(int _index)
+    {
+        if (DisplayImage == null) { return; }
+        if (_index < 0 || _index >= Cinematics.Count) { return; }
         StopAllCoroutines();
-        StartCoroutine(CPlayCinematic(Cinematics[_Index]));
+        StartCoroutine(CPlayCinematic(Cinematics[_index]));
     }
 
-    public void PlayCinematic(string _Name)
+    public void PlayCinematic(string _name)
     {
         for (int i = 0; i < Cinematics.Count; i++)
         {
-            if (Cinematics[i].Name == _Name)
+            if (Cinematics[i].Name == _name)
             {
                 PlayCinematic(i);
                 return;
             }
         }
+        Debug.LogWarning($"CinematicManager : cinematique '{_name}' introuvable.");
     }
 
-    private IEnumerator CPlayCinematic(Cinematic _Cinematic)
+    // ── Coroutine principale ─────────────────────────────────────────
+
+    private IEnumerator CPlayCinematic(Cinematic _cinematic)
     {
-        if (playerController != null)
-            playerController.DisableInput();
+        // Bloquer les mouvements du joueur
+        if (_playerController != null)
+        {
+            _playerController.DisableInput();
+        }
 
         DisplayImage.enabled = true;
 
-        // CanvasGroup pour gérer l'alpha
         CanvasGroup cg = DisplayImage.GetComponent<CanvasGroup>();
         if (cg == null)
+        {
             cg = DisplayImage.gameObject.AddComponent<CanvasGroup>();
+        }
         cg.alpha = 0f;
 
-        OnCinematicStart?.Invoke(_Cinematic);
-        Debug.Log("Début de la cinématique : " + _Cinematic.Name);
+        _skipRequested = false;
 
-        foreach (var cinematicImage in _Cinematic.Images)
+        OnCinematicStart?.Invoke(_cinematic);
+        Debug.Log($"[Cinematic] Debut : {_cinematic.Name}");
+
+        foreach (CinematicImage ci in _cinematic.Images)
         {
-            if (cinematicImage.Image == null) continue;
+            if (ci.Image == null) { continue; }
 
-            DisplayImage.sprite = cinematicImage.Image;
+            DisplayImage.sprite = ci.Image;
 
             // Fade in
-            cg.DOFade(1f, cinematicImage.Fade);
+            cg.DOFade(1f, ci.Fade);
 
-            // Attend la durée visible moins le fade
-            float timer = 0f;
-            float visibleTime = Mathf.Max(0f, cinematicImage.Duration - cinematicImage.Fade);
+            // Attendre la duree visible — le joueur peut appuyer sur E pour passer
+            float timer      = 0f;
+            float visibleTime = Mathf.Max(0f, ci.Duration - ci.Fade);
 
             while (timer < visibleTime)
             {
-                if (cinematicAction != null && cinematicAction.triggered)
-                    break;
-
+                if (_skipRequested)
+                {
+                    _skipRequested = false;
+                    break; // Passe a l'image suivante
+                }
                 timer += Time.deltaTime;
                 yield return null;
             }
 
             // Fade out
-            cg.DOFade(0f, cinematicImage.Fade);
-            yield return new WaitForSeconds(cinematicImage.Fade);
+            cg.DOFade(0f, ci.Fade);
+            yield return new WaitForSeconds(ci.Fade);
         }
 
-        DisplayImage.sprite = null;
+        // Fin
+        DisplayImage.sprite  = null;
         DisplayImage.enabled = false;
+        cg.alpha             = 0f;
 
-        Debug.Log("Fin de la cinématique : " + _Cinematic.Name);
-        OnCinematicEnd?.Invoke(_Cinematic);
+        Debug.Log($"[Cinematic] Fin : {_cinematic.Name}");
+        OnCinematicEnd?.Invoke(_cinematic);
 
-        if (playerController != null)
-            playerController.EnableInput();
+        // Rendre les mouvements au joueur
+        if (_playerController != null)
+        {
+            _playerController.EnableInput();
+        }
     }
 }
