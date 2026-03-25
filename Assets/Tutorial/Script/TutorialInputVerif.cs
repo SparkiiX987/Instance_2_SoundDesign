@@ -1,7 +1,8 @@
 using DG.Tweening;
 using System.Collections.Generic;
-using System.Linq;
+using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 public class TutorialInputVerif : MonoBehaviour
@@ -9,8 +10,10 @@ public class TutorialInputVerif : MonoBehaviour
     private const string PrefKey = "TutorialCompleted";
 
     [SerializeField] private List<CanvasGroup> canvasGroups = new();
+    [SerializeField] private List<TextMeshProUGUI> textList = new();
     [SerializeField] private List<Image> imagesList = new();
     [SerializeField] private List<Sprite> spritesList = new();
+    [SerializeField] private InputActionAsset inputActions;
     [SerializeField] private float fadeDuration = 0.5f;
     [SerializeField] private Color goodColor = Color.green;
     [SerializeField] private bool resetTutorial;
@@ -19,6 +22,15 @@ public class TutorialInputVerif : MonoBehaviour
     private Tween activeTween;
     private bool canProgress;
     private readonly HashSet<Vector2> validatedDirections = new();
+
+    // Cached key names
+    private string sonarKey;
+    private string jumpKey;
+    private string crouchKey;
+    private string moveUpKey;
+    private string moveDownKey;
+    private string moveLeftKey;
+    private string moveRightKey;
 
     public void Start()
     {
@@ -32,6 +44,7 @@ public class TutorialInputVerif : MonoBehaviour
             return;
         }
 
+        CacheBindingNames();
         EventBus.Subscribe<OnPlayerInputEnter>(TutorialButton);
 
         foreach (CanvasGroup group in canvasGroups)
@@ -39,6 +52,7 @@ public class TutorialInputVerif : MonoBehaviour
 
         state = TutorialVerifState.echolocation;
         imagesList[0].sprite = spritesList[0];
+        SetTextForState(state);
 
         canProgress = false;
         activeTween = canvasGroups[0].DOFade(1, fadeDuration)
@@ -49,6 +63,87 @@ public class TutorialInputVerif : MonoBehaviour
     {
         EventBus.Unsubscribe<OnPlayerInputEnter>(TutorialButton);
         activeTween?.Kill();
+    }
+
+    private void CacheBindingNames()
+    {
+        InputActionMap playerMap = inputActions.FindActionMap("Player");
+        InputActionMap uiMap = inputActions.FindActionMap("UI");
+
+        sonarKey = FormatKey(uiMap?.FindAction("Sonar"));
+        jumpKey = FormatKey(playerMap?.FindAction("Jump"));
+        crouchKey = FormatKey(playerMap?.FindAction("Crouch"));
+
+        InputAction moveAction = playerMap?.FindAction("Move");
+        if (moveAction != null && moveAction.bindings.Count > 4)
+        {
+            moveUpKey = FormatKeyPath(moveAction.bindings[1].effectivePath);
+            moveDownKey = FormatKeyPath(moveAction.bindings[2].effectivePath);
+            moveLeftKey = FormatKeyPath(moveAction.bindings[3].effectivePath);
+            moveRightKey = FormatKeyPath(moveAction.bindings[4].effectivePath);
+        }
+        else
+        {
+            moveUpKey = "W";
+            moveDownKey = "S";
+            moveLeftKey = "A";
+            moveRightKey = "D";
+        }
+    }
+
+    private static string FormatKey(InputAction action)
+    {
+        if (action == null) return "?";
+        string display = action.GetBindingDisplayString(0);
+        return NormalizeKeyName(display);
+    }
+
+    private static string FormatKeyPath(string path)
+    {
+        string display = InputControlPath.ToHumanReadableString(path);
+        return NormalizeKeyName(display);
+    }
+
+    private static string NormalizeKeyName(string key)
+    {
+        if (string.IsNullOrEmpty(key)) return "?";
+
+        string lower = key.ToLower();
+        if (lower == "space" || lower == "espace")
+            return "ESP";
+
+        // Return uppercase single letter
+        if (key.Length == 1)
+            return key.ToUpper();
+
+        return key;
+    }
+
+    private void SetTextForState(TutorialVerifState tutorialState)
+    {
+        switch (tutorialState)
+        {
+            case TutorialVerifState.echolocation:
+                if (textList.Count > 0) textList[0].text = sonarKey;
+                break;
+            case TutorialVerifState.jump:
+                if (textList.Count > 0) textList[0].text = jumpKey;
+                break;
+            case TutorialVerifState.crouch:
+                if (textList.Count > 0) textList[0].text = crouchKey;
+                break;
+            case TutorialVerifState.movement:
+                if (textList.Count > 0) textList[0].text = moveUpKey;
+                if (textList.Count > 1) textList[1].text = moveLeftKey;
+                if (textList.Count > 2) textList[2].text = moveDownKey;
+                if (textList.Count > 3) textList[3].text = moveRightKey;
+                break;
+            case TutorialVerifState.leap:
+                if (textList.Count > 1) textList[1].text = crouchKey;
+                if (textList.Count > 2) textList[2].text = "+";
+                if (textList.Count > 3) textList[3].text = jumpKey;
+                break;
+        }
     }
 
     private void TutorialButton(OnPlayerInputEnter inputEnter)
@@ -64,7 +159,6 @@ public class TutorialInputVerif : MonoBehaviour
         if (input != state)
             return;
 
-        // If mid-transition (fade in), interrupt and skip to next
         if (!canProgress)
             activeTween?.Kill();
 
@@ -83,12 +177,13 @@ public class TutorialInputVerif : MonoBehaviour
             int nextSprite = stateIndex + 1;
             bool isMovementNext = stateIndex == 2;
 
+            state++;
+            SetTextForState(state);
+
             Sequence seq = DOTween.Sequence();
 
-            // Fade out current instruction
             seq.Append(canvasGroups[0].DOFade(0, fadeDuration));
 
-            // Swap sprite(s) at the midpoint
             seq.AppendCallback(() =>
             {
                 imagesList[0].sprite = spritesList[nextSprite];
@@ -103,7 +198,6 @@ public class TutorialInputVerif : MonoBehaviour
                 }
             });
 
-            // Fade in new instruction(s)
             seq.Append(canvasGroups[0].DOFade(1, fadeDuration));
             if (isMovementNext)
             {
@@ -114,7 +208,6 @@ public class TutorialInputVerif : MonoBehaviour
 
             seq.OnComplete(() => canProgress = true);
             activeTween = seq;
-            state++;
         }
         else if (state == TutorialVerifState.leap)
         {
@@ -131,7 +224,7 @@ public class TutorialInputVerif : MonoBehaviour
     {
         if (!canProgress)
             return;
-            
+
         if (input == Vector2.up)    { validatedDirections.Add(Vector2.up);    imagesList[0].DOColor(goodColor, fadeDuration); }
         if (input == Vector2.left)  { validatedDirections.Add(Vector2.left);  imagesList[1].DOColor(goodColor, fadeDuration); }
         if (input == Vector2.down)  { validatedDirections.Add(Vector2.down);  imagesList[2].DOColor(goodColor, fadeDuration); }
@@ -141,14 +234,14 @@ public class TutorialInputVerif : MonoBehaviour
             return;
 
         canProgress = false;
+        state++;
+        SetTextForState(state);
 
         Sequence seq = DOTween.Sequence();
 
-        // Fade out all movement images
         for (int i = 0; i < 4; i++)
             seq.Join(canvasGroups[i].DOFade(0, fadeDuration));
 
-        // Swap to leap sprites
         seq.AppendCallback(() =>
         {
             foreach (Image img in imagesList)
@@ -159,14 +252,12 @@ public class TutorialInputVerif : MonoBehaviour
             imagesList[3].sprite = spritesList[1];
         });
 
-        // Fade in leap images (1-3)
         seq.Append(canvasGroups[1].DOFade(1, fadeDuration));
         seq.Join(canvasGroups[2].DOFade(1, fadeDuration));
         seq.Join(canvasGroups[3].DOFade(1, fadeDuration));
 
         seq.OnComplete(() => canProgress = true);
         activeTween = seq;
-        state++;
     }
 
     private void CompleteTutorial()
