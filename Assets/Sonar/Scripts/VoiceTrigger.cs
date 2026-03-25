@@ -97,8 +97,19 @@ public class VoiceTrigger : PlayerAbility
             if (_lastSmooth > _chargePeakVolume)
                 _chargePeakVolume = _lastSmooth;
 
-            if (_chargeTimer >= chargeMaxDuration)
-                Fire();
+    /// <summary>
+    /// Cherche le premier driver CONNECTED et demarre l'enregistrement dessus.
+    /// Ignore les drivers loopback (haut-parleurs).
+    /// </summary>
+    public void TryStartRecording()
+    {
+        FMOD.System core = FMODUnity.RuntimeManager.CoreSystem;
+        core.getRecordNumDrivers(out int numDrivers, out int _);
+
+        if (numDrivers == 0)
+        {
+            UnityEngine.Debug.LogWarning("[VoiceTrigger] Aucun driver FMOD disponible.");
+            return;
         }
         else
         {
@@ -141,7 +152,9 @@ public class VoiceTrigger : PlayerAbility
         float[] pcm = new float[total];
         int offset = 0;
 
-        if(ptr1!=IntPtr.Zero && len1>0)
+    public void StopRecording()
+    {
+        if (_recording && _activeDriverIndex >= 0)
         {
             int c = (int)(len1/sizeof(float));
             Marshal.Copy(ptr1,pcm,offset,c);
