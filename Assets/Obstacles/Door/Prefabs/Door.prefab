@@ -181,6 +181,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b4f0a5e8dc2dc549bc8440c96d0b420, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DoorWithSwitch
+  sound:
+    Guid:
+      Data1: -620250239
+      Data2: 1194213945
+      Data3: -217428545
+      Data4: 18431619
+    Path: event:/Door/Door
+  volumeMin: 0.1
+  targetVolume: 0.1
+  volumeMax: 1
+  pitchMin: 0.5
+  targetPitch: 0.5
+  pitchMax: 2
+  fadeInDuration: 0.08
+  sustainDuration: 0.25
+  fadeOutDuration: 0.5
   connectedSwitchId: 0
 --- !u!114 &8860674350436545095
 MonoBehaviour:

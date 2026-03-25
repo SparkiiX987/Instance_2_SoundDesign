@@ -1,5 +1,6 @@
 using DG.Tweening;
 using UnityEngine;
+using FMODUnity;
 
 public class S_ToySonarEmitter : MonoBehaviour
 {
@@ -13,18 +14,33 @@ public class S_ToySonarEmitter : MonoBehaviour
     [SerializeField] private bool  autoTrigger = true;
     [SerializeField] private float interval    = 3f;
 
-    // Index unique attribue par le manager
+    [Header("FMOD Sound")]
+    [SerializeField] private EventReference sonarLoopSound;
+
+   
     [HideInInspector] public int emitterIndex = 0;
 
     private float _currentRadius;
     private float _cooldownTimer;
     private Tween _waveTween;
 
+
+    private FMOD.Studio.EventInstance _loopInstance;
+
     private void Start()
     {
-        // S'enregistrer aupres du manager
+       
         SonarEmitterManager.Register(this);
 
+      
+        if (!sonarLoopSound.IsNull)
+        {
+            _loopInstance = RuntimeManager.CreateInstance(sonarLoopSound);
+            _loopInstance.set3DAttributes(RuntimeUtils.To3DAttributes(gameObject));
+            _loopInstance.start();
+        }
+
+        
         if (autoTrigger)
             InvokeRepeating(nameof(TriggerWave), Random.Range(0f, interval), interval);
     }
@@ -32,6 +48,13 @@ public class S_ToySonarEmitter : MonoBehaviour
     private void OnDestroy()
     {
         SonarEmitterManager.Unregister(this);
+
+       
+        if (_loopInstance.isValid())
+        {
+            _loopInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
+            _loopInstance.release();
+        }
     }
 
     private void Update()
