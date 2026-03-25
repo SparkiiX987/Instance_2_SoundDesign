@@ -52,12 +52,8 @@ public class Settings : MonoBehaviour
                 }
             }
         }
-
-        if (dropdownResolution == null)
-        {
-            dropdownResolution.AddOptions(options);
-        }
-
+        
+        dropdownResolution.AddOptions(options);
         dropdownResolution.value = currentIndex;
         dropdownResolution.RefreshShownValue();
     }
