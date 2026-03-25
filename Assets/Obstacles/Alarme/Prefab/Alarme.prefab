@@ -44,10 +44,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1237ae878a9613341a5d4f50ba430d12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AlarmActivate
-  duration: 1
-  loopDuration: 0
-  detectableTag: default
-  isActiveOnStart: 1
   sound:
     Guid:
       Data1: 1559050279
@@ -55,7 +51,7 @@ MonoBehaviour:
       Data3: 1228229546
       Data4: 349503919
     Path: event:/alarm/Alarme1
-  volumeMin: 0.1
+  volumeMin: 1
   targetVolume: 1
   volumeMax: 1
   pitchMin: 0.5
@@ -64,3 +60,7 @@ MonoBehaviour:
   fadeInDuration: 0.08
   sustainDuration: 0.25
   fadeOutDuration: 0.5
+  duration: 1
+  loopDuration: 0
+  detectableTag: default
+  isActiveOnStart: 1
