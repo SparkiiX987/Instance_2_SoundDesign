@@ -4,14 +4,22 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using DG.Tweening;
 using Player.Scripts;
+
+[System.Serializable]
+public class CinematicImage
+{
+    public Sprite Image;          // L'image à afficher
+    public float Duration = 1f;   // Durée pendant laquelle elle reste visible
+    public float Fade = 0.5f;     // Durée du fondu d'entrée et de sortie
+}
 
 [System.Serializable]
 public class Cinematic
 {
     public string Name;
-    public List<Sprite> Images = new List<Sprite>();
-    public float ImageDuration = 1f;
+    public List<CinematicImage> Images = new List<CinematicImage>();
 }
 
 public class CinematicManager : MonoBehaviour
@@ -32,45 +40,18 @@ public class CinematicManager : MonoBehaviour
     private void Awake()
     {
         if (DisplayImage == null)
-        {
             Debug.LogError("CinematicManager : aucune Image UI assignée dans l'inspecteur.");
-        }
 
         playerController = FindObjectOfType<PlayerController>();
-        if (playerController == null)
-        {
-            Debug.LogWarning("CinematicManager : aucun PlayerController trouvé dans la scène.");
-        }
-
         playerInput = FindObjectOfType<PlayerInput>();
-        if (playerInput == null)
-        {
-            Debug.LogWarning("CinematicManager : aucun PlayerInput trouvé dans la scène.");
-        }
-        else
-        {
+        if (playerInput != null)
             cinematicAction = playerInput.actions["cinematique"];
-
-            if (cinematicAction == null)
-            {
-                Debug.LogWarning("CinematicManager : aucune action 'cinematique' trouvée.");
-            }
-        }
     }
 
     public void PlayCinematic(int _Index)
     {
-        if (DisplayImage == null)
-        {
-            Debug.LogError("CinematicManager : aucune Image UI assignée.");
-            return;
-        }
-
-        if (_Index < 0 || _Index >= Cinematics.Count)
-        {
-            Debug.LogWarning("CinematicManager : index invalide.");
-            return;
-        }
+        if (DisplayImage == null) return;
+        if (_Index < 0 || _Index >= Cinematics.Count) return;
 
         StopAllCoroutines();
         StartCoroutine(CPlayCinematic(Cinematics[_Index]));
@@ -86,46 +67,49 @@ public class CinematicManager : MonoBehaviour
                 return;
             }
         }
-
-        Debug.LogWarning("CinematicManager : aucune cinématique trouvée avec le nom " + _Name);
     }
 
     private IEnumerator CPlayCinematic(Cinematic _Cinematic)
     {
         if (playerController != null)
-        {
             playerController.DisableInput();
-        }
 
         DisplayImage.enabled = true;
+
+        // CanvasGroup pour gérer l'alpha
+        CanvasGroup cg = DisplayImage.GetComponent<CanvasGroup>();
+        if (cg == null)
+            cg = DisplayImage.gameObject.AddComponent<CanvasGroup>();
+        cg.alpha = 0f;
 
         OnCinematicStart?.Invoke(_Cinematic);
         Debug.Log("Début de la cinématique : " + _Cinematic.Name);
 
-        for (int i = 0; i < _Cinematic.Images.Count; i++)
+        foreach (var cinematicImage in _Cinematic.Images)
         {
-            Sprite _CurrentSprite = _Cinematic.Images[i];
+            if (cinematicImage.Image == null) continue;
 
-            if (_CurrentSprite == null)
-            {
-                Debug.LogWarning("CinematicManager : image nulle à l'index " + i);
-                continue;
-            }
+            DisplayImage.sprite = cinematicImage.Image;
 
-            DisplayImage.sprite = _CurrentSprite;
+            // Fade in
+            cg.DOFade(1f, cinematicImage.Fade);
 
-            float _Timer = 0f;
+            // Attend la durée visible moins le fade
+            float timer = 0f;
+            float visibleTime = Mathf.Max(0f, cinematicImage.Duration - cinematicImage.Fade);
 
-            while (_Timer < _Cinematic.ImageDuration)
+            while (timer < visibleTime)
             {
                 if (cinematicAction != null && cinematicAction.triggered)
-                {
                     break;
-                }
 
-                _Timer += Time.deltaTime;
+                timer += Time.deltaTime;
                 yield return null;
             }
+
+            // Fade out
+            cg.DOFade(0f, cinematicImage.Fade);
+            yield return new WaitForSeconds(cinematicImage.Fade);
         }
 
         DisplayImage.sprite = null;
@@ -135,8 +119,6 @@ public class CinematicManager : MonoBehaviour
         OnCinematicEnd?.Invoke(_Cinematic);
 
         if (playerController != null)
-        {
             playerController.EnableInput();
-        }
     }
 }
