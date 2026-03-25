@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using UnityEngine.InputSystem;
 using DG.Tweening;
 using Player.Scripts;
+using FMODUnity;
 
 [System.Serializable]
 public class CinematicImage
@@ -13,6 +14,9 @@ public class CinematicImage
     public Sprite Image;
     public float Duration = 1f;
     public float Fade     = 0.5f;
+
+    [Header("FMOD")]
+    public EventReference Sound;
 }
 
 [System.Serializable]
@@ -36,36 +40,32 @@ public class CinematicManager : MonoBehaviour
     private PlayerController _playerController;
     private InputAction      _cinematicAction;
 
-    // Flag mis a true quand le joueur appuie sur E pendant la cinematique
     private bool _skipRequested;
 
-    // ── Init ─────────────────────────────────────────────────────────
+    // ───────── INIT ─────────
 
-
-    
-        private void Start()
+    private void Start()
+    {
+        if (DisplayImage == null)
         {
-            if (DisplayImage == null)
-            {
-                Debug.LogError("CinematicManager : aucune Image UI assignee.");
-            }
-
-            // 🔥 Récupère automatiquement le player
-            _playerController = FindObjectOfType<PlayerController>();
-
-            if (_playerController == null)
-            {
-                Debug.LogWarning("CinematicManager : PlayerController introuvable.");
-            }
-
-            // 🔥 Input system
-            PlayerInput pi = FindObjectOfType<PlayerInput>();
-            if (pi != null)
-            {
-                _cinematicAction = pi.actions["cinematique"];
-            }
+            Debug.LogError("CinematicManager : aucune Image UI assignée.");
         }
-    
+
+        // 🔥 Récup auto du player
+        _playerController = FindObjectOfType<PlayerController>();
+
+        if (_playerController == null)
+        {
+            Debug.LogWarning("CinematicManager : PlayerController introuvable.");
+        }
+
+        // 🔥 Input
+        PlayerInput pi = FindObjectOfType<PlayerInput>();
+        if (pi != null)
+        {
+            _cinematicAction = pi.actions["cinematique"];
+        }
+    }
 
     private void OnEnable()
     {
@@ -84,18 +84,18 @@ public class CinematicManager : MonoBehaviour
         }
     }
 
-    // Callback appele quand le joueur appuie sur E
     private void OnSkip(InputAction.CallbackContext _ctx)
     {
         _skipRequested = true;
     }
 
-    // ── API publique ─────────────────────────────────────────────────
+    // ───────── API ─────────
 
     public void PlayCinematic(int _index)
     {
-        if (DisplayImage == null) { return; }
-        if (_index < 0 || _index >= Cinematics.Count) { return; }
+        if (DisplayImage == null) return;
+        if (_index < 0 || _index >= Cinematics.Count) return;
+
         StopAllCoroutines();
         StartCoroutine(CPlayCinematic(Cinematics[_index]));
     }
@@ -110,14 +110,15 @@ public class CinematicManager : MonoBehaviour
                 return;
             }
         }
-        Debug.LogWarning($"CinematicManager : cinematique '{_name}' introuvable.");
+
+        Debug.LogWarning($"Cinematic '{_name}' introuvable.");
     }
 
-    // ── Coroutine principale ─────────────────────────────────────────
+    // ───────── CINEMATIQUE ─────────
 
     private IEnumerator CPlayCinematic(Cinematic _cinematic)
     {
-        // Bloquer les mouvements du joueur
+        // 🔒 Bloque le joueur
         if (_playerController != null)
         {
             _playerController.DisableInput();
@@ -127,11 +128,9 @@ public class CinematicManager : MonoBehaviour
 
         CanvasGroup cg = DisplayImage.GetComponent<CanvasGroup>();
         if (cg == null)
-        {
             cg = DisplayImage.gameObject.AddComponent<CanvasGroup>();
-        }
-        cg.alpha = 0f;
 
+        cg.alpha = 0f;
         _skipRequested = false;
 
         OnCinematicStart?.Invoke(_cinematic);
@@ -139,15 +138,20 @@ public class CinematicManager : MonoBehaviour
 
         foreach (CinematicImage ci in _cinematic.Images)
         {
-            if (ci.Image == null) { continue; }
+            if (ci.Image == null) continue;
 
             DisplayImage.sprite = ci.Image;
 
-            // Fade in
+            // 🔊 SON FMOD
+            if (!ci.Sound.IsNull)
+            {
+                RuntimeManager.PlayOneShot(ci.Sound);
+            }
+
+            // 🎬 Fade IN
             cg.DOFade(1f, ci.Fade);
 
-            // Attendre la duree visible — le joueur peut appuyer sur E pour passer
-            float timer      = 0f;
+            float timer = 0f;
             float visibleTime = Mathf.Max(0f, ci.Duration - ci.Fade);
 
             while (timer < visibleTime)
@@ -155,18 +159,19 @@ public class CinematicManager : MonoBehaviour
                 if (_skipRequested)
                 {
                     _skipRequested = false;
-                    break; // Passe a l'image suivante
+                    break;
                 }
+
                 timer += Time.deltaTime;
                 yield return null;
             }
 
-            // Fade out
+            // 🎬 Fade OUT
             cg.DOFade(0f, ci.Fade);
             yield return new WaitForSeconds(ci.Fade);
         }
 
-        // Fin
+        // 🧹 Fin
         DisplayImage.sprite  = null;
         DisplayImage.enabled = false;
         cg.alpha             = 0f;
@@ -174,7 +179,7 @@ public class CinematicManager : MonoBehaviour
         Debug.Log($"[Cinematic] Fin : {_cinematic.Name}");
         OnCinematicEnd?.Invoke(_cinematic);
 
-        // Rendre les mouvements au joueur
+        // 🔓 Redonne le contrôle
         if (_playerController != null)
         {
             _playerController.EnableInput();
