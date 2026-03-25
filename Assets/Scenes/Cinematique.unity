@@ -605,6 +605,38 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3928226071501368883, guid: 2f345e2f191d6664786bea610d3af10c, type: 3}
+      propertyPath: Cinematics.Array.data[0].Images.Array.data[7].Fade
+      value: 0.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 3928226071501368883, guid: 2f345e2f191d6664786bea610d3af10c, type: 3}
+      propertyPath: Cinematics.Array.data[0].Images.Array.data[0].Duration
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3928226071501368883, guid: 2f345e2f191d6664786bea610d3af10c, type: 3}
+      propertyPath: Cinematics.Array.data[0].Images.Array.data[1].Duration
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 3928226071501368883, guid: 2f345e2f191d6664786bea610d3af10c, type: 3}
+      propertyPath: Cinematics.Array.data[0].Images.Array.data[2].Duration
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3928226071501368883, guid: 2f345e2f191d6664786bea610d3af10c, type: 3}
+      propertyPath: Cinematics.Array.data[0].Images.Array.data[4].Duration
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 3928226071501368883, guid: 2f345e2f191d6664786bea610d3af10c, type: 3}
+      propertyPath: Cinematics.Array.data[0].Images.Array.data[5].Duration
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 3928226071501368883, guid: 2f345e2f191d6664786bea610d3af10c, type: 3}
+      propertyPath: Cinematics.Array.data[0].Images.Array.data[6].Duration
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 3928226071501368883, guid: 2f345e2f191d6664786bea610d3af10c, type: 3}
+      propertyPath: Cinematics.Array.data[0].Images.Array.data[7].Duration
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 8222912975194556386, guid: 2f345e2f191d6664786bea610d3af10c, type: 3}
       propertyPath: m_UiScaleMode
       value: 1

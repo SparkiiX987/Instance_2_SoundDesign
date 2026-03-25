@@ -225,7 +225,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1419428141154948861
 Transform:
   m_ObjectHideFlags: 0
@@ -274,7 +274,6 @@ GameObject:
   - component: {fileID: 557918341562204626}
   - component: {fileID: 3083880830315173958}
   - component: {fileID: 6567904383834033050}
-  - component: {fileID: 9197493075774429678}
   m_Layer: 6
   m_Name: visuel
   m_TagString: Untagged
@@ -354,29 +353,6 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!136 &9197493075774429678
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3238826335146715193}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5000001
-  m_Height: 2.0000005
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &5546302886298232283
 GameObject:
   m_ObjectHideFlags: 0
@@ -591,13 +567,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11188fa985bd82541b71685ea27499ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VoiceTrigger
-  sonar: {fileID: 82036979122223303}
+  isEnabled: 1
   volumeThreshold: 0.02
   volumeMax: 0.3
   smoothFrames: 10
   chargeMaxDuration: 1.5
   chargeMinDuration: 0.1
   driverCheckInterval: 2
+  sonar: {fileID: 82036979122223303}
 --- !u!114 &1485946798422442459
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -918,7 +895,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.8, y: 0.1, z: 0.8}
+  m_Size: {x: 0.8, y: 0.25, z: 0.8}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &5864307829325704268
 MonoBehaviour:
