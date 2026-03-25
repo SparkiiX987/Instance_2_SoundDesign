@@ -4,6 +4,7 @@ using UnityEngine.SceneManagement;
 public class PauseMenu : MonoBehaviour
 {
     [SerializeField] private Animator animator;
+    [SerializeField] private GameObject panelSettings;
 
     private bool isActive;
 
@@ -29,6 +30,7 @@ public class PauseMenu : MonoBehaviour
     public void AnimsPauseMenu(OnPaused _onPaused)
     {
         ChangePauseState();
+        panelSettings.SetActive(false);
     }
 
     public void ChangePauseState()

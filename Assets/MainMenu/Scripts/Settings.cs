@@ -23,8 +23,12 @@ public class Settings : MonoBehaviour
     void PopulateResolutionDropdown()
     {
         Resolution[] allResolutions = Screen.resolutions;
-        dropdownResolution.ClearOptions();
-        uniqueResolutions.Clear();
+
+        if (dropdownResolution != null)
+        {
+            dropdownResolution.ClearOptions();
+            uniqueResolutions.Clear();
+        }
 
         List<string> options = new List<string>();
         int currentIndex = 0;
@@ -49,7 +53,11 @@ public class Settings : MonoBehaviour
             }
         }
 
-        dropdownResolution.AddOptions(options);
+        if (dropdownResolution == null)
+        {
+            dropdownResolution.AddOptions(options);
+        }
+
         dropdownResolution.value = currentIndex;
         dropdownResolution.RefreshShownValue();
     }
