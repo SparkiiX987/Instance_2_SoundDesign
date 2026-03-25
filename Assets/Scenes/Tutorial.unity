@@ -746,10 +746,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 2495828229778127949, guid: 8eb6d01b6bbea8e4c897aa826dd726a4, type: 3}
-      propertyPath: resetTutorial
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 5880941168014513575, guid: 8eb6d01b6bbea8e4c897aa826dd726a4, type: 3}
       propertyPath: m_Name
       value: TutorialCanvaFading

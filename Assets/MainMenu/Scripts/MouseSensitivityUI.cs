@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+[DefaultExecutionOrder(10)]
 public class MouseSensitivityUI : MonoBehaviour
 {
     [SerializeField] private Slider sensitivitySlider;
@@ -41,6 +42,15 @@ public class MouseSensitivityUI : MonoBehaviour
     
     public void SetSensitivity(float value)
     {
-        playerLook.lookSpeed = value;
+        if (playerLook == null)
+        {
+            PlayerLook _playerLook = GameManager.instance.player.GetComponent<PlayerLook>();
+            _playerLook.lookSpeed = value;
+        }
+        else
+        {
+            playerLook.lookSpeed = value;
+        }
+        
     }
 }

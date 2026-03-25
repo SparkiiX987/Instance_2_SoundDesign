@@ -43,8 +43,50 @@ namespace Utils
 
         #endregion
 
-        #region Screen Transitions
+        
 
+        #region Fade Animations
+        #region Simple Fades
+        /// <summary>
+        /// Simple fade in (alpha 0 → 1) on a CanvasGroup
+        /// </summary>
+        /// <param name="canvasGroup">CanvasGroup to fade in</param>
+        /// <param name="duration">Duration of the fade (default: NORMAL)</param>
+        /// <param name="ease">Easing function (default: IN_SMOOTH)</param>
+        /// <returns>The animation Sequence</returns>
+        public static Sequence FadeIn(CanvasGroup canvasGroup, float duration = NORMAL, Ease? ease = null)
+        {
+            Sequence sequence = DOTween.Sequence();
+
+            canvasGroup.alpha = 0;
+            canvasGroup.gameObject.SetActive(true);
+
+            sequence.Append(canvasGroup.DOFade(1f, duration).SetEase(ease ?? IN_SMOOTH));
+
+            return sequence;
+        }
+
+        /// <summary>
+        /// Simple fade out (alpha 1 → 0) on a CanvasGroup
+        /// </summary>
+        /// <param name="canvasGroup">CanvasGroup to fade out</param>
+        /// <param name="duration">Duration of the fade (default: NORMAL)</param>
+        /// <param name="ease">Easing function (default: OUT_SMOOTH)</param>
+        /// <param name="deactivate">If true, deactivates the GameObject on complete (default: true)</param>
+        /// <returns>The animation Sequence</returns>
+        public static Sequence FadeOut(CanvasGroup canvasGroup, float duration = NORMAL, Ease? ease = null, bool deactivate = true)
+        {
+            Sequence sequence = DOTween.Sequence();
+
+            sequence.Append(canvasGroup.DOFade(0f, duration).SetEase(ease ?? OUT_SMOOTH));
+            if (deactivate)
+                sequence.OnComplete(() => canvasGroup.gameObject.SetActive(false));
+
+            return sequence;
+        }
+
+        #endregion
+        
         /// <summary>
         /// Show a screen (fade + slide)
         /// </summary>

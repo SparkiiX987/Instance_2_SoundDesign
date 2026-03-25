@@ -7,7 +7,6 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Transform playerSpawnPoint;
     [SerializeField] private CanvasGroup victoryCanvasGroup;
     [SerializeField] private RectTransform victoryRectTransform;
-    
     public GameObject player { get ; private set; }
 
     public static GameManager instance;
@@ -65,7 +64,7 @@ public class GameManager : MonoBehaviour
     {
         if (victoryRectTransform != null && victoryCanvasGroup!= null)
         {
-            
+            victoryRectTransform.gameObject.SetActive(true);
             Utils.AnimationHelper.FadeInScreen(victoryCanvasGroup, victoryRectTransform, 500f);
         }
 
