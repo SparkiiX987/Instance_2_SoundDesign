@@ -22,7 +22,15 @@ public struct OnDefeat
 
 public struct OnVictory
 {
+    
+    public CanvasGroup canvasGroup;
+    public RectTransform rectTransform;
 
+    public OnVictory(CanvasGroup _canvasGroup, RectTransform _rectTransform)
+    {
+        canvasGroup = _canvasGroup;
+        rectTransform = _rectTransform;
+    }
 }
 public struct OnTutorialFinish
 {
