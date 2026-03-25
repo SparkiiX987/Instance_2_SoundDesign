@@ -1,3 +1,4 @@
+using Player.Scripts;
 using UnityEngine;
 
 [DefaultExecutionOrder(-10)]
@@ -67,8 +68,8 @@ public class GameManager : MonoBehaviour
             victoryRectTransform.gameObject.SetActive(true);
             Utils.AnimationHelper.FadeInScreen(victoryCanvasGroup, victoryRectTransform, 500f);
         }
-
-        print("victory");
+        
+        player.GetComponent<PlayerController>().DisableInput();
     }
 
     private void ChangePlayerSpawnPoint(OnLevelEnd _evt)

@@ -1,7 +1,12 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/cinematique/planche.meta
 guid: ffa88fcfce9a967448a7414e1946e2e2
 folderAsset: yes
 DefaultImporter:
+========
+guid: 1c5596c797a846249a7f9a4d528fccb4
+PrefabImporter:
+>>>>>>>> 0c76430 (Adding Level 4):Assets/Level Design/Levels/Level 4.prefab.meta
   externalObjects: {}
   userData: 
   assetBundleName: 
