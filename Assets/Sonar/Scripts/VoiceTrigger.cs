@@ -120,7 +120,7 @@ public class VoiceTrigger : PlayerAbility
     /// Cherche le premier driver CONNECTED et demarre l'enregistrement dessus.
     /// Ignore les drivers loopback (haut-parleurs).
     /// </summary>
-    private void TryStartRecording()
+    public void TryStartRecording()
     {
         FMOD.System core = FMODUnity.RuntimeManager.CoreSystem;
         core.getRecordNumDrivers(out int numDrivers, out int _);
@@ -237,7 +237,7 @@ public class VoiceTrigger : PlayerAbility
         UnityEngine.Debug.Log($"[VoiceTrigger] Micro demarre sur driver [{_driverIndex}].");
     }
 
-    private void StopRecording()
+    public void StopRecording()
     {
         if (_recording && _activeDriverIndex >= 0)
         {
