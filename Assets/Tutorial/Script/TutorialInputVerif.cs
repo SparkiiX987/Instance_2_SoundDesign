@@ -11,6 +11,7 @@ public class TutorialInputVerif : MonoBehaviour
 
     [SerializeField] private List<TutorialStep> steps = new();
     [SerializeField] private List<CanvasGroup> canvasGroups = new();
+    [SerializeField] private CanvasGroup descriptionCanvasGroup;
     [SerializeField] private List<TextMeshProUGUI> textList = new();
     [SerializeField] private List<Image> imagesList = new();
     [SerializeField] private List<Sprite> spritesList = new();
@@ -103,6 +104,8 @@ public class TutorialInputVerif : MonoBehaviour
         foreach (int i in step.canvasGroupIndices)
             seq.Join(canvasGroups[i].DOFade(0, fadeDuration));
 
+        seq.Join(descriptionCanvasGroup.DOFade(0, fadeDuration));
+
         seq.AppendCallback(() =>
         {
             foreach (Image img in imagesList)
@@ -123,6 +126,8 @@ public class TutorialInputVerif : MonoBehaviour
         TutorialStep current = steps[currentStepIndex];
         foreach (int i in current.canvasGroupIndices)
             seq.Join(canvasGroups[i].DOFade(0, fadeDuration));
+
+        seq.Join(descriptionCanvasGroup.DOFade(0, fadeDuration));
 
         seq.AppendInterval(fadeDuration);
 
@@ -186,6 +191,8 @@ public class TutorialInputVerif : MonoBehaviour
 
         foreach (int i in step.canvasGroupIndices)
             seq.Join(canvasGroups[i].DOFade(1, fadeDuration));
+
+        seq.Join(descriptionCanvasGroup.DOFade(1, fadeDuration));
 
         return seq;
     }

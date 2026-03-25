@@ -10815,13 +10815,25 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: e380dc749f79929409b779273d8b8fc5, type: 2}
     - target: {fileID: 2495828229778127949, guid: 8eb6d01b6bbea8e4c897aa826dd726a4, type: 3}
+      propertyPath: descriptionCanvasGroup
+      value: 
+      objectReference: {fileID: 1997479919}
+    - target: {fileID: 2495828229778127949, guid: 8eb6d01b6bbea8e4c897aa826dd726a4, type: 3}
       propertyPath: spritesList.Array.size
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2495828229778127949, guid: 8eb6d01b6bbea8e4c897aa826dd726a4, type: 3}
+      propertyPath: canvasGroups.Array.size
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 2495828229778127949, guid: 8eb6d01b6bbea8e4c897aa826dd726a4, type: 3}
       propertyPath: 'spritesList.Array.data[7]'
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 2495828229778127949, guid: 8eb6d01b6bbea8e4c897aa826dd726a4, type: 3}
+      propertyPath: 'canvasGroups.Array.data[4]'
+      value: 
+      objectReference: {fileID: 1997479919}
     - target: {fileID: 2853779025146783988, guid: 8eb6d01b6bbea8e4c897aa826dd726a4, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -17032,6 +17044,7 @@ GameObject:
   - component: {fileID: 1997479916}
   - component: {fileID: 1997479918}
   - component: {fileID: 1997479917}
+  - component: {fileID: 1997479919}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -17158,6 +17171,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1997479915}
   m_CullTransparentMesh: 1
+--- !u!225 &1997479919
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1997479915}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &2005220612
 GameObject:
   m_ObjectHideFlags: 0

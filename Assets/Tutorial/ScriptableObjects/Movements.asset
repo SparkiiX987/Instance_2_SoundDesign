@@ -29,4 +29,4 @@ MonoBehaviour:
   - textIndex: 3
     actionName: MoveRight
     fixedText: 
-  inputAction: Displacements
+  inputAction: Movements
