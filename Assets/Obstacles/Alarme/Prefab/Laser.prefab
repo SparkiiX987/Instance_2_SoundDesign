@@ -56,7 +56,7 @@ MonoBehaviour:
       Data3: -182505563
       Data4: 1395056263
     Path: event:/GPE/Danger GPE
-  volumeMin: 0.1
+  volumeMin: 1
   volumeMax: 1
   pitchMin: 0.5
   pitchMax: 2
@@ -82,8 +82,8 @@ MonoBehaviour:
       Data3: 550242989
       Data4: 1731392650
     Path: event:/Metal cage Falling
-  volumeMin: 0.1
-  targetVolume: 0.1
+  volumeMin: 1
+  targetVolume: 1
   volumeMax: 1
   pitchMin: 0.5
   targetPitch: 0.5
