@@ -159,7 +159,7 @@ namespace Player.Scripts
         /// <summary>
         /// Forces the player back to standing if currently crouching.
         /// </summary>
-        private void ForceUnCrouch()
+        public void ForceUnCrouch()
         {
             if (!isCrouching)
                 return;

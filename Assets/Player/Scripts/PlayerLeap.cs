@@ -169,8 +169,8 @@ namespace Player.Scripts
             if (playerMove)
                 playerMove.enabled = true;
 
-            if (!isCKeyHeld)
-                playerJump.enabled = true;
+            playerCrouch.ForceUnCrouch();
+            playerJump.enabled = true;
 
             controller.EnableInput();
             //EventBus.Publish(new OnEnableInput());
