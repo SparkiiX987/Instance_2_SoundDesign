@@ -7,7 +7,6 @@ public class MouseSensitivityUI : MonoBehaviour
 {
     [SerializeField] private Slider sensitivitySlider;
     [SerializeField] private TMP_Text sensitivityText;
-    [SerializeField] private PlayerLook playerLook;
 
     private string playerPrefsKey = "MouseSensitivity";
     private float defaultSensitivity = 1f;
@@ -41,6 +40,8 @@ public class MouseSensitivityUI : MonoBehaviour
     
     public void SetSensitivity(float value)
     {
+        PlayerLook playerLook = GameManager.instance.player.GetComponent<PlayerLook>();
+        
         playerLook.lookSpeed = value;
     }
 }
