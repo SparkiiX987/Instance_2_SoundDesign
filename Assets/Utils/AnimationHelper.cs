@@ -48,6 +48,10 @@ namespace Utils
         /// <summary>
         /// Show a screen (fade + slide)
         /// </summary>
+        /// <param name="canvasGroup">CanvasGroup of the screen to fade in</param>
+        /// <param name="rectTransform">RectTransform of the screen to slide</param>
+        /// <param name="slideOffset">Horizontal offset in pixels before sliding in (default: 50)</param>
+        /// <returns>The animation Sequence</returns>
         public static Sequence FadeInScreen(CanvasGroup canvasGroup, RectTransform rectTransform, float slideOffset = 50f)
         {
             Sequence sequence = DOTween.Sequence();
@@ -68,6 +72,10 @@ namespace Utils
         /// <summary>
         /// Hide a screen (fade + slide)
         /// </summary>
+        /// <param name="canvasGroup">CanvasGroup of the screen to fade out</param>
+        /// <param name="rectTransform">RectTransform of the screen to slide</param>
+        /// <param name="slideOffset">Horizontal offset in pixels to slide out to (default: -50)</param>
+        /// <returns>The animation Sequence</returns>
         public static Sequence FadeOutScreen(CanvasGroup canvasGroup, RectTransform rectTransform, float slideOffset = -50f)
         {
             Sequence sequence = DOTween.Sequence();
@@ -83,28 +91,23 @@ namespace Utils
         }
 
 
-        ///<summary>
-        /// Show a new image by fading out CanvasGroup the old one and fading in the new one.
+        /// <summary>
+        /// Transition between two images with a fade effect (old image fades out, new image fades in)
         /// </summary>
-        public static Sequence FadeImageTransition(CanvasGroup oldCgImage, CanvasGroup newCgImage, Image newImage, float duration = NORMAL)
+        /// <param name="cgImage">CanvasGroup wrapping the Image to transition</param>
+        /// <param name="newImage">Image containing the new sprite to display</param>
+        /// <param name="duration">Total duration of the transition (default: NORMAL)</param>
+        /// <returns>The animation Sequence</returns>
+        public static Sequence FadeImageTransition(CanvasGroup cgImage, Image newImage, float duration = NORMAL)
         {
             Sequence sequence = DOTween.Sequence();
             
-            // Initial state
-            newCgImage.alpha = 0;
-            newCgImage.gameObject.SetActive(true);
-            if (newImage)
-                newImage.gameObject.SetActive(true);
-
-            // Animation
-            sequence.Append(oldCgImage.DOFade(0f, duration).SetEase(OUT_SMOOTH));
-            sequence.Join(newCgImage.DOFade(1f, duration).SetEase(IN_SMOOTH));
-            sequence.OnComplete(() =>
-            {
-                oldCgImage.gameObject.SetActive(false);
-                if (newImage)
-                    newImage.gameObject.SetActive(true);
-            });
+            // Fade out old image
+            sequence.Append(cgImage.DOFade(0f, duration * 0.5f).SetEase(OUT_SMOOTH));
+            // Change sprite when old image is fully faded out
+            sequence.AppendCallback(() => cgImage.GetComponent<Image>().sprite = newImage.sprite);
+            // Fade in new image
+            sequence.Append(cgImage.DOFade(1f, duration * 0.5f).SetEase(IN_SMOOTH));
 
             return sequence;
         }
@@ -116,6 +119,9 @@ namespace Utils
         /// <summary>
         /// Panel that "pops" in (appearance with scale bounce)
         /// </summary>
+        /// <param name="transform">Transform of the panel to animate</param>
+        /// <param name="duration">Duration of the pop animation (default: MEDIUM)</param>
+        /// <returns>The animation Sequence</returns>
         public static Sequence PopIn(Transform transform, float duration = MEDIUM)
         {
             Sequence sequence = DOTween.Sequence();
@@ -133,6 +139,9 @@ namespace Utils
         /// <summary>
         /// Panel that disappears (scale to zero)
         /// </summary>
+        /// <param name="transform">Transform of the panel to animate</param>
+        /// <param name="duration">Duration of the pop-out animation (default: FAST)</param>
+        /// <returns>The animation Sequence</returns>
         public static Sequence PopOut(Transform transform, float duration = FAST)
         {
             Sequence sequence = DOTween.Sequence();
@@ -151,6 +160,9 @@ namespace Utils
         /// <summary>
         /// Hover on a button (scale + optional glow)
         /// </summary>
+        /// <param name="button">Transform of the button to scale up</param>
+        /// <param name="glow">Optional CanvasGroup for the glow effect</param>
+        /// <param name="scaleMultiplier">Target scale on hover (default: 1.05)</param>
         public static void ButtonHoverEnter(Transform button, CanvasGroup glow = null, float scaleMultiplier = 1.05f)
         {
             button.DOScale(scaleMultiplier, FAST).SetEase(HOVER);
@@ -162,6 +174,8 @@ namespace Utils
         /// <summary>
         /// Exit hover on a button
         /// </summary>
+        /// <param name="button">Transform of the button to reset scale</param>
+        /// <param name="glow">Optional CanvasGroup for the glow effect to fade out</param>
         public static void ButtonHoverExit(Transform button, CanvasGroup glow = null)
         {
             button.DOScale(1f, FAST).SetEase(HOVER);
@@ -173,6 +187,7 @@ namespace Utils
         /// <summary>
         /// Click animation (punch scale)
         /// </summary>
+        /// <param name="button">Transform of the button to punch</param>
         public static void ButtonClick(Transform button)
         {
             button.DOPunchScale(Vector3.one * 0.1f, 0.2f, 1, 0.5f);
@@ -198,6 +213,10 @@ namespace Utils
         /// <summary>
         /// Pulse for a loading element (scale loop)
         /// </summary>
+        /// <param name="element">Transform of the element to pulse</param>
+        /// <param name="scaleMin">Minimum scale value (default: 0.9)</param>
+        /// <param name="scaleMax">Maximum scale value (default: 1.1)</param>
+        /// <returns>The looping Tweener</returns>
         public static Tweener StartLoadingPulse(Transform element, float scaleMin = 0.9f, float scaleMax = 1.1f)
         {
             return element.DOScale(scaleMax, 0.6f)
@@ -209,6 +228,9 @@ namespace Utils
         /// <summary>
         /// Skeleton shimmer effect (moving gradient)
         /// </summary>
+        /// <param name="shimmerMask">RectTransform of the shimmer mask to move</param>
+        /// <param name="width">Width of the shimmer travel distance in pixels</param>
+        /// <returns>The looping Tweener</returns>
         public static Tweener StartShimmerEffect(RectTransform shimmerMask, float width)
         {
             shimmerMask.anchoredPosition = new Vector2(-width, 0);
@@ -225,6 +247,11 @@ namespace Utils
         /// <summary>
         /// Toast that slides from the bottom
         /// </summary>
+        /// <param name="toast">RectTransform of the toast to animate</param>
+        /// <param name="visibleY">Y position when visible (default: 20)</param>
+        /// <param name="hiddenY">Y position when hidden (default: -100)</param>
+        /// <param name="displayDuration">Time the toast stays visible in seconds (default: 3)</param>
+        /// <returns>The animation Sequence</returns>
         public static Sequence ShowToast(RectTransform toast, float visibleY = 20f, float hiddenY = -100f, float displayDuration = 3f)
         {
             Sequence sequence = DOTween.Sequence();
@@ -249,6 +276,8 @@ namespace Utils
         /// <summary>
         /// Badge notification (pop + shake)
         /// </summary>
+        /// <param name="badge">Transform of the badge to animate</param>
+        /// <returns>The animation Sequence</returns>
         public static Sequence ShowNotificationBadge(Transform badge)
         {
             Sequence sequence = DOTween.Sequence();
@@ -272,6 +301,8 @@ namespace Utils
         /// <summary>
         /// Shake to indicate an error
         /// </summary>
+        /// <param name="transform">Transform of the element to shake</param>
+        /// <param name="strength">Shake intensity in pixels (default: 10)</param>
         public static void ShakeError(Transform transform, float strength = 10f)
         {
             transform.DOShakePosition(0.3f, strength: strength, vibrato: 10, fadeOut: true);
@@ -280,6 +311,9 @@ namespace Utils
         /// <summary>
         /// Temporary highlight (flash color)
         /// </summary>
+        /// <param name="image">Image component to flash</param>
+        /// <param name="highlightColor">Color to flash to</param>
+        /// <param name="duration">Total duration of the flash effect (default: 0.5)</param>
         public static void FlashHighlight(UnityEngine.UI.Image image, Color highlightColor, float duration = 0.5f)
         {
             Color originalColor = image.color;
@@ -331,6 +365,8 @@ namespace Utils
         /// <summary>
         /// Kill all animations of a GameObject
         /// </summary>
+        /// <param name="target">GameObject whose animations will be killed</param>
+        /// <param name="complete">If true, forces animations to their end value before killing (default: false)</param>
         public static void KillAllAnimations(GameObject target, bool complete = false)
         {
             target.transform.DOKill(complete);
