@@ -4,11 +4,7 @@ using UnityEngine;
 using DG.Tweening;
 using FMOD.Studio;
 
-/// <summary>
-/// Composant a attacher sur tout objet detectable par le radar.
-/// Utilise exclusivement FMOD pour le son — aucun AudioSource, aucun AudioClip.
-/// Prerequis : FMOD for Unity importe dans le projet.
-/// </summary>
+
 public class DetectableObject : MonoBehaviour, IDetectable
 {
     [Header("Detection")]
@@ -32,34 +28,29 @@ public class DetectableObject : MonoBehaviour, IDetectable
     [SerializeField] private float sustainDuration = 0.25f;
     [SerializeField] private float fadeOutDuration = 0.5f;
 
-    // ---------------------------------------------------------------
+    
 
     private bool _active;
 
-    // ---------------------------------------------------------------
+  
 
     private void Awake()
     {
         _active = isActiveOnStart;
     }
 
-    // ---------------------------------------------------------------
-    // IDetectable
+    
 
     public Vector3 GetPosition() => transform.position;
     public string GetDetectableTag() => detectableTag;
     public bool IsActive() => _active && gameObject.activeInHierarchy;
 
-    /// <summary>
-    /// Appele par RadarSystem quand l'onde touche cet objet.
-    /// Lance un evenement FMOD avec enveloppe fade in -> sustain -> fade out.
-    /// normalizedProximity : 0 = loin, 1 = proche.
-    /// </summary>
+   
     public void OnProb(float normalizedProximity)
     {
         if (!sound.IsNull)
         {
-            //GameAudioManager.instance.PlayOneShot(sound, transform.position);
+           
             float targetVolume = Mathf.Lerp(volumeMin, volumeMax, normalizedProximity);
             float targetPitch = Mathf.Lerp(pitchMin, pitchMax, normalizedProximity);
             
@@ -94,7 +85,7 @@ public class DetectableObject : MonoBehaviour, IDetectable
 
     }
 
-    // ---------------------------------------------------------------
+    
 
     public void SetActive(bool _value) => _active = _value;
 }

@@ -14,7 +14,7 @@ Shader "Sonar/SonarSurface"
         _FadeDuration     ("Duree trace (s)",            Float)  = 15.0
         _EdgeFadeMult     ("Multiplicateur duree",       Float)  = 1.0
 
-        // 🔹 Nouvelle propriété pour les ennemis
+
         [Range(0.1, 3.0)] _EnemyWaveThickness ("Epaisseur onde ennemis", Float) = 0.8
     }
 
@@ -22,7 +22,7 @@ Shader "Sonar/SonarSurface"
     {
         Tags { "RenderType"="Opaque" "Queue"="Geometry" "RenderPipeline"="UniversalPipeline" }
 
-        // PASSE 1 : Anneau de l'onde
+
         Pass
         {
             Name "WaveRingPass"
@@ -40,7 +40,7 @@ Shader "Sonar/SonarSurface"
             float4 _ConeForward; float _ConeHalfAngleCos; float _ConeEdgeSoftness;
             float4 _RingColor; float4 _SurfaceColor;
             float  _WaveThickness; float _RingThickness;
-            float  _EnemyWaveThickness; // ✅ variable réglable pour les ennemis
+            float  _EnemyWaveThickness;
 
             float4 _EnemyOrigin0; float _EnemyRadius0; float _EnemyActive0; float4 _EnemyColor0;
             float4 _EnemyOrigin1; float _EnemyRadius1; float _EnemyActive1; float4 _EnemyColor1;
@@ -78,7 +78,7 @@ Shader "Sonar/SonarSurface"
                 float3 eCol = float3(0,0,0);
                 float  eAny = 0;
 
-                // 🔹 Utilisation de _EnemyWaveThickness ici pour les ennemis
+               
                 #define ENEMY_RING(IDX) { \
                     float ed = distance(IN.posWS, _EnemyOrigin##IDX.xyz); \
                     float ei = smoothstep(_EnemyRadius##IDX - _EnemyWaveThickness, _EnemyRadius##IDX, ed); \
