@@ -97,10 +97,7 @@ public class Sonar : PlayerAbility
             _coneIsFrozen = false;
         }
 
-        if (Input.GetKeyDown(activationKey) && _cooldownTimer <= 0f)
-        {
-            TriggerWave();
-        }
+       
 
         HandleMovementWave();
         PushShaderGlobals();
