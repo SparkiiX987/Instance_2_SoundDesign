@@ -19262,6 +19262,9 @@ MonoBehaviour:
       - assetName: NouvelAsset
         sceneObject: {fileID: 7927893787293668568}
         ignore: 0
+      - assetName: NouvelAsset
+        sceneObject: {fileID: 0}
+        ignore: 0
     - categoryName: 'Door Material '
       categoryMaterial: {fileID: 2100000, guid: 4ee6b6d6fc66c764fb964d4d2fc9ef37, type: 2}
       assets:
