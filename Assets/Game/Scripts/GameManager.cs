@@ -64,7 +64,7 @@ public class GameManager : MonoBehaviour
     {
         if (victoryRectTransform != null && victoryCanvasGroup!= null)
         {
-          
+            victoryRectTransform.gameObject.SetActive(true);
             Utils.AnimationHelper.FadeInScreen(victoryCanvasGroup, victoryRectTransform, 500f);
         }
 
