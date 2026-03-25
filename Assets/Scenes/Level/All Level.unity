@@ -131,7 +131,7 @@ GameObject:
   - component: {fileID: 158581182}
   - component: {fileID: 158581181}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: EndTrigger
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -145,12 +145,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 158581178}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 52.47527, y: -4.607, z: 27.47968}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 55.97527, y: -4.607, z: 35.76}
   m_LocalScale: {x: 4.2894, y: 3.689, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 413838853}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &158581181
 MonoBehaviour:
@@ -295,6 +295,7 @@ Transform:
   m_Children:
   - {fileID: 785176593}
   - {fileID: 1951233382}
+  - {fileID: 158581180}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &427440271
@@ -732,6 +733,11 @@ PrefabInstance:
 --- !u!224 &1055619272 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6234910892798914152, guid: 4812705d81c59164a863aac936f04ed3, type: 3}
+  m_PrefabInstance: {fileID: 1818272063}
+  m_PrefabAsset: {fileID: 0}
+--- !u!225 &1055619273 stripped
+CanvasGroup:
+  m_CorrespondingSourceObject: {fileID: 4018601000615746699, guid: 4812705d81c59164a863aac936f04ed3, type: 3}
   m_PrefabInstance: {fileID: 1818272063}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1089148650 stripped
@@ -1438,15 +1444,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 22062975839751949, guid: 33bb555877c10234c964b6ba5cc81315, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.25
+      value: 54.07
       objectReference: {fileID: 0}
     - target: {fileID: 22062975839751949, guid: 33bb555877c10234c964b6ba5cc81315, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -2.25
+      value: -5.92
       objectReference: {fileID: 0}
     - target: {fileID: 22062975839751949, guid: 33bb555877c10234c964b6ba5cc81315, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 26.92
       objectReference: {fileID: 0}
     - target: {fileID: 623208327066077983, guid: 33bb555877c10234c964b6ba5cc81315, type: 3}
       propertyPath: playerPrefab
@@ -1455,11 +1461,11 @@ PrefabInstance:
     - target: {fileID: 623208327066077983, guid: 33bb555877c10234c964b6ba5cc81315, type: 3}
       propertyPath: victoryCanvasGroup
       value: 
-      objectReference: {fileID: 4018601000615746699, guid: 4812705d81c59164a863aac936f04ed3, type: 3}
+      objectReference: {fileID: 1055619273}
     - target: {fileID: 623208327066077983, guid: 33bb555877c10234c964b6ba5cc81315, type: 3}
       propertyPath: victoryRectTransform
       value: 
-      objectReference: {fileID: 6234910892798914152, guid: 4812705d81c59164a863aac936f04ed3, type: 3}
+      objectReference: {fileID: 1055619272}
     - target: {fileID: 2403634905783544529, guid: 33bb555877c10234c964b6ba5cc81315, type: 3}
       propertyPath: m_Icon
       value: 
@@ -1534,4 +1540,3 @@ SceneRoots:
   - {fileID: 946583457}
   - {fileID: 904697213}
   - {fileID: 1096376912}
-  - {fileID: 158581180}
