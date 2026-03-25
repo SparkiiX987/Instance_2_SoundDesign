@@ -829,6 +829,30 @@ PrefabInstance:
       addedObject: {fileID: 427440272}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1c5596c797a846249a7f9a4d528fccb4, type: 3}
+--- !u!1 &1144048539 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6697015211668775246, guid: 910ad224672f9b14bb231a71b236aa70, type: 3}
+  m_PrefabInstance: {fileID: 1174434160}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1144048541
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1144048539}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cb88b80a131d9848bd97382864d24fd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::S_ToySonarEmitter
+  range: 15
+  speed: 10
+  cooldown: 3
+  waveColor: {r: 1, g: 0, b: 0, a: 1}
+  autoTrigger: 1
+  interval: 3
+  emitterIndex: 0
 --- !u!1001 &1174434160
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -881,22 +905,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Level 1
       objectReference: {fileID: 0}
-    - target: {fileID: 988993694155023695, guid: 910ad224672f9b14bb231a71b236aa70, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2626570913771889096, guid: 910ad224672f9b14bb231a71b236aa70, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4345663687217875395, guid: 910ad224672f9b14bb231a71b236aa70, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4578612056469686475, guid: 910ad224672f9b14bb231a71b236aa70, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 4898207474615051102, guid: 910ad224672f9b14bb231a71b236aa70, type: 3}
       propertyPath: groups.Array.data[0].categories.Array.data[0].assets.Array.data[8].sceneObject
       value: 
@@ -908,7 +916,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6697015211668775246, guid: 910ad224672f9b14bb231a71b236aa70, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1144048541}
   m_SourcePrefab: {fileID: 100100000, guid: 910ad224672f9b14bb231a71b236aa70, type: 3}
 --- !u!1 &1318086163
 GameObject:

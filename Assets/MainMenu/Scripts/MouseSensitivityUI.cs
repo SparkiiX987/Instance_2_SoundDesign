@@ -1,7 +1,7 @@
 using Player.Scripts;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 [DefaultExecutionOrder(10)]
 public class MouseSensitivityUI : MonoBehaviour
@@ -28,29 +28,29 @@ public class MouseSensitivityUI : MonoBehaviour
         sensitivitySlider.onValueChanged.RemoveListener(OnSliderChanged);
     }
 
-    private void OnSliderChanged(float value)
+    private void OnSliderChanged(float _value)
     {
-        UpdateText(value);
-        PlayerPrefs.SetFloat(playerPrefsKey, value);
+        UpdateText(_value);
+        PlayerPrefs.SetFloat(playerPrefsKey, _value);
         PlayerPrefs.Save();
+        SetSensitivity(_value);
     }
 
-    private void UpdateText(float value)
+    private void UpdateText(float _value)
     {
-        sensitivityText.text = value.ToString("F" + decimals);
+        sensitivityText.text = _value.ToString("F" + decimals);
     }
-    
-    public void SetSensitivity(float value)
+
+    public void SetSensitivity(float _value)
     {
         if (playerLook == null)
         {
-            PlayerLook _playerLook = GameManager.instance.player.GetComponent<PlayerLook>();
-            _playerLook.lookSpeed = value;
+            if (GameManager.instance.player)
+            {
+                playerLook = GameManager.instance.player.GetComponent<PlayerLook>();
+            }
         }
-        else
-        {
-            playerLook.lookSpeed = value;
-        }
-        
+            playerLook.lookSpeed = _value;
+
     }
 }

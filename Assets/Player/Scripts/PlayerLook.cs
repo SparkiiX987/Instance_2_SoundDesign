@@ -24,6 +24,7 @@ namespace Player.Scripts
         {
             base.Init(_playerController);
             Assert.IsNotNull(cameraRoot, $"[{GetType().Name}] PlayerCamera reference is null.");
+            lookSpeed = PlayerPrefs.GetFloat("MouseSensitivity");
         }
 
         /// <summary>
@@ -39,11 +40,11 @@ namespace Player.Scripts
 
             Vector2 lookInput = _context.ReadValue<Vector2>();
 
-            rotationX -= lookInput.y * lookSpeed;
+            rotationX -= lookInput.y * (lookSpeed * 0.1f);
             rotationX = Mathf.Clamp(rotationX, -lookXLimit, lookXLimit);
 
             cameraRoot.transform.localRotation = Quaternion.Euler(rotationX, 0f, 0f);
-            transform.Rotate(Vector3.up * lookInput.x * lookSpeed);
+            transform.Rotate(Vector3.up * lookInput.x * (lookSpeed * 0.1f));
         }
     }
 }
