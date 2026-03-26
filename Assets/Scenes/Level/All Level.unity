@@ -1610,6 +1610,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 74653293}
   m_CullTransparentMesh: 1
+--- !u!4 &75364091 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1776138112202971696, guid: 1c5596c797a846249a7f9a4d528fccb4, type: 3}
+  m_PrefabInstance: {fileID: 823595990}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &79000238
 GameObject:
   m_ObjectHideFlags: 0
@@ -8007,6 +8012,37 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519684571}
   m_Mesh: {fileID: 6113912581363944171, guid: 576ad6062f1dd7541837ac713e3bc17c, type: 3}
+--- !u!1 &519703244 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4192379473283879611, guid: 1c5596c797a846249a7f9a4d528fccb4, type: 3}
+  m_PrefabInstance: {fileID: 823595990}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &519703248
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 519703244}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cb88b80a131d9848bd97382864d24fd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::S_ToySonarEmitter
+  range: 4
+  speed: 1
+  cooldown: 1
+  waveColor: {r: 1, g: 1, b: 1, a: 1}
+  autoTrigger: 1
+  interval: 1
+  sonarLoopSound:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  emitterIndex: 0
 --- !u!1 &520334746
 GameObject:
   m_ObjectHideFlags: 0
@@ -9152,6 +9188,106 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 590827107}
   m_Mesh: {fileID: 4563637298700409943, guid: 576ad6062f1dd7541837ac713e3bc17c, type: 3}
+--- !u!1001 &599901652
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 75364091}
+    m_Modifications:
+    - target: {fileID: 468687369853038865, guid: 39d01be3744286a4f8b3d5224c2a6852, type: 3}
+      propertyPath: m_Name
+      value: gobelet (5)
+      objectReference: {fileID: 0}
+    - target: {fileID: 993830974141574059, guid: 39d01be3744286a4f8b3d5224c2a6852, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -9.104
+      objectReference: {fileID: 0}
+    - target: {fileID: 993830974141574059, guid: 39d01be3744286a4f8b3d5224c2a6852, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 3.712
+      objectReference: {fileID: 0}
+    - target: {fileID: 993830974141574059, guid: 39d01be3744286a4f8b3d5224c2a6852, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 1.964
+      objectReference: {fileID: 0}
+    - target: {fileID: 993830974141574059, guid: 39d01be3744286a4f8b3d5224c2a6852, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 993830974141574059, guid: 39d01be3744286a4f8b3d5224c2a6852, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.50000006
+      objectReference: {fileID: 0}
+    - target: {fileID: 993830974141574059, guid: 39d01be3744286a4f8b3d5224c2a6852, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.49999997
+      objectReference: {fileID: 0}
+    - target: {fileID: 993830974141574059, guid: 39d01be3744286a4f8b3d5224c2a6852, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 993830974141574059, guid: 39d01be3744286a4f8b3d5224c2a6852, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 993830974141574059, guid: 39d01be3744286a4f8b3d5224c2a6852, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 993830974141574059, guid: 39d01be3744286a4f8b3d5224c2a6852, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 993830974141574059, guid: 39d01be3744286a4f8b3d5224c2a6852, type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 468687369853038865, guid: 39d01be3744286a4f8b3d5224c2a6852, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 599901655}
+  m_SourcePrefab: {fileID: 100100000, guid: 39d01be3744286a4f8b3d5224c2a6852, type: 3}
+--- !u!4 &599901653 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 993830974141574059, guid: 39d01be3744286a4f8b3d5224c2a6852, type: 3}
+  m_PrefabInstance: {fileID: 599901652}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &599901654 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 468687369853038865, guid: 39d01be3744286a4f8b3d5224c2a6852, type: 3}
+  m_PrefabInstance: {fileID: 599901652}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &599901655
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 599901654}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cb88b80a131d9848bd97382864d24fd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::S_ToySonarEmitter
+  range: 3
+  speed: 1
+  cooldown: 1
+  waveColor: {r: 1, g: 1, b: 1, a: 1}
+  autoTrigger: 1
+  interval: 1
+  sonarLoopSound:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  emitterIndex: 0
 --- !u!1 &600604954
 GameObject:
   m_ObjectHideFlags: 0
@@ -11816,6 +11952,18 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 609330919978759089, guid: 1c5596c797a846249a7f9a4d528fccb4, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -2.26
+      objectReference: {fileID: 0}
+    - target: {fileID: 609330919978759089, guid: 1c5596c797a846249a7f9a4d528fccb4, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -1.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 609330919978759089, guid: 1c5596c797a846249a7f9a4d528fccb4, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -1.64
+      objectReference: {fileID: 0}
     - target: {fileID: 947168388477062496, guid: 1c5596c797a846249a7f9a4d528fccb4, type: 3}
       propertyPath: m_Enabled
       value: 1
@@ -12785,6 +12933,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5003454458034544601, guid: 1c5596c797a846249a7f9a4d528fccb4, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1886323743}
+    - targetCorrespondingSourceObject: {fileID: 1776138112202971696, guid: 1c5596c797a846249a7f9a4d528fccb4, type: 3}
+      insertIndex: 8
+      addedObject: {fileID: 599901653}
     - targetCorrespondingSourceObject: {fileID: 3624717100805583642, guid: 1c5596c797a846249a7f9a4d528fccb4, type: 3}
       insertIndex: 2
       addedObject: {fileID: 1176565882}
@@ -12813,15 +12964,18 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5999857760983790543, guid: 1c5596c797a846249a7f9a4d528fccb4, type: 3}
       insertIndex: -1
       addedObject: {fileID: 443831054}
-    - targetCorrespondingSourceObject: {fileID: 5958119024861405745, guid: 1c5596c797a846249a7f9a4d528fccb4, type: 3}
+    - targetCorrespondingSourceObject: {fileID: 4192379473283879611, guid: 1c5596c797a846249a7f9a4d528fccb4, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1199346539}
+      addedObject: {fileID: 519703248}
     - targetCorrespondingSourceObject: {fileID: 7633430850925422356, guid: 1c5596c797a846249a7f9a4d528fccb4, type: 3}
       insertIndex: -1
       addedObject: {fileID: 853862436}
     - targetCorrespondingSourceObject: {fileID: 710896501977680793, guid: 1c5596c797a846249a7f9a4d528fccb4, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1071700018}
+    - targetCorrespondingSourceObject: {fileID: 7008050883829146458, guid: 1c5596c797a846249a7f9a4d528fccb4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1382507716}
   m_SourcePrefab: {fileID: 100100000, guid: 1c5596c797a846249a7f9a4d528fccb4, type: 3}
 --- !u!1 &826492062
 GameObject:
@@ -20240,37 +20394,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1198324206}
   m_Mesh: {fileID: 4493585093827132993, guid: 7dc1c18990dc5bf48b2113f1ea6a1956, type: 3}
---- !u!1 &1199346535 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5958119024861405745, guid: 1c5596c797a846249a7f9a4d528fccb4, type: 3}
-  m_PrefabInstance: {fileID: 823595990}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1199346539
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1199346535}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3cb88b80a131d9848bd97382864d24fd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::S_ToySonarEmitter
-  range: 3
-  speed: 1
-  cooldown: 1
-  waveColor: {r: 1, g: 1, b: 1, a: 1}
-  autoTrigger: 1
-  interval: 1
-  sonarLoopSound:
-    Guid:
-      Data1: 0
-      Data2: 0
-      Data3: 0
-      Data4: 0
-    Path: 
-  emitterIndex: 0
 --- !u!1 &1200557571
 GameObject:
   m_ObjectHideFlags: 0
@@ -22710,6 +22833,37 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 5.601473, z: 1}
   m_Center: {x: 0, y: 0.5378171, z: 0}
+--- !u!1 &1382507712 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7008050883829146458, guid: 1c5596c797a846249a7f9a4d528fccb4, type: 3}
+  m_PrefabInstance: {fileID: 823595990}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1382507716
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1382507712}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cb88b80a131d9848bd97382864d24fd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::S_ToySonarEmitter
+  range: 6
+  speed: 1
+  cooldown: 1
+  waveColor: {r: 1, g: 1, b: 1, a: 1}
+  autoTrigger: 1
+  interval: 1
+  sonarLoopSound:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  emitterIndex: 0
 --- !u!1 &1388004757
 GameObject:
   m_ObjectHideFlags: 0
