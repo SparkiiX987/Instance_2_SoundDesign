@@ -65,7 +65,7 @@ public class MicroSelector : MonoBehaviour
 
         UpdateStatusLabel();
 
-        Debug.Log($"[MicroSelector] Micro {(muted ? "désactivé (muet)" : "activé")}");
+        Debug.Log($"[MicroSelector] Micro {(muted ? "désactivé (mute)" : "activé")}");
     }
 
     /// <summary>Bascule l'état mute — utile sur un KeyCode dans Update().</summary>
@@ -97,7 +97,7 @@ public class MicroSelector : MonoBehaviour
             options.Add($"{name}  ({rate / 1000}kHz)");
         }
 
-        micDropdown.AddOptions(options.Count > 0 ? options : new List<string> { "Aucun micro detecte" });
+        micDropdown.AddOptions(options.Count > 0 ? options : new List<string> { "No micro detected" });
         micDropdown.interactable = _drivers.Count > 0;
         applyButton.interactable = _drivers.Count > 0;
 
@@ -139,7 +139,7 @@ public class MicroSelector : MonoBehaviour
         if (statusLabel == null) return;
 
         int active = _voiceTrigger.GetActiveDriverIndex();
-        if (active < 0) { statusLabel.text = "Micro actif : aucun"; return; }
+        if (active < 0) { statusLabel.text = "Active microphone: none"; return; }
 
         FMODUnity.RuntimeManager.CoreSystem.getRecordDriverInfo(
             active, out string name, 256,
@@ -148,7 +148,7 @@ public class MicroSelector : MonoBehaviour
             out FMOD.DRIVER_STATE _);
 
         statusLabel.text = _voiceTrigger.IsMuted
-            ? $"Micro actif : {name}  [MUET]"
-            : $"Micro actif : {name}";
+            ? $"Active microphone : {name}  [MUTE]"
+            : $"Active microphone : {name}";
     }
 }
