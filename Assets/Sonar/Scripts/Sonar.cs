@@ -241,31 +241,31 @@ public class Sonar : PlayerAbility
         {
             float a0 = (i / (float)segs) * Mathf.PI * 2f;
             float a1 = ((i + 1) / (float)segs) * Mathf.PI * 2f;
-            Debug.DrawLine(
+            /*Debug.DrawLine(
                 originPos + new Vector3(Mathf.Cos(a0), 0, Mathf.Sin(a0)) * scanRadius,
                 originPos + new Vector3(Mathf.Cos(a1), 0, Mathf.Sin(a1)) * scanRadius,
-                Color.yellow, 0.15f);
+                Color.yellow, 0.15f);*/
         }
 
         Collider[] hits = Physics.OverlapSphere(originPos, scanRadius, detectableLayerMask);
-        Debug.Log($"[Sonar] radius={scanRadius:F2} hits={hits.Length}");
+        //Debug.Log($"[Sonar] radius={scanRadius:F2} hits={hits.Length}");
 
         foreach (Collider hit in hits)
         {
             IDetectable detectable = hit.GetComponent<IDetectable>();
             if (detectable == null)
             {
-                Debug.Log($"[Sonar] SKIP {hit.name} : pas IDetectable");
+                //Debug.Log($"[Sonar] SKIP {hit.name} : pas IDetectable");
                 continue;
             }
             if (!detectable.IsActive())
             {
-                Debug.Log($"[Sonar] SKIP {hit.name} : inactif");
+                //Debug.Log($"[Sonar] SKIP {hit.name} : inactif");
                 continue;
             }
             if (_hitObjects.Contains(detectable))
             {
-                Debug.Log($"[Sonar] SKIP {hit.name} : deja detecte");
+                //Debug.Log($"[Sonar] SKIP {hit.name} : deja detecte");
                 continue;
             }
 
@@ -276,7 +276,7 @@ public class Sonar : PlayerAbility
             Vector3 dir2obj  = (position - originPos).normalized;
             float   cosAngle = Vector3.Dot(dir2obj, originFwd.normalized);
             bool    inCone   = cosAngle >= halfCos;
-            Debug.Log($"[Sonar] CONE {hit.name} : {(inCone ? "DANS" : "HORS")} (cos={cosAngle:F2} vs {halfCos:F2})");
+            //.Log($"[Sonar] CONE {hit.name} : {(inCone ? "DANS" : "HORS")} (cos={cosAngle:F2} vs {halfCos:F2})");
             if (!inCone) { continue; }
 
            
@@ -314,8 +314,8 @@ public class Sonar : PlayerAbility
                     if (!isSelf) { thisBlocked = true; break; }
                 }
 
-                Debug.DrawLine(originPos, target,
-                    thisBlocked ? Color.red : Color.green, 0.5f);
+                /*Debug.DrawLine(originPos, target,
+                    thisBlocked ? Color.red : Color.green, 0.5f);*/
 
                 if (!thisBlocked)
                 {
@@ -324,13 +324,13 @@ public class Sonar : PlayerAbility
                 }
             }
 
-            Debug.Log($"[Sonar] RAYCAST {hit.name} : anyUnblocked={anyUnblocked}");
+            //Debug.Log($"[Sonar] RAYCAST {hit.name} : anyUnblocked={anyUnblocked}");
             if (!anyUnblocked) { continue; }
 
             _hitObjects.Add(detectable);
             float proximity = Mathf.Clamp01(1f - (distance / _activeRange));
             detectable.OnProb(proximity);
-            Debug.Log($"[Sonar] >>> DETECTE {hit.name} prox={proximity:F2}");
+            //Debug.Log($"[Sonar] >>> DETECTE {hit.name} prox={proximity:F2}");
         }
     }
 
