@@ -10,7 +10,7 @@ Shader "Custom/StifledEdge_Sonar"
         _EdgeThreshold   ("Sensibilite aretes",     Range(0.01, 1)) = 0.08
 
         [Header(Onde)]
-        _WaveWidth       ("Largeur crete (m)",      Range(0.1, 6))  = 1.5
+        _CrestDuration   ("Duree crete (s)",       Range(0.02, 1)) = 0.15
         _WaveBrightness  ("Intensite crete",        Range(1, 5))    = 2.0
         _ConeSoftness    ("Douceur bord cone",      Range(0, 0.5))  = 0.25
         _FadeDuration    ("Duree trace (s)",        Float)          = 4.0
@@ -94,7 +94,7 @@ Shader "Custom/StifledEdge_Sonar"
             float4 _EnemyRingColor;
             float  _EdgeThickness;
             float  _EdgeThreshold;
-            float  _WaveWidth;
+            float  _CrestDuration;
             float  _WaveBrightness;
             float  _ConeSoftness;
             float  _FadeDuration;
@@ -111,12 +111,25 @@ Shader "Custom/StifledEdge_Sonar"
             // moment-la. La revelation recule donc du proche vers le loin
             // au lieu de s eteindre d un bloc.
             //
+            // La crete n est pas un objet separe : c est la tete de la
+            // trace, un pic bref sur la meme base de temps. Avant, elle
+            // etait pilotee par le rayon vivant du tween et par un flag
+            // "active" que le C# remettait a zero des la fin de la
+            // propagation : elle disparaissait donc d une frame a l autre,
+            // et sa largeur etait une valeur en metres commune au cri du
+            // joueur (20 m de portee) et aux petits emetteurs (3 m), ou
+            // elle couvrait la moitie de la sphere. D ou deux etats
+            // distincts, un fort coupe net puis un faible.
+            //
             //  dist      distance pixel <-> origine de l onde
             //  fireTime  _Time.y du tir (0 = jamais tire)
             //  maxRadius portee de l onde
             //  travel    duree de propagation sur toute la portee
             //  mask      masque supplementaire (cone, orientation) ; 1 si aucun
-            float TrailFactor(float dist, float fireTime, float maxRadius, float travel, float mask)
+            //
+            //  retour .x intensite totale, de 0 a _WaveBrightness
+            //  retour .y poids de la crete, de 0 a 1, pour la teinte
+            float2 WaveFactor(float dist, float fireTime, float maxRadius, float travel, float mask)
             {
                 float fired   = step(0.001, fireTime);
                 float inRange = step(dist, maxRadius);
@@ -126,20 +139,19 @@ Shader "Custom/StifledEdge_Sonar"
                 float arrived = step(0.0, since);
 
                 float fadeDur = max(_FadeDuration * _EdgeFadeMult, 0.001);
-                float fade    = saturate(1.0 - since / fadeDur);
-                fade          = fade * fade;                    // decroissance douce
+                float trail   = saturate(1.0 - since / fadeDur);
+                trail         = trail * trail;                  // decroissance douce
+
+                // Pic au passage du front. Exprime en secondes, il suit donc
+                // la vitesse de chaque onde au lieu d une largeur fixe.
+                float crest   = exp(-since / max(_CrestDuration, 0.01));
 
                 // Le lointain revient moins fort : donne la lecture de profondeur.
                 float falloff = lerp(1.0, 1.0 - saturate(dist / max(maxRadius, 0.001)), _DistanceFalloff);
 
-                return fired * inRange * arrived * mask * fade * falloff;
-            }
-
-            // Crete lumineuse du front d onde, pendant la propagation.
-            float CrestFactor(float dist, float radius, float active, float mask)
-            {
-                float c = 1.0 - saturate(abs(dist - radius) / max(_WaveWidth, 0.01));
-                return c * c * active * mask;
+                float live    = fired * inRange * arrived * mask * falloff;
+                return float2(live * (trail + crest * (_WaveBrightness - 1.0)),
+                              live * crest);
             }
 
             float3 DepthToWorld(float2 uv)
@@ -224,18 +236,15 @@ Shader "Custom/StifledEdge_Sonar"
                                             _ConeHalfAngleCos + _ConeSoftness * 0.25,
                                             dot(toPixel, coneF));
 
-                float trailFade = TrailFactor(dist, _WaveFireTime, _WaveMaxRadius, _WaveFadeDuration, inCone);
-                float crest     = CrestFactor(dist, _WaveRadius, _WaveActive, inCone);
+                float2 cri   = WaveFactor(dist, _WaveFireTime, _WaveMaxRadius, _WaveFadeDuration, inCone);
 
                 // ══ Onde de mouvement, omnidirectionnelle ═════════════
-                float moveDist  = distance(posC, _MoveWaveOrigin.xyz);
-                float moveTrail = TrailFactor(moveDist, _MoveWaveFireTime, _MoveWaveMaxRadius, _MoveWaveFadeDuration, 1.0);
-                float moveCrest = CrestFactor(moveDist, _MoveWaveRadius, _MoveWaveActive, 1.0);
+                float  moveDist = distance(posC, _MoveWaveOrigin.xyz);
+                float2 pas      = WaveFactor(moveDist, _MoveWaveFireTime, _MoveWaveMaxRadius, _MoveWaveFadeDuration, 1.0);
 
                 // ══ Echolocalisation de l ennemi ══════════════════════
-                float enemyDist  = distance(posC, _EnemyWaveOrigin.xyz);
-                float enemyTrail = TrailFactor(enemyDist, _EnemyWaveFireTime, _EnemyWaveMaxRadius, _EnemyWaveFadeDuration, 1.0);
-                float enemyCrest = CrestFactor(enemyDist, _EnemyWaveRadius, _EnemyWaveActive, 1.0);
+                float  enemyDist = distance(posC, _EnemyWaveOrigin.xyz);
+                float2 ennemi    = WaveFactor(enemyDist, _EnemyWaveFireTime, _EnemyWaveMaxRadius, _EnemyWaveFadeDuration, 1.0);
 
                 // ══ Emetteurs sonar (jouets, pieges...) ═══════════════
                 float  eTrailAny = 0;
@@ -246,9 +255,8 @@ Shader "Custom/StifledEdge_Sonar"
                     /* Attenue les surfaces qui tournent le dos a l emetteur */ \
                     float3 eDir   = (posC - _EnemyOrigin##IDX.xyz) / max(ed, 1e-4); \
                     float  facing = saturate(dot(-eDir, nC) * 0.5 + 0.6); \
-                    float  et = TrailFactor(ed, _EnemyFireTime##IDX, _EnemyMaxRad##IDX, _EnemyFadeDur##IDX, facing); \
-                    float  ec = CrestFactor(ed, _EnemyRadius##IDX, _EnemyActive##IDX, facing); \
-                    float  e  = saturate(et + ec * _WaveBrightness); \
+                    float2 ew = WaveFactor(ed, _EnemyFireTime##IDX, _EnemyMaxRad##IDX, _EnemyFadeDur##IDX, facing); \
+                    float  e  = saturate(ew.x); \
                     eTrailCol = lerp(eTrailCol, _EnemyColor##IDX.rgb, e); \
                     eTrailAny = max(eTrailAny, e); \
                 }
@@ -261,17 +269,16 @@ Shader "Custom/StifledEdge_Sonar"
                 // rouge = onde de mouvement, bleu = ennemis et emetteurs.
                 if (_DebugMode >= 1.5)
                 {
-                    return half4(saturate(moveTrail + moveCrest),
-                                 saturate(trailFade + crest),
-                                 saturate(enemyTrail + enemyCrest + eTrailAny),
-                                 1.0);
+                    return half4(saturate(pas.x), saturate(cri.x),
+                                 saturate(ennemi.x + eTrailAny), 1.0);
                 }
 
                 // ══ Composition ═══════════════════════════════════════
-                float3 col = float3(0, 0, 0);
-                col += _EdgeColor.rgb      * max(max(trailFade, moveTrail), _TrailFloor);
-                col += _EdgeWaveColor.rgb  * saturate(crest + moveCrest) * _WaveBrightness;
-                col += _EnemyRingColor.rgb * saturate(enemyTrail + enemyCrest * _WaveBrightness);
+                // La teinte de crete se fond dans la trace au lieu de
+                // former un palier : plus de rupture visible entre les deux.
+                float3 col = lerp(_EdgeColor.rgb, _EdgeWaveColor.rgb, saturate(cri.y + pas.y))
+                           * max(max(cri.x, pas.x), _TrailFloor);
+                col += _EnemyRingColor.rgb * ennemi.x;
                 col += eTrailCol           * eTrailAny;
 
                 return half4(col * edge, 1.0);

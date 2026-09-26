@@ -26,6 +26,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _ConeSoftness: 0.25
+    - _CrestDuration: 0.15
     - _DebugMode: 0
     - _DistanceFalloff: 0.6
     - _EdgeFadeMult: 1
@@ -34,7 +35,6 @@ Material:
     - _FadeDuration: 4
     - _TrailFloor: 0
     - _WaveBrightness: 2
-    - _WaveWidth: 1.5
     m_Colors:
     - _EdgeColor: {r: 1, g: 1, b: 1, a: 1}
     - _EdgeWaveColor: {r: 0.81023014, g: 1, b: 0.8, a: 1}
