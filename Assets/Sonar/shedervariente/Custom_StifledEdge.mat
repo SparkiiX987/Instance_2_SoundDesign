@@ -25,12 +25,13 @@ Material:
     m_TexEnvs: []
     m_Ints: []
     m_Floats:
-    - _DepthThreshold: 0.03
+    - _ConeSoftness: 0.08
+    - _DepthThreshold: 0.02
     - _DistanceFalloff: 0.6
     - _EdgeFadeMult: 1
-    - _EdgeThickness: 1.5
+    - _EdgeThickness: 1.2
     - _FadeDuration: 4
-    - _NormalThreshold: 0.35
+    - _NormalThreshold: 0.25
     - _TrailFloor: 0
     - _WaveBrightness: 2
     - _WaveWidth: 1.5

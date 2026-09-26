@@ -6,13 +6,14 @@ Shader "Custom/StifledEdge_Sonar"
         _EdgeColor       ("Couleur trace",          Color)          = (1,1,1,1)
         _EdgeWaveColor   ("Couleur crete onde",     Color)          = (0.8,1,1,1)
         _EnemyRingColor  ("Couleur onde ennemi",    Color)          = (1,0.3,0.1,1)
-        _EdgeThickness   ("Epaisseur (texels)",     Range(0.5, 4))  = 1.5
-        _DepthThreshold  ("Seuil silhouette",       Range(0, 0.2))  = 0.03
-        _NormalThreshold ("Seuil arete (tangente)", Range(0, 2))    = 0.35
+        _EdgeThickness   ("Epaisseur (texels)",     Range(0.5, 4))  = 1.2
+        _DepthThreshold  ("Seuil silhouette",       Range(0, 0.2))  = 0.02
+        _NormalThreshold ("Seuil arete",            Range(0, 2))    = 0.25
 
         [Header(Onde)]
         _WaveWidth       ("Largeur crete (m)",      Range(0.1, 6))  = 1.5
         _WaveBrightness  ("Intensite crete",        Range(1, 5))    = 2.0
+        _ConeSoftness    ("Douceur bord cone",      Range(0, 0.5))  = 0.08
         _FadeDuration    ("Duree trace (s)",        Float)          = 4.0
         _EdgeFadeMult    ("Multiplicateur duree",   Float)          = 1.0
         _DistanceFalloff ("Attenuation distance",   Range(0, 1))    = 0.6
@@ -30,10 +31,9 @@ Shader "Custom/StifledEdge_Sonar"
             #pragma vertex Vert
             #pragma fragment Frag
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareNormalsTexture.hlsl"
             #include "Packages/com.unity.render-pipelines.core/Runtime/Utilities/Blit.hlsl"
-
-            TEXTURE2D_X(_CameraDepthTexture);
-            SAMPLER(sampler_CameraDepthTexture);
 
             // Globaux sonar joueur (cri).
             // _WaveOrigin et _ConeForward restent FIGES sur le tir tant que
@@ -88,24 +88,11 @@ Shader "Custom/StifledEdge_Sonar"
             float  _NormalThreshold;
             float  _WaveWidth;
             float  _WaveBrightness;
+            float  _ConeSoftness;
             float  _FadeDuration;
             float  _EdgeFadeMult;
             float  _DistanceFalloff;
             float  _TrailFloor;
-
-            // ---------------------------------------------------------
-            //  Echantillonnage profondeur
-            // ---------------------------------------------------------
-
-            float RawDepth(float2 uv)
-            {
-                return SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_CameraDepthTexture, uv).r;
-            }
-
-            float3 DepthToWorld(float2 uv, float rawDepth)
-            {
-                return ComputeWorldSpacePosition(uv, rawDepth, UNITY_MATRIX_I_VP);
-            }
 
             // ---------------------------------------------------------
             //  Revelation : facteur commun a toutes les ondes
@@ -155,13 +142,7 @@ Shader "Custom/StifledEdge_Sonar"
                 float2 uv  = input.texcoord;
                 float2 off = float2(1.0 / _ScreenParams.x, 1.0 / _ScreenParams.y) * _EdgeThickness;
 
-                // Voisinage en croix.
-                float rawC = RawDepth(uv);
-                float rawR = RawDepth(uv + float2( off.x, 0));
-                float rawL = RawDepth(uv + float2(-off.x, 0));
-                float rawU = RawDepth(uv + float2(0,  off.y));
-                float rawD = RawDepth(uv + float2(0, -off.y));
-
+                float rawC = SampleSceneDepth(uv);
                 float eyeC = LinearEyeDepth(rawC, _ZBufferParams);
 
                 // Ciel / plan lointain : rien a reveler.
@@ -170,74 +151,81 @@ Shader "Custom/StifledEdge_Sonar"
                     return half4(0, 0, 0, 1);
                 }
 
-                float3 posC = DepthToWorld(uv,                      rawC);
-                float3 posR = DepthToWorld(uv + float2( off.x, 0),  rawR);
-                float3 posL = DepthToWorld(uv + float2(-off.x, 0),  rawL);
-                float3 posU = DepthToWorld(uv + float2(0,  off.y),  rawU);
-                float3 posD = DepthToWorld(uv + float2(0, -off.y),  rawD);
+                float3 posC = ComputeWorldSpacePosition(uv, rawC, UNITY_MATRIX_I_VP);
 
-                float3 dR = posR - posC, dL = posL - posC;
-                float3 dU = posU - posC, dD = posD - posC;
+                // Normale monde du GBuffer. Contrairement a une normale
+                // reconstruite depuis la depth, elle ne subit ni la
+                // triangulation des meshes ni le raccourci perspectif des
+                // surfaces vues en rasant.
+                float3 nC   = SampleSceneNormals(uv);
+                float  nLen = length(nC);
+                nC = nLen > 0.1 ? nC / nLen : float3(0, 1, 0);
 
-                // Taille monde d un texel. Le MIN reste valide meme sur une
-                // silhouette : au moins un voisin est sur la meme surface.
-                float stepWS = min(min(length(dR), length(dL)), min(length(dU), length(dD)));
-                stepWS = max(stepWS, 1e-5);
-
-                // 1. Silhouettes : saut de profondeur relatif a la distance,
-                //    donc un meme seuil marche a 2 m comme a 40 m.
-                float eyeR = LinearEyeDepth(rawR, _ZBufferParams);
-                float eyeL = LinearEyeDepth(rawL, _ZBufferParams);
-                float eyeU = LinearEyeDepth(rawU, _ZBufferParams);
-                float eyeD = LinearEyeDepth(rawD, _ZBufferParams);
+                // ── 1. Silhouettes ───────────────────────────────────
+                // Ecart de profondeur relatif a la distance, pour qu un
+                // meme seuil tienne a 2 m comme a 40 m.
+                float eyeR = LinearEyeDepth(SampleSceneDepth(uv + float2( off.x, 0)), _ZBufferParams);
+                float eyeL = LinearEyeDepth(SampleSceneDepth(uv + float2(-off.x, 0)), _ZBufferParams);
+                float eyeU = LinearEyeDepth(SampleSceneDepth(uv + float2(0,  off.y)), _ZBufferParams);
+                float eyeD = LinearEyeDepth(SampleSceneDepth(uv + float2(0, -off.y)), _ZBufferParams);
                 float depthDelta = max(max(abs(eyeR - eyeC), abs(eyeL - eyeC)),
                                        max(abs(eyeU - eyeC), abs(eyeD - eyeC)));
                 float depthEdge  = depthDelta / max(eyeC, 0.001);
 
-                // 2. Aretes vives : ecart au plan tangent local. Un voisin
-                //    coplanaire donne 0, un angle vif donne ~tan(angle).
-                //    Insensible a la triangulation des meshes, contrairement
-                //    au Sobel sur normales reconstruites.
-                float3 nRaw = cross(dU, dR);
-                float  nLen = length(nRaw);
-                float3 nC   = nLen > 1e-12 ? nRaw / nLen : float3(0, 1, 0);
-                float creaseEdge = max(max(abs(dot(dR, nC)), abs(dot(dL, nC))),
-                                       max(abs(dot(dU, nC)), abs(dot(dD, nC)))) / stepWS;
+                // Un sol vu en rasant creuse un enorme ecart de profondeur
+                // entre deux pixels voisins sans qu il y ait la moindre
+                // arete : on relache le seuil proportionnellement.
+                float3 viewDir = normalize(GetCameraPositionWS() - posC);
+                float  NdotV   = saturate(dot(nC, viewDir));
+                float  tolerance = _DepthThreshold / max(NdotV, 0.06);
+                float  eDepth  = smoothstep(tolerance, tolerance * 2.0, depthEdge);
 
-                // smoothstep plutot que step : pas de scintillement sur les
-                // lignes en mouvement.
-                float eDepth  = smoothstep(_DepthThreshold,  _DepthThreshold  * 2.0, depthEdge);
-                float eCrease = smoothstep(_NormalThreshold, _NormalThreshold * 2.0, creaseEdge);
-                float edge    = saturate(eDepth + eCrease);
+                // ── 2. Aretes vives : croix de Roberts sur les normales ──
+                // Sur une surface plane les deux normales opposees sont
+                // identiques (produit scalaire = 1, donc 0) quel que soit
+                // l angle de vue. Sur une arete, elles divergent.
+                float3 nA = SampleSceneNormals(uv + float2( off.x,  off.y));
+                float3 nB = SampleSceneNormals(uv + float2(-off.x, -off.y));
+                float3 nE = SampleSceneNormals(uv + float2(-off.x,  off.y));
+                float3 nF = SampleSceneNormals(uv + float2( off.x, -off.y));
+                float  normalEdge = (1.0 - dot(nA, nB)) + (1.0 - dot(nE, nF));
+                float  eNormal = smoothstep(_NormalThreshold, _NormalThreshold * 2.0, normalEdge);
+
+                float edge = saturate(eDepth + eNormal);
 
                 if (edge < 0.01)
                 {
                     return half4(0, 0, 0, 1);
                 }
 
-                // Onde du joueur (cri) : cone fige au moment du tir.
+                // ══ Onde du joueur (cri) : cone fige au moment du tir ══
                 float3 coneF  = _ConeForward.xyz;
                 float  coneLn = length(coneF);
                 coneF = coneLn > 1e-4 ? coneF / coneLn : float3(0, 0, 1);
 
                 float  dist    = distance(posC, _WaveOrigin.xyz);
                 float3 toPixel = (posC - _WaveOrigin.xyz) / max(dist, 1e-4);
-                float  inCone  = step(_ConeHalfAngleCos, dot(toPixel, coneF));
+                // Bord adouci : le cone etant fige dans le monde, sa limite
+                // balaie l ecran quand on tourne la tete. En dur elle se
+                // lisait comme une coupure nette au milieu du decor.
+                float  inCone  = smoothstep(_ConeHalfAngleCos - _ConeSoftness,
+                                            _ConeHalfAngleCos + _ConeSoftness * 0.25,
+                                            dot(toPixel, coneF));
 
                 float trailFade = TrailFactor(dist, _WaveFireTime, _WaveMaxRadius, _WaveFadeDuration, inCone);
                 float crest     = CrestFactor(dist, _WaveRadius, _WaveActive, inCone);
 
-                // Onde de mouvement, omnidirectionnelle.
+                // ══ Onde de mouvement, omnidirectionnelle ═════════════
                 float moveDist  = distance(posC, _MoveWaveOrigin.xyz);
                 float moveTrail = TrailFactor(moveDist, _MoveWaveFireTime, _MoveWaveMaxRadius, _MoveWaveFadeDuration, 1.0);
                 float moveCrest = CrestFactor(moveDist, _MoveWaveRadius, _MoveWaveActive, 1.0);
 
-                // Echolocalisation de l ennemi.
+                // ══ Echolocalisation de l ennemi ══════════════════════
                 float enemyDist  = distance(posC, _EnemyWaveOrigin.xyz);
                 float enemyTrail = TrailFactor(enemyDist, _EnemyWaveFireTime, _EnemyWaveMaxRadius, _EnemyWaveFadeDuration, 1.0);
                 float enemyCrest = CrestFactor(enemyDist, _EnemyWaveRadius, _EnemyWaveActive, 1.0);
 
-                // Emetteurs sonar (jouets, pieges...).
+                // ══ Emetteurs sonar (jouets, pieges...) ═══════════════
                 float  eTrailAny = 0;
                 float3 eTrailCol = float3(0, 0, 0);
 
@@ -256,7 +244,7 @@ Shader "Custom/StifledEdge_Sonar"
                 ENEMY_POST(5)  ENEMY_POST(6)  ENEMY_POST(7)  ENEMY_POST(8)  ENEMY_POST(9)
                 ENEMY_POST(10) ENEMY_POST(11) ENEMY_POST(12) ENEMY_POST(13) ENEMY_POST(14)
 
-                // Composition.
+                // ══ Composition ═══════════════════════════════════════
                 float3 col = float3(0, 0, 0);
                 col += _EdgeColor.rgb      * max(max(trailFade, moveTrail), _TrailFloor);
                 col += _EdgeWaveColor.rgb  * saturate(crest + moveCrest) * _WaveBrightness;
