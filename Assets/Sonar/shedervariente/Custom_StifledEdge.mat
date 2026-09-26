@@ -25,7 +25,7 @@ Material:
     m_TexEnvs: []
     m_Ints: []
     m_Floats:
-    - _ConeSoftness: 0.08
+    - _ConeSoftness: 0.25
     - _DepthThreshold: 0.02
     - _DistanceFalloff: 0.6
     - _EdgeFadeMult: 1
