@@ -67,7 +67,7 @@ Shader "Custom/StifledEdge_Sonar"
             float  _EnemyWaveMaxRadius;
             float  _EnemyWaveFadeDuration;
 
-            // Emetteurs sonar (SonarEmitterManager, 15 slots).
+            // Emetteurs sonar (SonarEmitterManager, 20 slots).
             float4 _EnemyOrigin0; float _EnemyRadius0; float _EnemyActive0; float4 _EnemyColor0; float _EnemyFireTime0; float _EnemyMaxRad0; float _EnemyFadeDur0;
             float4 _EnemyOrigin1; float _EnemyRadius1; float _EnemyActive1; float4 _EnemyColor1; float _EnemyFireTime1; float _EnemyMaxRad1; float _EnemyFadeDur1;
             float4 _EnemyOrigin2; float _EnemyRadius2; float _EnemyActive2; float4 _EnemyColor2; float _EnemyFireTime2; float _EnemyMaxRad2; float _EnemyFadeDur2;
@@ -83,6 +83,11 @@ Shader "Custom/StifledEdge_Sonar"
             float4 _EnemyOrigin12; float _EnemyRadius12; float _EnemyActive12; float4 _EnemyColor12; float _EnemyFireTime12; float _EnemyMaxRad12; float _EnemyFadeDur12;
             float4 _EnemyOrigin13; float _EnemyRadius13; float _EnemyActive13; float4 _EnemyColor13; float _EnemyFireTime13; float _EnemyMaxRad13; float _EnemyFadeDur13;
             float4 _EnemyOrigin14; float _EnemyRadius14; float _EnemyActive14; float4 _EnemyColor14; float _EnemyFireTime14; float _EnemyMaxRad14; float _EnemyFadeDur14;
+            float4 _EnemyOrigin15; float _EnemyRadius15; float _EnemyActive15; float4 _EnemyColor15; float _EnemyFireTime15; float _EnemyMaxRad15; float _EnemyFadeDur15;
+            float4 _EnemyOrigin16; float _EnemyRadius16; float _EnemyActive16; float4 _EnemyColor16; float _EnemyFireTime16; float _EnemyMaxRad16; float _EnemyFadeDur16;
+            float4 _EnemyOrigin17; float _EnemyRadius17; float _EnemyActive17; float4 _EnemyColor17; float _EnemyFireTime17; float _EnemyMaxRad17; float _EnemyFadeDur17;
+            float4 _EnemyOrigin18; float _EnemyRadius18; float _EnemyActive18; float4 _EnemyColor18; float _EnemyFireTime18; float _EnemyMaxRad18; float _EnemyFadeDur18;
+            float4 _EnemyOrigin19; float _EnemyRadius19; float _EnemyActive19; float4 _EnemyColor19; float _EnemyFireTime19; float _EnemyMaxRad19; float _EnemyFadeDur19;
 
             float4 _EdgeColor;
             float4 _EdgeWaveColor;
@@ -249,7 +254,8 @@ Shader "Custom/StifledEdge_Sonar"
                 }
                 ENEMY_POST(0)  ENEMY_POST(1)  ENEMY_POST(2)  ENEMY_POST(3)  ENEMY_POST(4)
                 ENEMY_POST(5)  ENEMY_POST(6)  ENEMY_POST(7)  ENEMY_POST(8)  ENEMY_POST(9)
-                ENEMY_POST(10) ENEMY_POST(11) ENEMY_POST(12) ENEMY_POST(13) ENEMY_POST(14)
+                ENEMY_POST(10)  ENEMY_POST(11)  ENEMY_POST(12)  ENEMY_POST(13)  ENEMY_POST(14)
+                ENEMY_POST(15)  ENEMY_POST(16)  ENEMY_POST(17)  ENEMY_POST(18)  ENEMY_POST(19)
 
                 // Masque de revelation seul : vert = trace du cri,
                 // rouge = onde de mouvement, bleu = ennemis et emetteurs.
