@@ -10,7 +10,7 @@ Shader "Custom/StifledEdge_Sonar"
         _EdgeThreshold   ("Sensibilite aretes",     Range(0.01, 1)) = 0.08
 
         [Header(Onde)]
-        _CrestDuration   ("Duree crete (s)",       Range(0.02, 1)) = 0.15
+        _CrestWidth      ("Largeur crete (part portee)", Range(0.02, 1)) = 0.25
         _WaveBrightness  ("Intensite crete",        Range(1, 5))    = 2.0
         _ConeSoftness    ("Douceur bord cone",      Range(0, 0.5))  = 0.25
         _FadeDuration    ("Duree trace (s)",        Float)          = 4.0
@@ -94,7 +94,7 @@ Shader "Custom/StifledEdge_Sonar"
             float4 _EnemyRingColor;
             float  _EdgeThickness;
             float  _EdgeThreshold;
-            float  _CrestDuration;
+            float  _CrestWidth;
             float  _WaveBrightness;
             float  _ConeSoftness;
             float  _FadeDuration;
@@ -142,9 +142,17 @@ Shader "Custom/StifledEdge_Sonar"
                 float trail   = saturate(1.0 - since / fadeDur);
                 trail         = trail * trail;                  // decroissance douce
 
-                // Pic au passage du front. Exprime en secondes, il suit donc
-                // la vitesse de chaque onde au lieu d une largeur fixe.
-                float crest   = exp(-since / max(_CrestDuration, 0.01));
+                // Pic au passage du front, exprime en fraction du temps de
+                // propagation, donc en fraction de la portee. La crete garde
+                // ainsi la meme largeur relative quelles que soient la
+                // vitesse et la portee de l onde.
+                //
+                // En secondes absolues elle s evanouissait sur les ondes
+                // lentes : un emetteur a 1 m/s n en montrait que 15 cm. En
+                // metres absolus elle couvrait la moitie de la sphere des
+                // que la portee etait courte.
+                float crestT  = max(_CrestWidth * max(travel, 0.001), 0.01);
+                float crest   = exp(-since / crestT);
 
                 // Le lointain revient moins fort : donne la lecture de profondeur.
                 float falloff = lerp(1.0, 1.0 - saturate(dist / max(maxRadius, 0.001)), _DistanceFalloff);
