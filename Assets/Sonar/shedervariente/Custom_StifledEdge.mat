@@ -26,12 +26,12 @@ Material:
     m_Ints: []
     m_Floats:
     - _ConeSoftness: 0.25
-    - _DepthThreshold: 0.02
+    - _DebugMode: 0
     - _DistanceFalloff: 0.6
     - _EdgeFadeMult: 1
     - _EdgeThickness: 1.2
+    - _EdgeThreshold: 0.08
     - _FadeDuration: 4
-    - _NormalThreshold: 0.25
     - _TrailFloor: 0
     - _WaveBrightness: 2
     - _WaveWidth: 1.5
