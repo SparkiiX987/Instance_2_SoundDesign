@@ -90,6 +90,16 @@ public class Sonar : PlayerAbility
     {
         _cooldownTimer -= Time.deltaTime;
 
+        // activationKey etait expose dans l'inspecteur sous "Debug" mais
+        // n'etait lu nulle part : le cri n'avait en pratique qu'un seul
+        // declencheur, le micro via VoiceTrigger.OnSoundFired. Aucune
+        // action du InputSystem n'est reliee a Execute() non plus.
+        // Ce raccourci sert a tester le sonar sans micro.
+        if (activationKey != KeyCode.None && Input.GetKeyDown(activationKey))
+        {
+            TriggerWave();
+        }
+
         HandleMovementWave();
         PushShaderGlobals();
     }
