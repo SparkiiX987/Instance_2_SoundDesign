@@ -25,18 +25,18 @@ Material:
     m_TexEnvs: []
     m_Ints: []
     m_Floats:
-    - _DepthThreshold: 0.036
+    - _DepthThreshold: 0.03
+    - _DistanceFalloff: 0.6
     - _EdgeFadeMult: 1
     - _EdgeThickness: 1.5
     - _FadeDuration: 4
-    - _IntersectMax: 0.103
-    - _IntersectMin: 0.0428
-    - _NormalThreshold: 2
-    - _WaveBrightness: 1.77
-    - _WaveWidth: 3.79
+    - _NormalThreshold: 0.35
+    - _TrailFloor: 0
+    - _WaveBrightness: 2
+    - _WaveWidth: 1.5
     m_Colors:
     - _EdgeColor: {r: 1, g: 1, b: 1, a: 1}
     - _EdgeWaveColor: {r: 0.81023014, g: 1, b: 0.8, a: 1}
-    - _WaveColor: {r: 0.19999996, g: 0.8, b: 1, a: 1}
+    - _EnemyRingColor: {r: 1, g: 0.3, b: 0.1, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

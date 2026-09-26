@@ -72,7 +72,7 @@ public class S_ToySonarEmitter : MonoBehaviour
         _currentRadius = 0f;
 
         float duration = range / speed;
-        SonarEmitterManager.PushFireTime(this, Time.time, range, duration);
+        SonarEmitterManager.PushFireTime(this, Time.timeSinceLevelLoad, range, duration);
 
         _waveTween?.Kill();
         _waveTween = DOTween.To(

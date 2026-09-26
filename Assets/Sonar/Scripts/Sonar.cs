@@ -49,7 +49,6 @@ public class Sonar : PlayerAbility
     private float      _cooldownTimer;
     private Vector3    _frozenConeForward;
     private Vector3    _frozenConeOrigin;  // origine figee au moment du tir
-    private bool       _coneIsFrozen;
     private HashSet<IDetectable> _hitObjects = new();
     private Tween      _waveTween;
     private float      _waveFireTime;
@@ -90,14 +89,6 @@ public class Sonar : PlayerAbility
     private void Update()
     {
         _cooldownTimer -= Time.deltaTime;
-
-       
-        if (_cooldownTimer <= 0f && _coneIsFrozen)
-        {
-            _coneIsFrozen = false;
-        }
-
-       
 
         HandleMovementWave();
         PushShaderGlobals();
@@ -157,7 +148,7 @@ public class Sonar : PlayerAbility
         float duration = movementWaveRange / Mathf.Max(settings.ondeSpeed, 0.1f);
         Vector3 originPos = coneOrigin.position;
 
-        Shader.SetGlobalFloat(ID_MoveFireTime,     Time.time);
+        Shader.SetGlobalFloat(ID_MoveFireTime,     Time.timeSinceLevelLoad);
         Shader.SetGlobalFloat(ID_MoveMaxRadius,    movementWaveRange);
         Shader.SetGlobalFloat(ID_MoveFadeDuration, duration);
 
@@ -197,9 +188,8 @@ public class Sonar : PlayerAbility
        
         _frozenConeForward = coneOrigin.forward;
         _frozenConeOrigin  = coneOrigin.position;
-        _coneIsFrozen      = true;
 
-        _waveFireTime     = Time.time;
+        _waveFireTime     = Time.timeSinceLevelLoad;
         _waveMaxRadius    = _range;
         _waveFadeDuration = _duration;
 
@@ -335,28 +325,21 @@ public class Sonar : PlayerAbility
     }
 
   
+    /// <summary>
+    /// L'origine et la direction du cone restent figees sur le dernier tir
+    /// jusqu'au suivant. Le shader s'en sert pour situer la trace dans le
+    /// monde : si on repoussait ici la position vivante du joueur, la zone
+    /// revelee se recalculerait a chaque frame depuis la camera et suivrait
+    /// le regard au lieu de rester accrochee au decor.
+    /// </summary>
     private void PushShaderGlobals()
     {
-        if (_coneIsFrozen)
-        {
-           
-            Shader.SetGlobalVector(ID_WaveOrigin, _frozenConeOrigin);
-            Shader.SetGlobalFloat(ID_WaveRadius,  _currentWaveRadius);
-            Shader.SetGlobalFloat(ID_WaveActive,  _currentWaveRadius > 0f ? 1f : 0f);
-            Shader.SetGlobalVector(ID_ConeForward, _frozenConeForward);
-            Shader.SetGlobalFloat(ID_ConeHalfAngleCos,
-                Mathf.Cos(settings.coneHalfAngle * Mathf.Deg2Rad));
-        }
-        else
-        {
-           
-            Shader.SetGlobalVector(ID_WaveOrigin, coneOrigin.position);
-            Shader.SetGlobalFloat(ID_WaveRadius,  0f);
-            Shader.SetGlobalFloat(ID_WaveActive,  0f);
-            Shader.SetGlobalVector(ID_ConeForward, coneOrigin.forward);
-            Shader.SetGlobalFloat(ID_ConeHalfAngleCos,
-                Mathf.Cos(settings.coneHalfAngle * Mathf.Deg2Rad));
-        }
+        Shader.SetGlobalVector(ID_WaveOrigin,  _frozenConeOrigin);
+        Shader.SetGlobalVector(ID_ConeForward, _frozenConeForward);
+        Shader.SetGlobalFloat(ID_WaveRadius,   _currentWaveRadius);
+        Shader.SetGlobalFloat(ID_WaveActive,   _currentWaveRadius > 0f ? 1f : 0f);
+        Shader.SetGlobalFloat(ID_ConeHalfAngleCos,
+            Mathf.Cos(settings.coneHalfAngle * Mathf.Deg2Rad));
     }
 
    
