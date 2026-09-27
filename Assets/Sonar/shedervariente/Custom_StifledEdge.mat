@@ -26,9 +26,13 @@ Material:
     m_Ints: []
     m_Floats:
     - _ConeSoftness: 0.25
+    - _BurstDecay: 0.25
+    - _BurstSize: 0.12
     - _CrestWidth: 0.15
     - _DebugMode: 0
     - _DistanceFalloff: 0.6
+    - _EchoDecay: 0.45
+    - _EchoSpacing: 2.5
     - _EdgeFadeMult: 1
     - _EdgeThickness: 1.2
     - _EdgeThreshold: 0.08
@@ -36,9 +40,11 @@ Material:
     - _RangeSoftness: 0.4
     - _TrailFloor: 0
     - _TrailStrength: 0.3
+    - _WaveEase: 1.35
     - _WaveBrightness: 2
     m_Colors:
     - _EdgeColor: {r: 1, g: 1, b: 1, a: 1}
+    - _EdgeFarColor: {r: 0.35, g: 0.5, b: 0.7, a: 1}
     - _EdgeWaveColor: {r: 0.81023014, g: 1, b: 0.8, a: 1}
     - _EnemyRingColor: {r: 1, g: 0.3, b: 0.1, a: 1}
   m_BuildTextureStacks: []

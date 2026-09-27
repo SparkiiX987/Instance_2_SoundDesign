@@ -12,13 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c63d52728d87dd540924a8275ad7f4c0, type: 3}
   m_Name: SO_SonarSettings
   m_EditorClassIdentifier: Assembly-CSharp::SO_SonarSettings
-  ondeSpeed: 15
-  range: 20
+  ondeSpeed: 9
+  range: 12
   cooldown: 2.5
   waveEase: 1
   coneHalfAngle: 45
   minVoiceRange: 3
-  maxVoiceRange: 20
+  maxVoiceRange: 12
   fadeDurationMin: 7
   fadeDurationMax: 100
   chargeMaxDuration: 2

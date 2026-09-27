@@ -6,6 +6,7 @@ Shader "Custom/StifledEdge_Sonar"
         _EdgeColor       ("Couleur trace",          Color)          = (1,1,1,1)
         _EdgeWaveColor   ("Couleur crete onde",     Color)          = (0.8,1,1,1)
         _EnemyRingColor  ("Couleur onde ennemi",    Color)          = (1,0.3,0.1,1)
+        _EdgeFarColor    ("Couleur retour lointain", Color)          = (0.35,0.5,0.7,1)
         _EdgeThickness   ("Epaisseur (texels)",     Range(0.5, 4))  = 1.2
         _EdgeThreshold   ("Sensibilite aretes",     Range(0.01, 1)) = 0.08
 
@@ -18,6 +19,13 @@ Shader "Custom/StifledEdge_Sonar"
         _DistanceFalloff ("Attenuation distance",   Range(0, 1))    = 0.6
         _RangeSoftness   ("Douceur bord portee",     Range(0.02, 1)) = 0.4
         _TrailStrength   ("Force de la trace",       Range(0, 1))    = 0.3
+
+        [Header(Impulsion)]
+        _WaveEase        ("Deceleration du front",   Range(1, 2.5))  = 1.35
+        _EchoDecay       ("Intensite des repliques", Range(0, 1))    = 0.45
+        _EchoSpacing     ("Ecart des repliques",     Range(1, 6))    = 2.5
+        _BurstSize       ("Taille eclat depart",     Range(0, 0.5))  = 0.12
+        _BurstDecay      ("Duree eclat depart (s)",  Range(0.05, 1)) = 0.25
         _TrailFloor      ("Trace minimale",         Range(0, 1))    = 0.0
 
         [Header(Debug)]
@@ -94,6 +102,7 @@ Shader "Custom/StifledEdge_Sonar"
             float4 _EdgeColor;
             float4 _EdgeWaveColor;
             float4 _EnemyRingColor;
+            float4 _EdgeFarColor;
             float  _EdgeThickness;
             float  _EdgeThreshold;
             float  _CrestWidth;
@@ -104,6 +113,11 @@ Shader "Custom/StifledEdge_Sonar"
             float  _DistanceFalloff;
             float  _RangeSoftness;
             float  _TrailStrength;
+            float  _WaveEase;
+            float  _EchoDecay;
+            float  _EchoSpacing;
+            float  _BurstSize;
+            float  _BurstDecay;
             float  _TrailFloor;
             float  _DebugMode;
 
@@ -133,11 +147,25 @@ Shader "Custom/StifledEdge_Sonar"
             //
             //  retour .x intensite totale, de 0 a _WaveBrightness
             //  retour .y poids de la crete, de 0 a 1, pour la teinte
-            float2 WaveFactor(float dist, float fireTime, float maxRadius, float travel, float mask)
+            // Une bande de crete, centree sur since = offset.
+            float CrestAt(float since, float width)
             {
-                float fired   = step(0.001, fireTime);
+                float c = saturate(1.0 - abs(since) / width);
+                return c * c;
+            }
 
-                float delay   = (dist / max(maxRadius, 0.001)) * max(travel, 0.001);
+            //  retour .x intensite totale
+            //  retour .y poids de la crete, de 0 a 1, pour la teinte
+            //  retour .z distance normalisee, de 0 a 1, pour la couleur
+            float3 WaveFactor(float dist, float fireTime, float maxRadius, float travel, float mask)
+            {
+                float fired = step(0.001, fireTime);
+                float d01   = saturate(dist / max(maxRadius, 0.001));
+
+                // Le front decelere en s eloignant : il part vif puis prend
+                // son temps sur le lointain, ce qui laisse lire la
+                // profondeur au lieu de tout balayer d un coup.
+                float delay   = pow(d01, _WaveEase) * max(travel, 0.001);
                 float since   = _Time.y - (fireTime + delay);   // < 0 : onde pas encore arrivee
                 float arrived = step(0.0, since);
 
@@ -163,11 +191,23 @@ Shader "Custom/StifledEdge_Sonar"
                 // largeur, une fraction du temps de propagation, vaut la
                 // meme fraction de la portee : elle reste lisible aussi bien
                 // sur le cri du joueur que sur un prop de deux metres.
-                float crestT  = max(_CrestWidth * max(travel, 0.001), 0.01);
-                float crest   = saturate(1.0 - abs(since) / crestT);
-                crest         = crest * crest;
+                float crestT = max(_CrestWidth * max(travel, 0.001), 0.01);
 
-                float d01 = saturate(dist / max(maxRadius, 0.001));
+                // Un cri n est pas une impulsion pure : on fait suivre le
+                // front de deux repliques de plus en plus faibles. C est ce
+                // train d ondes qui donne sa matiere a l echo.
+                float gap   = crestT * _EchoSpacing;
+                float crest = CrestAt(since, crestT)
+                            + CrestAt(since - gap,       crestT) * _EchoDecay
+                            + CrestAt(since - gap * 2.0, crestT) * _EchoDecay * _EchoDecay;
+
+                // Eclat au depart : l onde nait a la gueule du renard.
+                // Independant de la distance parcourue, il marque l instant
+                // du cri lui-meme.
+                float tSince = _Time.y - fireTime;
+                float burst  = step(0.0, tSince)
+                             * exp(-tSince / max(_BurstDecay, 0.01))
+                             * (1.0 - smoothstep(0.0, max(_BurstSize, 0.001), d01));
 
                 // Le lointain revient moins fort : donne la lecture de profondeur.
                 float falloff = lerp(1.0, 1.0 - d01, _DistanceFalloff);
@@ -185,8 +225,9 @@ Shader "Custom/StifledEdge_Sonar"
                 // La trace derriere le front n est qu une memoire sourde :
                 // c est le contraste avec la crete qui fait lire une onde qui
                 // voyage plutot qu un eclairage global qui s eteint.
-                return float2(live * (trail * _TrailStrength + crest * _WaveBrightness),
-                              live * crest);
+                return float3(live * (trail * _TrailStrength + (crest + burst) * _WaveBrightness),
+                              live * saturate(crest + burst),
+                              d01);
             }
 
             float3 DepthToWorld(float2 uv)
@@ -271,15 +312,15 @@ Shader "Custom/StifledEdge_Sonar"
                                             _ConeHalfAngleCos + _ConeSoftness * 0.25,
                                             dot(toPixel, coneF));
 
-                float2 cri   = WaveFactor(dist, _WaveFireTime, _WaveMaxRadius, _WaveFadeDuration, inCone);
+                float3 cri   = WaveFactor(dist, _WaveFireTime, _WaveMaxRadius, _WaveFadeDuration, inCone);
 
                 // ══ Onde de mouvement, omnidirectionnelle ═════════════
                 float  moveDist = distance(posC, _MoveWaveOrigin.xyz);
-                float2 pas      = WaveFactor(moveDist, _MoveWaveFireTime, _MoveWaveMaxRadius, _MoveWaveFadeDuration, 1.0);
+                float3 pas      = WaveFactor(moveDist, _MoveWaveFireTime, _MoveWaveMaxRadius, _MoveWaveFadeDuration, 1.0);
 
                 // ══ Echolocalisation de l ennemi ══════════════════════
                 float  enemyDist = distance(posC, _EnemyWaveOrigin.xyz);
-                float2 ennemi    = WaveFactor(enemyDist, _EnemyWaveFireTime, _EnemyWaveMaxRadius, _EnemyWaveFadeDuration, 1.0);
+                float3 ennemi    = WaveFactor(enemyDist, _EnemyWaveFireTime, _EnemyWaveMaxRadius, _EnemyWaveFadeDuration, 1.0);
 
                 // ══ Emetteurs sonar (jouets, pieges...) ═══════════════
                 float  eTrailAny = 0;
@@ -290,7 +331,7 @@ Shader "Custom/StifledEdge_Sonar"
                     /* Attenue les surfaces qui tournent le dos a l emetteur */ \
                     float3 eDir   = (posC - _EnemyOrigin##IDX.xyz) / max(ed, 1e-4); \
                     float  facing = saturate(dot(-eDir, nC) * 0.5 + 0.6); \
-                    float2 ew = WaveFactor(ed, _EnemyFireTime##IDX, _EnemyMaxRad##IDX, _EnemyFadeDur##IDX, facing); \
+                    float3 ew = WaveFactor(ed, _EnemyFireTime##IDX, _EnemyMaxRad##IDX, _EnemyFadeDur##IDX, facing); \
                     float  e  = saturate(ew.x); \
                     eTrailCol = lerp(eTrailCol, _EnemyColor##IDX.rgb, e); \
                     eTrailAny = max(eTrailAny, e); \
@@ -311,7 +352,13 @@ Shader "Custom/StifledEdge_Sonar"
                 // ══ Composition ═══════════════════════════════════════
                 // La teinte de crete se fond dans la trace au lieu de
                 // former un palier : plus de rupture visible entre les deux.
-                float3 col = lerp(_EdgeColor.rgb, _EdgeWaveColor.rgb, saturate(cri.y + pas.y))
+                // Le retour lointain ne sonne pas comme le proche : on le
+                // teinte differemment pour que la distance se lise d un coup
+                // d oeil, sans avoir a attendre l arrivee du front.
+                float3 dom    = (cri.x >= pas.x) ? cri : pas;
+                float3 proche = lerp(_EdgeColor.rgb, _EdgeFarColor.rgb, dom.z);
+
+                float3 col = lerp(proche, _EdgeWaveColor.rgb, saturate(cri.y + pas.y))
                            * max(max(cri.x, pas.x), _TrailFloor);
                 col += _EnemyRingColor.rgb * ennemi.x;
                 col += eTrailCol           * eTrailAny;
