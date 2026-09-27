@@ -50,6 +50,7 @@ public class VoiceTrigger : PlayerAbility
 
     private float _driverCheckTimer;
     private bool _isMuted = false;
+    private bool _warnedNoDriver;
 
     // -------------------------------------------------
     public override void Init(PlayerController _playerController)
@@ -63,7 +64,17 @@ public class VoiceTrigger : PlayerAbility
         _driverCheckTimer = 0f;
 
         if (isEnabled)
+        {
             TryStartRecording();
+        }
+        else
+        {
+            // Le reglage est persiste : coupe une fois dans le menu, la voix
+            // le reste d'une session a l'autre. Sans trace, on croit a une
+            // panne du micro.
+            Debug.Log("[VoiceTrigger] Voix desactivee via les preferences. " +
+                      "L'echolocalisation ne repondra pas au micro.", this);
+        }
     }
 
     private void Update()
@@ -229,7 +240,11 @@ public class VoiceTrigger : PlayerAbility
     {
         FMOD.System core = FMODUnity.RuntimeManager.CoreSystem;
         core.getRecordNumDrivers(out int numDrivers, out int _);
-        if (numDrivers == 0) return;
+        if (numDrivers == 0)
+        {
+            WarnNoDriver("aucun peripherique d'enregistrement detecte");
+            return;
+        }
 
         for (int i = 0; i < numDrivers; i++)
         {
@@ -242,6 +257,21 @@ public class VoiceTrigger : PlayerAbility
                 return;
             }
         }
+
+        WarnNoDriver($"{numDrivers} peripherique(s) listes, aucun connecte");
+    }
+
+    /// <summary>
+    /// N'avertit qu'une fois par periode de panne : CheckDriverState
+    /// reessaie toutes les driverCheckInterval secondes, un log par tentative
+    /// noierait la console.
+    /// </summary>
+    private void WarnNoDriver(string _reason)
+    {
+        if (_warnedNoDriver) { return; }
+        _warnedNoDriver = true;
+        Debug.LogWarning($"[VoiceTrigger] Micro indisponible : {_reason}. " +
+                         "L'echolocalisation par la voix ne repondra pas.", this);
     }
 
     private void StartRecordingOnDriver(int index, int rate, int channels)
@@ -259,9 +289,32 @@ public class VoiceTrigger : PlayerAbility
         ex.length = (uint)(rate * sizeof(float) * channels * BUFFER_SEC);
         ex.format = FMOD.SOUND_FORMAT.PCMFLOAT;
 
-        core.createSound((string)null, FMOD.MODE.LOOP_NORMAL | FMOD.MODE.OPENUSER, ref ex, out _recordingSound);
+        // Les deux appels renvoyaient un code que personne ne lisait : un
+        // micro qui refuse de demarrer laissait _recording a true et le jeu
+        // attendait indefiniment une voix qui n'arrivait jamais.
+        FMOD.RESULT r = core.createSound((string)null,
+            FMOD.MODE.LOOP_NORMAL | FMOD.MODE.OPENUSER, ref ex, out _recordingSound);
+        if (r != FMOD.RESULT.OK)
+        {
+            Debug.LogError($"[VoiceTrigger] createSound a echoue : {r}", this);
+            return;
+        }
+
         _recordingSound.getLength(out _soundLengthSamples, FMOD.TIMEUNIT.PCM);
-        core.recordStart(index, _recordingSound, true);
+
+        r = core.recordStart(index, _recordingSound, true);
+        if (r != FMOD.RESULT.OK)
+        {
+            Debug.LogError($"[VoiceTrigger] recordStart a echoue : {r}", this);
+            _recordingSound.release();
+            return;
+        }
+
+        core.getRecordDriverInfo(index, out string driverName, 256,
+            out Guid _, out int _, out FMOD.SPEAKERMODE _, out int _, out FMOD.DRIVER_STATE _);
+        Debug.Log($"[VoiceTrigger] Micro actif : \"{driverName}\" " +
+                  $"({rate} Hz, {channels} canal/canaux).", this);
+        _warnedNoDriver = false;
 
         _activeDriverIndex = index;
         _recording = true;
