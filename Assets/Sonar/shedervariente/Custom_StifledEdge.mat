@@ -33,7 +33,9 @@ Material:
     - _EdgeThickness: 1.2
     - _EdgeThreshold: 0.08
     - _FadeDuration: 4
+    - _RangeSoftness: 0.4
     - _TrailFloor: 0
+    - _TrailStrength: 0.3
     - _WaveBrightness: 2
     m_Colors:
     - _EdgeColor: {r: 1, g: 1, b: 1, a: 1}

@@ -16,6 +16,8 @@ Shader "Custom/StifledEdge_Sonar"
         _FadeDuration    ("Duree trace (s)",        Float)          = 4.0
         _EdgeFadeMult    ("Multiplicateur duree",   Float)          = 1.0
         _DistanceFalloff ("Attenuation distance",   Range(0, 1))    = 0.6
+        _RangeSoftness   ("Douceur bord portee",     Range(0.02, 1)) = 0.4
+        _TrailStrength   ("Force de la trace",       Range(0, 1))    = 0.3
         _TrailFloor      ("Trace minimale",         Range(0, 1))    = 0.0
 
         [Header(Debug)]
@@ -100,6 +102,8 @@ Shader "Custom/StifledEdge_Sonar"
             float  _FadeDuration;
             float  _EdgeFadeMult;
             float  _DistanceFalloff;
+            float  _RangeSoftness;
+            float  _TrailStrength;
             float  _TrailFloor;
             float  _DebugMode;
 
@@ -132,7 +136,6 @@ Shader "Custom/StifledEdge_Sonar"
             float2 WaveFactor(float dist, float fireTime, float maxRadius, float travel, float mask)
             {
                 float fired   = step(0.001, fireTime);
-                float inRange = step(dist, maxRadius);
 
                 float delay   = (dist / max(maxRadius, 0.001)) * max(travel, 0.001);
                 float since   = _Time.y - (fireTime + delay);   // < 0 : onde pas encore arrivee
@@ -164,13 +167,25 @@ Shader "Custom/StifledEdge_Sonar"
                 float crest   = saturate(1.0 - abs(since) / crestT);
                 crest         = crest * crest;
 
+                float d01 = saturate(dist / max(maxRadius, 0.001));
+
                 // Le lointain revient moins fort : donne la lecture de profondeur.
-                float falloff = lerp(1.0, 1.0 - saturate(dist / max(maxRadius, 0.001)), _DistanceFalloff);
+                float falloff = lerp(1.0, 1.0 - d01, _DistanceFalloff);
+
+                // Extinction douce sur la fin de la portee. Avec un simple
+                // step(dist, maxRadius), l intensite tombait d un coup de
+                // (1 - _DistanceFalloff) a zero : un anneau franc au bord de
+                // la zone revelee.
+                float rangeFade = 1.0 - smoothstep(1.0 - _RangeSoftness, 1.0, d01);
 
                 // arrived est deja porte par trail : la crete doit pouvoir
                 // eclairer juste devant le front.
-                float live    = fired * inRange * mask * falloff;
-                return float2(live * (trail + crest * (_WaveBrightness - 1.0)),
+                float live = fired * mask * falloff * rangeFade;
+
+                // La trace derriere le front n est qu une memoire sourde :
+                // c est le contraste avec la crete qui fait lire une onde qui
+                // voyage plutot qu un eclairage global qui s eteint.
+                return float2(live * (trail * _TrailStrength + crest * _WaveBrightness),
                               live * crest);
             }
 
