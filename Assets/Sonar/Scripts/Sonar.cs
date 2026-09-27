@@ -21,9 +21,6 @@ public class Sonar : PlayerAbility
     [SerializeField] private float movementWaveInterval = 0.5f;
     [SerializeField] private float movementThreshold    = 0.05f;
 
-    [Header("Debug")]
-    [SerializeField] private KeyCode activationKey = KeyCode.E;
-
     // ── Shader IDs cri ───────────────────────────────────────────────
     private static readonly int ID_WaveOrigin       = Shader.PropertyToID("_WaveOrigin");
     private static readonly int ID_WaveRadius       = Shader.PropertyToID("_WaveRadius");
@@ -89,16 +86,6 @@ public class Sonar : PlayerAbility
     private void Update()
     {
         _cooldownTimer -= Time.deltaTime;
-
-        // activationKey etait expose dans l'inspecteur sous "Debug" mais
-        // n'etait lu nulle part : le cri n'avait en pratique qu'un seul
-        // declencheur, le micro via VoiceTrigger.OnSoundFired. Aucune
-        // action du InputSystem n'est reliee a Execute() non plus.
-        // Ce raccourci sert a tester le sonar sans micro.
-        if (activationKey != KeyCode.None && Input.GetKeyDown(activationKey))
-        {
-            TriggerWave();
-        }
 
         HandleMovementWave();
         PushShaderGlobals();
