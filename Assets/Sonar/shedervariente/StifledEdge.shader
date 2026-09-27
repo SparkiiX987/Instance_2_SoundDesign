@@ -10,7 +10,7 @@ Shader "Custom/StifledEdge_Sonar"
         _EdgeThreshold   ("Sensibilite aretes",     Range(0.01, 1)) = 0.08
 
         [Header(Onde)]
-        _CrestWidth      ("Largeur crete (part portee)", Range(0.02, 1)) = 0.25
+        _CrestWidth      ("Largeur crete (part portee)", Range(0.02, 1)) = 0.15
         _WaveBrightness  ("Intensite crete",        Range(1, 5))    = 2.0
         _ConeSoftness    ("Douceur bord cone",      Range(0, 0.5))  = 0.25
         _FadeDuration    ("Duree trace (s)",        Float)          = 4.0
@@ -138,26 +138,38 @@ Shader "Custom/StifledEdge_Sonar"
                 float since   = _Time.y - (fireTime + delay);   // < 0 : onde pas encore arrivee
                 float arrived = step(0.0, since);
 
+                // La trace ne commence qu au passage du front et decroit
+                // lentement derriere lui.
                 float fadeDur = max(_FadeDuration * _EdgeFadeMult, 0.001);
-                float trail   = saturate(1.0 - since / fadeDur);
+                float trail   = arrived * saturate(1.0 - since / fadeDur);
                 trail         = trail * trail;                  // decroissance douce
 
-                // Pic au passage du front, exprime en fraction du temps de
-                // propagation, donc en fraction de la portee. La crete garde
-                // ainsi la meme largeur relative quelles que soient la
-                // vitesse et la portee de l onde.
+                // La crete est une bande SYMETRIQUE autour du front : elle
+                // deborde autant devant que derriere, ce qui lui donne sa
+                // lecture de vague qui voyage. C est la meme chose que
+                // |dist - radius| < largeur, mais exprimee en temps :
                 //
-                // En secondes absolues elle s evanouissait sur les ondes
-                // lentes : un emetteur a 1 m/s n en montrait que 15 cm. En
-                // metres absolus elle couvrait la moitie de la sphere des
-                // que la portee etait courte.
+                //     since = (radius - dist) * travel / maxRadius
+                //
+                // donc |since| * maxRadius / travel = |radius - dist|.
+                //
+                // L ecrire ainsi plutot qu a partir du rayon vivant du tween
+                // a deux consequences. La crete ne depend plus du flag
+                // _WaveActive, que le C# remet a zero des la fin de la
+                // propagation : elle ne peut plus etre coupee net. Et sa
+                // largeur, une fraction du temps de propagation, vaut la
+                // meme fraction de la portee : elle reste lisible aussi bien
+                // sur le cri du joueur que sur un prop de deux metres.
                 float crestT  = max(_CrestWidth * max(travel, 0.001), 0.01);
-                float crest   = exp(-since / crestT);
+                float crest   = saturate(1.0 - abs(since) / crestT);
+                crest         = crest * crest;
 
                 // Le lointain revient moins fort : donne la lecture de profondeur.
                 float falloff = lerp(1.0, 1.0 - saturate(dist / max(maxRadius, 0.001)), _DistanceFalloff);
 
-                float live    = fired * inRange * arrived * mask * falloff;
+                // arrived est deja porte par trail : la crete doit pouvoir
+                // eclairer juste devant le front.
+                float live    = fired * inRange * mask * falloff;
                 return float2(live * (trail + crest * (_WaveBrightness - 1.0)),
                               live * crest);
             }

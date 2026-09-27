@@ -26,7 +26,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _ConeSoftness: 0.25
-    - _CrestWidth: 0.25
+    - _CrestWidth: 0.15
     - _DebugMode: 0
     - _DistanceFalloff: 0.6
     - _EdgeFadeMult: 1
