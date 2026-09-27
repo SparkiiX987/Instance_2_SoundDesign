@@ -29,10 +29,9 @@ Material:
     - _BurstDecay: 0.25
     - _BurstSize: 0.12
     - _CrestWidth: 0.15
+    - _CrestLead: 0.35
     - _DebugMode: 0
     - _DistanceFalloff: 0.6
-    - _EchoDecay: 0.45
-    - _EchoSpacing: 2.5
     - _EdgeFadeMult: 1
     - _EdgeThickness: 1.2
     - _EdgeThreshold: 0.08

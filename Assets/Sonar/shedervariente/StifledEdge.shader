@@ -22,8 +22,7 @@ Shader "Custom/StifledEdge_Sonar"
 
         [Header(Impulsion)]
         _WaveEase        ("Deceleration du front",   Range(1, 2.5))  = 1.35
-        _EchoDecay       ("Intensite des repliques", Range(0, 1))    = 0.45
-        _EchoSpacing     ("Ecart des repliques",     Range(1, 6))    = 2.5
+        _CrestLead       ("Nettete du bord avant",   Range(0.1, 1))  = 0.35
         _BurstSize       ("Taille eclat depart",     Range(0, 0.5))  = 0.12
         _BurstDecay      ("Duree eclat depart (s)",  Range(0.05, 1)) = 0.25
 
@@ -121,8 +120,7 @@ Shader "Custom/StifledEdge_Sonar"
             float  _RangeSoftness;
             float  _TrailStrength;
             float  _WaveEase;
-            float  _EchoDecay;
-            float  _EchoSpacing;
+            float  _CrestLead;
             float  _BurstSize;
             float  _BurstDecay;
             float  _EmitterCrestWidth;
@@ -156,10 +154,15 @@ Shader "Custom/StifledEdge_Sonar"
             //
             //  retour .x intensite totale, de 0 a _WaveBrightness
             //  retour .y poids de la crete, de 0 a 1, pour la teinte
-            // Une bande de crete, centree sur since = offset.
+            // Bande de crete autour du front, asymetrique : le bord d avant
+            // est plus serre que la traine, ce qui donne un sens de
+            // deplacement a une onde unique. Empiler plusieurs bandes pour
+            // obtenir le meme effet ne donnait pas de la matiere mais trois
+            // ondes distinctes a l ecran.
             float CrestAt(float since, float width)
             {
-                float c = saturate(1.0 - abs(since) / width);
+                float w = width * lerp(_CrestLead, 1.0, step(0.0, since));
+                float c = saturate(1.0 - abs(since) / max(w, 0.001));
                 return c * c;
             }
 
@@ -203,13 +206,7 @@ Shader "Custom/StifledEdge_Sonar"
                 // sur le cri du joueur que sur un prop de deux metres.
                 float crestT = max(crestWidth * max(travel, 0.001), 0.01);
 
-                // Un cri n est pas une impulsion pure : on fait suivre le
-                // front de deux repliques de plus en plus faibles. C est ce
-                // train d ondes qui donne sa matiere a l echo.
-                float gap   = crestT * _EchoSpacing;
-                float crest = CrestAt(since, crestT)
-                            + CrestAt(since - gap,       crestT) * _EchoDecay
-                            + CrestAt(since - gap * 2.0, crestT) * _EchoDecay * _EchoDecay;
+                float crest = CrestAt(since, crestT);
 
                 // Eclat au depart : l onde nait a la gueule du renard.
                 // Independant de la distance parcourue, il marque l instant
