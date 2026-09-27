@@ -36,6 +36,8 @@ Material:
     - _EdgeFadeMult: 1
     - _EdgeThickness: 1.2
     - _EdgeThreshold: 0.08
+    - _EmitterCrestWidth: 0.5
+    - _EmitterTrailForce: 0.8
     - _FadeDuration: 4
     - _RangeSoftness: 0.4
     - _TrailFloor: 0

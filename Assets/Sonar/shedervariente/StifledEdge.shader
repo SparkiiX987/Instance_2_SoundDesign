@@ -26,6 +26,13 @@ Shader "Custom/StifledEdge_Sonar"
         _EchoSpacing     ("Ecart des repliques",     Range(1, 6))    = 2.5
         _BurstSize       ("Taille eclat depart",     Range(0, 0.5))  = 0.12
         _BurstDecay      ("Duree eclat depart (s)",  Range(0.05, 1)) = 0.25
+
+        [Header(Emetteurs du decor)]
+        // Un prop de trois metres et un cri de douze ne sont pas le meme
+        // phenomene : une crete a 15 pour cent de la portee fait 1,8 m sur
+        // le cri mais 45 cm sur un conduit, ou elle ne se voit plus.
+        _EmitterCrestWidth ("Largeur crete emetteurs", Range(0.02, 1)) = 0.5
+        _EmitterTrailForce ("Force trace emetteurs",   Range(0, 1))    = 0.8
         _TrailFloor      ("Trace minimale",         Range(0, 1))    = 0.0
 
         [Header(Debug)]
@@ -118,6 +125,8 @@ Shader "Custom/StifledEdge_Sonar"
             float  _EchoSpacing;
             float  _BurstSize;
             float  _BurstDecay;
+            float  _EmitterCrestWidth;
+            float  _EmitterTrailForce;
             float  _TrailFloor;
             float  _DebugMode;
 
@@ -157,7 +166,8 @@ Shader "Custom/StifledEdge_Sonar"
             //  retour .x intensite totale
             //  retour .y poids de la crete, de 0 a 1, pour la teinte
             //  retour .z distance normalisee, de 0 a 1, pour la couleur
-            float3 WaveFactor(float dist, float fireTime, float maxRadius, float travel, float mask)
+            float3 WaveFactor(float dist, float fireTime, float maxRadius, float travel, float mask,
+                              float crestWidth, float trailForce)
             {
                 float fired = step(0.001, fireTime);
                 float d01   = saturate(dist / max(maxRadius, 0.001));
@@ -191,7 +201,7 @@ Shader "Custom/StifledEdge_Sonar"
                 // largeur, une fraction du temps de propagation, vaut la
                 // meme fraction de la portee : elle reste lisible aussi bien
                 // sur le cri du joueur que sur un prop de deux metres.
-                float crestT = max(_CrestWidth * max(travel, 0.001), 0.01);
+                float crestT = max(crestWidth * max(travel, 0.001), 0.01);
 
                 // Un cri n est pas une impulsion pure : on fait suivre le
                 // front de deux repliques de plus en plus faibles. C est ce
@@ -225,7 +235,7 @@ Shader "Custom/StifledEdge_Sonar"
                 // La trace derriere le front n est qu une memoire sourde :
                 // c est le contraste avec la crete qui fait lire une onde qui
                 // voyage plutot qu un eclairage global qui s eteint.
-                return float3(live * (trail * _TrailStrength + (crest + burst) * _WaveBrightness),
+                return float3(live * (trail * trailForce + (crest + burst) * _WaveBrightness),
                               live * saturate(crest + burst),
                               d01);
             }
@@ -312,15 +322,15 @@ Shader "Custom/StifledEdge_Sonar"
                                             _ConeHalfAngleCos + _ConeSoftness * 0.25,
                                             dot(toPixel, coneF));
 
-                float3 cri   = WaveFactor(dist, _WaveFireTime, _WaveMaxRadius, _WaveFadeDuration, inCone);
+                float3 cri   = WaveFactor(dist, _WaveFireTime, _WaveMaxRadius, _WaveFadeDuration, inCone, _CrestWidth, _TrailStrength);
 
                 // ══ Onde de mouvement, omnidirectionnelle ═════════════
                 float  moveDist = distance(posC, _MoveWaveOrigin.xyz);
-                float3 pas      = WaveFactor(moveDist, _MoveWaveFireTime, _MoveWaveMaxRadius, _MoveWaveFadeDuration, 1.0);
+                float3 pas      = WaveFactor(moveDist, _MoveWaveFireTime, _MoveWaveMaxRadius, _MoveWaveFadeDuration, 1.0, _CrestWidth, _TrailStrength);
 
                 // ══ Echolocalisation de l ennemi ══════════════════════
                 float  enemyDist = distance(posC, _EnemyWaveOrigin.xyz);
-                float3 ennemi    = WaveFactor(enemyDist, _EnemyWaveFireTime, _EnemyWaveMaxRadius, _EnemyWaveFadeDuration, 1.0);
+                float3 ennemi    = WaveFactor(enemyDist, _EnemyWaveFireTime, _EnemyWaveMaxRadius, _EnemyWaveFadeDuration, 1.0, _CrestWidth, _TrailStrength);
 
                 // ══ Emetteurs sonar (jouets, pieges...) ═══════════════
                 float  eTrailAny = 0;
@@ -331,7 +341,7 @@ Shader "Custom/StifledEdge_Sonar"
                     /* Attenue les surfaces qui tournent le dos a l emetteur */ \
                     float3 eDir   = (posC - _EnemyOrigin##IDX.xyz) / max(ed, 1e-4); \
                     float  facing = saturate(dot(-eDir, nC) * 0.5 + 0.6); \
-                    float3 ew = WaveFactor(ed, _EnemyFireTime##IDX, _EnemyMaxRad##IDX, _EnemyFadeDur##IDX, facing); \
+                    float3 ew = WaveFactor(ed, _EnemyFireTime##IDX, _EnemyMaxRad##IDX, _EnemyFadeDur##IDX, facing, _EmitterCrestWidth, _EmitterTrailForce); \
                     float  e  = saturate(ew.x); \
                     eTrailCol = lerp(eTrailCol, _EnemyColor##IDX.rgb, e); \
                     eTrailAny = max(eTrailAny, e); \
