@@ -18,8 +18,9 @@ public class Sonar : PlayerAbility
 
     [Header("Onde de mouvement")]
     [SerializeField] private float movementWaveRange    = 3f;
-    [SerializeField] private float movementWaveInterval = 0.5f;
-    [SerializeField] private float movementThreshold    = 0.05f;
+    [Tooltip("Distance horizontale a parcourir entre deux ondes de pas. " +
+             "A 4 m/s, 2 m donne la meme cadence que l'ancien intervalle de 0,5 s.")]
+    [SerializeField] private float footstepStride       = 2f;
 
     // ── Shader IDs cri ───────────────────────────────────────────────
     private static readonly int ID_WaveOrigin       = Shader.PropertyToID("_WaveOrigin");
@@ -57,8 +58,8 @@ public class Sonar : PlayerAbility
     private float  _moveCurrentRadius;
     private float  _movePreviousRadius;
     private Tween  _moveTween;
-    private float  _movementTimer;
     private Vector3 _lastPosition;
+    private Vector3 _stepAnchor;   // position du dernier pas
 
     // ── Init ─────────────────────────────────────────────────────────
 
@@ -72,6 +73,7 @@ public class Sonar : PlayerAbility
         _frozenConeOrigin  = coneOrigin.position;
         _selfColliders     = GetComponentsInChildren<Collider>();
         _lastPosition      = transform.position;
+        _stepAnchor        = transform.position;
 
         VoiceTrigger.OnSoundFired += OnVoiceFired;
     }
@@ -127,16 +129,42 @@ public class Sonar : PlayerAbility
     }
 
    
+    /// <summary>
+    /// Emet une onde de pas chaque fois que le joueur s'est eloigne de
+    /// footstepStride metres, a l'horizontale, de l'endroit du pas precedent.
+    ///
+    /// L'ancien test comparait la position d'une frame a l'autre contre un
+    /// seuil de 5 cm. Le joueur etant un Rigidbody non interpole deplace en
+    /// FixedUpdate, sa position avance par a-coups ; contre un mur, le solveur
+    /// le renvoie en arriere a chaque pas physique, et au sol le contact le
+    /// fait rebondir de quelques millimetres. Ces oscillations franchissaient
+    /// parfois le seuil : le joueur emettait des ondes sans bouger. Le seuil
+    /// par frame rendait aussi la cadence dependante du framerate.
+    ///
+    /// Une distance nette depuis le dernier pas ignore toute oscillation sur
+    /// place, quel qu'en soit l'amplitude par frame.
+    /// </summary>
     private void HandleMovementWave()
     {
-        float moved = Vector3.Distance(transform.position, _lastPosition);
-        _lastPosition = transform.position;
-        if (moved < movementThreshold) { return; }
+        Vector3 position = transform.position;
 
-        _movementTimer -= Time.deltaTime;
-        if (_movementTimer > 0f) { return; }
-        _movementTimer = movementWaveInterval;
+        Vector3 frameStep = position - _lastPosition;
+        frameStep.y = 0f;
+        _lastPosition = position;
 
+        // Teleportation (mort, changement de niveau) : ce n'est pas un pas.
+        // Aucun deplacement reel ne parcourt 1,5 m en une seule frame.
+        if (frameStep.magnitude > 1.5f)
+        {
+            _stepAnchor = position;
+            return;
+        }
+
+        Vector3 sinceStep = position - _stepAnchor;
+        sinceStep.y = 0f;
+        if (sinceStep.magnitude < footstepStride) { return; }
+
+        _stepAnchor = position;
         EmitMovementWave();
     }
 
