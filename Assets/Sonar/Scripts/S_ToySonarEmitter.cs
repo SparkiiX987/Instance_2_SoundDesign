@@ -87,6 +87,18 @@ public class S_ToySonarEmitter : MonoBehaviour
 
     public float CurrentRadius => _currentRadius;
 
+    /// <summary>
+    /// Confie le declenchement a un script externe, une goutte ou un
+    /// interrupteur, au lieu du chrono interne. Le cooldown est leve aussi :
+    /// sinon un declenchement plus rapproche que lui serait avale sans
+    /// emettre d onde.
+    /// </summary>
+    public void SetExternallyDriven()
+    {
+        autoTrigger = false;
+        cooldown    = 0f;
+    }
+
     public void TriggerWave()
     {
         if (_cooldownTimer > 0f) { return; }
