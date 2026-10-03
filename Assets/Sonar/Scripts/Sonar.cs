@@ -45,6 +45,7 @@ public class Sonar : PlayerAbility
     private float      _previousWaveRadius;
     private float      _activeRange;
     private float      _cooldownTimer;
+    private string     _lastSource = "aucun";
     private Vector3    _frozenConeForward;
     private Vector3    _frozenConeOrigin;  // origine figee au moment du tir
     private HashSet<IDetectable> _hitObjects = new();
@@ -115,9 +116,18 @@ public class Sonar : PlayerAbility
    
     public void TriggerWave()
     {
-        if (_cooldownTimer > 0f) { return; }
+        if (_cooldownTimer > 0f)
+        {
+            // Le micro partage ce cooldown : un bruit capte juste avant
+            // l'appui suffit a le relancer. Sans trace, on croit que la
+            // touche ne repond pas.
+            Debug.Log($"[Sonar] Cri a la touche refuse : cooldown encore {_cooldownTimer:F2} s " +
+                      $"(dernier cri : {_lastSource}).", this);
+            return;
+        }
         EmitWave(settings.range, settings.GetWaveDuration(settings.range), 1f);
         _cooldownTimer = settings.cooldown;
+        _lastSource    = "touche";
     }
 
     public void TriggerWaveWithVolume(float _normalizedVolume)
@@ -126,6 +136,8 @@ public class Sonar : PlayerAbility
         float range = settings.GetVoiceRange(_normalizedVolume);
         EmitWave(range, settings.GetWaveDuration(range), _normalizedVolume);
         _cooldownTimer = settings.cooldown;
+        _lastSource    = $"micro (volume {_normalizedVolume:F2})";
+        Debug.Log($"[Sonar] Cri declenche par le micro, volume {_normalizedVolume:F2}.", this);
     }
 
    
