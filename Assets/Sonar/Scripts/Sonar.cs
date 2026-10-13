@@ -18,11 +18,9 @@ public class Sonar : PlayerAbility
 
     [Header("Onde de mouvement")]
     [SerializeField] private float movementWaveRange    = 3f;
-    [SerializeField] private float movementWaveInterval = 0.5f;
-    [SerializeField] private float movementThreshold    = 0.05f;
-
-    [Header("Debug")]
-    [SerializeField] private KeyCode activationKey = KeyCode.E;
+    [Tooltip("Distance horizontale a parcourir entre deux ondes de pas. " +
+             "A 4 m/s, 2 m donne la meme cadence que l'ancien intervalle de 0,5 s.")]
+    [SerializeField] private float footstepStride       = 2f;
 
     // ── Shader IDs cri ───────────────────────────────────────────────
     private static readonly int ID_WaveOrigin       = Shader.PropertyToID("_WaveOrigin");
@@ -47,9 +45,9 @@ public class Sonar : PlayerAbility
     private float      _previousWaveRadius;
     private float      _activeRange;
     private float      _cooldownTimer;
+    private string     _lastSource = "aucun";
     private Vector3    _frozenConeForward;
     private Vector3    _frozenConeOrigin;  // origine figee au moment du tir
-    private bool       _coneIsFrozen;
     private HashSet<IDetectable> _hitObjects = new();
     private Tween      _waveTween;
     private float      _waveFireTime;
@@ -61,8 +59,8 @@ public class Sonar : PlayerAbility
     private float  _moveCurrentRadius;
     private float  _movePreviousRadius;
     private Tween  _moveTween;
-    private float  _movementTimer;
     private Vector3 _lastPosition;
+    private Vector3 _stepAnchor;   // position du dernier pas
 
     // ── Init ─────────────────────────────────────────────────────────
 
@@ -76,6 +74,7 @@ public class Sonar : PlayerAbility
         _frozenConeOrigin  = coneOrigin.position;
         _selfColliders     = GetComponentsInChildren<Collider>();
         _lastPosition      = transform.position;
+        _stepAnchor        = transform.position;
 
         VoiceTrigger.OnSoundFired += OnVoiceFired;
     }
@@ -90,14 +89,6 @@ public class Sonar : PlayerAbility
     private void Update()
     {
         _cooldownTimer -= Time.deltaTime;
-
-       
-        if (_cooldownTimer <= 0f && _coneIsFrozen)
-        {
-            _coneIsFrozen = false;
-        }
-
-       
 
         HandleMovementWave();
         PushShaderGlobals();
@@ -125,9 +116,18 @@ public class Sonar : PlayerAbility
    
     public void TriggerWave()
     {
-        if (_cooldownTimer > 0f) { return; }
+        if (_cooldownTimer > 0f)
+        {
+            // Le micro partage ce cooldown : un bruit capte juste avant
+            // l'appui suffit a le relancer. Sans trace, on croit que la
+            // touche ne repond pas.
+            Debug.Log($"[Sonar] Cri a la touche refuse : cooldown encore {_cooldownTimer:F2} s " +
+                      $"(dernier cri : {_lastSource}).", this);
+            return;
+        }
         EmitWave(settings.range, settings.GetWaveDuration(settings.range), 1f);
         _cooldownTimer = settings.cooldown;
+        _lastSource    = "touche";
     }
 
     public void TriggerWaveWithVolume(float _normalizedVolume)
@@ -136,19 +136,47 @@ public class Sonar : PlayerAbility
         float range = settings.GetVoiceRange(_normalizedVolume);
         EmitWave(range, settings.GetWaveDuration(range), _normalizedVolume);
         _cooldownTimer = settings.cooldown;
+        _lastSource    = $"micro (volume {_normalizedVolume:F2})";
+        Debug.Log($"[Sonar] Cri declenche par le micro, volume {_normalizedVolume:F2}.", this);
     }
 
    
+    /// <summary>
+    /// Emet une onde de pas chaque fois que le joueur s'est eloigne de
+    /// footstepStride metres, a l'horizontale, de l'endroit du pas precedent.
+    ///
+    /// L'ancien test comparait la position d'une frame a l'autre contre un
+    /// seuil de 5 cm. Le joueur etant un Rigidbody non interpole deplace en
+    /// FixedUpdate, sa position avance par a-coups ; contre un mur, le solveur
+    /// le renvoie en arriere a chaque pas physique, et au sol le contact le
+    /// fait rebondir de quelques millimetres. Ces oscillations franchissaient
+    /// parfois le seuil : le joueur emettait des ondes sans bouger. Le seuil
+    /// par frame rendait aussi la cadence dependante du framerate.
+    ///
+    /// Une distance nette depuis le dernier pas ignore toute oscillation sur
+    /// place, quel qu'en soit l'amplitude par frame.
+    /// </summary>
     private void HandleMovementWave()
     {
-        float moved = Vector3.Distance(transform.position, _lastPosition);
-        _lastPosition = transform.position;
-        if (moved < movementThreshold) { return; }
+        Vector3 position = transform.position;
 
-        _movementTimer -= Time.deltaTime;
-        if (_movementTimer > 0f) { return; }
-        _movementTimer = movementWaveInterval;
+        Vector3 frameStep = position - _lastPosition;
+        frameStep.y = 0f;
+        _lastPosition = position;
 
+        // Teleportation (mort, changement de niveau) : ce n'est pas un pas.
+        // Aucun deplacement reel ne parcourt 1,5 m en une seule frame.
+        if (frameStep.magnitude > 1.5f)
+        {
+            _stepAnchor = position;
+            return;
+        }
+
+        Vector3 sinceStep = position - _stepAnchor;
+        sinceStep.y = 0f;
+        if (sinceStep.magnitude < footstepStride) { return; }
+
+        _stepAnchor = position;
         EmitMovementWave();
     }
 
@@ -157,7 +185,7 @@ public class Sonar : PlayerAbility
         float duration = movementWaveRange / Mathf.Max(settings.ondeSpeed, 0.1f);
         Vector3 originPos = coneOrigin.position;
 
-        Shader.SetGlobalFloat(ID_MoveFireTime,     Time.time);
+        Shader.SetGlobalFloat(ID_MoveFireTime,     Time.timeSinceLevelLoad);
         Shader.SetGlobalFloat(ID_MoveMaxRadius,    movementWaveRange);
         Shader.SetGlobalFloat(ID_MoveFadeDuration, duration);
 
@@ -197,9 +225,8 @@ public class Sonar : PlayerAbility
        
         _frozenConeForward = coneOrigin.forward;
         _frozenConeOrigin  = coneOrigin.position;
-        _coneIsFrozen      = true;
 
-        _waveFireTime     = Time.time;
+        _waveFireTime     = Time.timeSinceLevelLoad;
         _waveMaxRadius    = _range;
         _waveFadeDuration = _duration;
 
@@ -335,28 +362,21 @@ public class Sonar : PlayerAbility
     }
 
   
+    /// <summary>
+    /// L'origine et la direction du cone restent figees sur le dernier tir
+    /// jusqu'au suivant. Le shader s'en sert pour situer la trace dans le
+    /// monde : si on repoussait ici la position vivante du joueur, la zone
+    /// revelee se recalculerait a chaque frame depuis la camera et suivrait
+    /// le regard au lieu de rester accrochee au decor.
+    /// </summary>
     private void PushShaderGlobals()
     {
-        if (_coneIsFrozen)
-        {
-           
-            Shader.SetGlobalVector(ID_WaveOrigin, _frozenConeOrigin);
-            Shader.SetGlobalFloat(ID_WaveRadius,  _currentWaveRadius);
-            Shader.SetGlobalFloat(ID_WaveActive,  _currentWaveRadius > 0f ? 1f : 0f);
-            Shader.SetGlobalVector(ID_ConeForward, _frozenConeForward);
-            Shader.SetGlobalFloat(ID_ConeHalfAngleCos,
-                Mathf.Cos(settings.coneHalfAngle * Mathf.Deg2Rad));
-        }
-        else
-        {
-           
-            Shader.SetGlobalVector(ID_WaveOrigin, coneOrigin.position);
-            Shader.SetGlobalFloat(ID_WaveRadius,  0f);
-            Shader.SetGlobalFloat(ID_WaveActive,  0f);
-            Shader.SetGlobalVector(ID_ConeForward, coneOrigin.forward);
-            Shader.SetGlobalFloat(ID_ConeHalfAngleCos,
-                Mathf.Cos(settings.coneHalfAngle * Mathf.Deg2Rad));
-        }
+        Shader.SetGlobalVector(ID_WaveOrigin,  _frozenConeOrigin);
+        Shader.SetGlobalVector(ID_ConeForward, _frozenConeForward);
+        Shader.SetGlobalFloat(ID_WaveRadius,   _currentWaveRadius);
+        Shader.SetGlobalFloat(ID_WaveActive,   _currentWaveRadius > 0f ? 1f : 0f);
+        Shader.SetGlobalFloat(ID_ConeHalfAngleCos,
+            Mathf.Cos(settings.coneHalfAngle * Mathf.Deg2Rad));
     }
 
    

@@ -2,15 +2,43 @@ Shader "Custom/StifledEdge_Sonar"
 {
     Properties
     {
-        _EdgeColor       ("Edge Color",         Color)        = (1,1,1,1)
-        _EdgeWaveColor   ("Edge Wave Color",     Color)        = (0.8,1,1,1)
-        _EdgeThickness   ("Edge Thickness",      Float)        = 1.2
-        _DepthThreshold  ("Depth Threshold",     Range(0,0.1)) = 0.008
-        _NormalThreshold ("Normal Threshold",    Range(0,2))   = 0.3
-        _IntersectMin    ("Intersection Min",    Range(0,0.1)) = 0.002
-        _IntersectMax    ("Intersection Max",    Range(0,0.5)) = 0.05
-        _FadeDuration    ("Duree trace (s)",     Float)        = 15.0
-        _EdgeFadeMult    ("Multiplicateur fade", Float)        = 1.0
+        [Header(Aretes)]
+        _EdgeColor       ("Couleur trace",          Color)          = (1,1,1,1)
+        _EdgeWaveColor   ("Couleur crete onde",     Color)          = (0.8,1,1,1)
+        _EnemyRingColor  ("Couleur onde ennemi",    Color)          = (1,0.3,0.1,1)
+        _EdgeFarColor    ("Couleur retour lointain", Color)          = (0.35,0.5,0.7,1)
+        _EdgeThickness   ("Epaisseur (texels)",     Range(0.5, 4))  = 1.2
+        _EdgeThreshold   ("Sensibilite aretes",     Range(0.01, 1)) = 0.08
+
+        [Header(Onde)]
+        _CrestWidth      ("Largeur crete (part portee)", Range(0.02, 1)) = 0.15
+        _WaveBrightness  ("Intensite crete",        Range(1, 5))    = 2.0
+        _ConeSoftness    ("Douceur bord cone",      Range(0, 0.5))  = 0.25
+        _FadeDuration    ("Duree trace (s)",        Float)          = 4.0
+        _EdgeFadeMult    ("Multiplicateur duree",   Float)          = 1.0
+        _DistanceFalloff ("Attenuation distance",   Range(0, 1))    = 0.6
+        _RangeSoftness   ("Douceur bord portee",     Range(0.02, 1)) = 0.4
+        _TrailStrength   ("Force de la trace",       Range(0, 1))    = 0.3
+
+        [Header(Impulsion)]
+        _WaveEase        ("Deceleration du front",   Range(1, 2.5))  = 1.35
+        _CrestLead       ("Nettete du bord avant",   Range(0.1, 1))  = 0.35
+        _BurstSize       ("Taille eclat depart",     Range(0, 0.5))  = 0.12
+        _BurstDecay      ("Duree eclat depart (s)",  Range(0.05, 1)) = 0.25
+
+        [Header(Emetteurs du decor)]
+        // Un prop de trois metres et un cri de douze ne sont pas le meme
+        // phenomene : une crete a 15 pour cent de la portee fait 1,8 m sur
+        // le cri mais 45 cm sur un conduit, ou elle ne se voit plus.
+        _EmitterCrestWidth ("Largeur crete emetteurs", Range(0.02, 1)) = 0.5
+        _EmitterTrailForce ("Force trace emetteurs",   Range(0, 1))    = 0.8
+        _TrailFloor      ("Trace minimale",         Range(0, 1))    = 0.0
+
+        [Header(Debug)]
+        // 0 = rendu normal
+        // 1 = masque des aretes seul, sans le sonar
+        // 2 = masque de revelation seul, sans les aretes
+        [Enum(Rendu,0,Aretes,1,Revelation,2)] _DebugMode ("Mode debug", Float) = 0
     }
 
     SubShader
@@ -24,12 +52,12 @@ Shader "Custom/StifledEdge_Sonar"
             #pragma vertex Vert
             #pragma fragment Frag
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
             #include "Packages/com.unity.render-pipelines.core/Runtime/Utilities/Blit.hlsl"
 
-            TEXTURE2D_X(_CameraDepthTexture);
-            SAMPLER(sampler_CameraDepthTexture);
-
-            // Globaux sonar joueur (cri)
+            // Globaux sonar joueur (cri).
+            // _WaveOrigin et _ConeForward restent FIGES sur le tir tant que
+            // la trace vit (cf. Sonar.PushShaderGlobals).
             float4 _WaveOrigin;
             float  _WaveRadius;
             float  _WaveActive;
@@ -39,7 +67,7 @@ Shader "Custom/StifledEdge_Sonar"
             float  _WaveMaxRadius;
             float  _WaveFadeDuration;
 
-            // Globaux onde de mouvement (cercle independant)
+            // Onde de mouvement (pas du renard) : cercle, sans cone.
             float4 _MoveWaveOrigin;
             float  _MoveWaveRadius;
             float  _MoveWaveActive;
@@ -47,7 +75,15 @@ Shader "Custom/StifledEdge_Sonar"
             float  _MoveWaveMaxRadius;
             float  _MoveWaveFadeDuration;
 
-            // Globaux sonar ennemis (8 slots)
+            // Onde d echolocalisation de l ennemi (EnemyEcholocation.cs).
+            float4 _EnemyWaveOrigin;
+            float  _EnemyWaveRadius;
+            float  _EnemyWaveActive;
+            float  _EnemyWaveFireTime;
+            float  _EnemyWaveMaxRadius;
+            float  _EnemyWaveFadeDuration;
+
+            // Emetteurs sonar (SonarEmitterManager, 20 slots).
             float4 _EnemyOrigin0; float _EnemyRadius0; float _EnemyActive0; float4 _EnemyColor0; float _EnemyFireTime0; float _EnemyMaxRad0; float _EnemyFadeDur0;
             float4 _EnemyOrigin1; float _EnemyRadius1; float _EnemyActive1; float4 _EnemyColor1; float _EnemyFireTime1; float _EnemyMaxRad1; float _EnemyFadeDur1;
             float4 _EnemyOrigin2; float _EnemyRadius2; float _EnemyActive2; float4 _EnemyColor2; float _EnemyFireTime2; float _EnemyMaxRad2; float _EnemyFadeDur2;
@@ -63,209 +99,278 @@ Shader "Custom/StifledEdge_Sonar"
             float4 _EnemyOrigin12; float _EnemyRadius12; float _EnemyActive12; float4 _EnemyColor12; float _EnemyFireTime12; float _EnemyMaxRad12; float _EnemyFadeDur12;
             float4 _EnemyOrigin13; float _EnemyRadius13; float _EnemyActive13; float4 _EnemyColor13; float _EnemyFireTime13; float _EnemyMaxRad13; float _EnemyFadeDur13;
             float4 _EnemyOrigin14; float _EnemyRadius14; float _EnemyActive14; float4 _EnemyColor14; float _EnemyFireTime14; float _EnemyMaxRad14; float _EnemyFadeDur14;
+            float4 _EnemyOrigin15; float _EnemyRadius15; float _EnemyActive15; float4 _EnemyColor15; float _EnemyFireTime15; float _EnemyMaxRad15; float _EnemyFadeDur15;
+            float4 _EnemyOrigin16; float _EnemyRadius16; float _EnemyActive16; float4 _EnemyColor16; float _EnemyFireTime16; float _EnemyMaxRad16; float _EnemyFadeDur16;
+            float4 _EnemyOrigin17; float _EnemyRadius17; float _EnemyActive17; float4 _EnemyColor17; float _EnemyFireTime17; float _EnemyMaxRad17; float _EnemyFadeDur17;
+            float4 _EnemyOrigin18; float _EnemyRadius18; float _EnemyActive18; float4 _EnemyColor18; float _EnemyFireTime18; float _EnemyMaxRad18; float _EnemyFadeDur18;
+            float4 _EnemyOrigin19; float _EnemyRadius19; float _EnemyActive19; float4 _EnemyColor19; float _EnemyFireTime19; float _EnemyMaxRad19; float _EnemyFadeDur19;
 
-
-
-
-            
             float4 _EdgeColor;
             float4 _EdgeWaveColor;
+            float4 _EnemyRingColor;
+            float4 _EdgeFarColor;
             float  _EdgeThickness;
-            float  _DepthThreshold;
-            float  _NormalThreshold;
-            float  _IntersectMin;
-            float  _IntersectMax;
+            float  _EdgeThreshold;
+            float  _CrestWidth;
+            float  _WaveBrightness;
+            float  _ConeSoftness;
             float  _FadeDuration;
             float  _EdgeFadeMult;
+            float  _DistanceFalloff;
+            float  _RangeSoftness;
+            float  _TrailStrength;
+            float  _WaveEase;
+            float  _CrestLead;
+            float  _BurstSize;
+            float  _BurstDecay;
+            float  _EmitterCrestWidth;
+            float  _EmitterTrailForce;
+            float  _TrailFloor;
+            float  _DebugMode;
 
-            // ── Reconstruction position monde depuis depth ────────────
-            float3 ReconstructWorldPos(float2 uv, float rawDepth)
+            // ---------------------------------------------------------
+            //  Revelation : facteur commun a toutes les ondes
+            // ---------------------------------------------------------
+            // Chaque pixel s allume au moment ou le front d onde l atteint
+            // (arrivee = tir + distance/vitesse) puis decroit depuis CE
+            // moment-la. La revelation recule donc du proche vers le loin
+            // au lieu de s eteindre d un bloc.
+            //
+            // La crete n est pas un objet separe : c est la tete de la
+            // trace, un pic bref sur la meme base de temps. Avant, elle
+            // etait pilotee par le rayon vivant du tween et par un flag
+            // "active" que le C# remettait a zero des la fin de la
+            // propagation : elle disparaissait donc d une frame a l autre,
+            // et sa largeur etait une valeur en metres commune au cri du
+            // joueur (20 m de portee) et aux petits emetteurs (3 m), ou
+            // elle couvrait la moitie de la sphere. D ou deux etats
+            // distincts, un fort coupe net puis un faible.
+            //
+            //  dist      distance pixel <-> origine de l onde
+            //  fireTime  _Time.y du tir (0 = jamais tire)
+            //  maxRadius portee de l onde
+            //  travel    duree de propagation sur toute la portee
+            //  mask      masque supplementaire (cone, orientation) ; 1 si aucun
+            //
+            //  retour .x intensite totale, de 0 a _WaveBrightness
+            //  retour .y poids de la crete, de 0 a 1, pour la teinte
+            // Bande de crete autour du front, asymetrique : le bord d avant
+            // est plus serre que la traine, ce qui donne un sens de
+            // deplacement a une onde unique. Empiler plusieurs bandes pour
+            // obtenir le meme effet ne donnait pas de la matiere mais trois
+            // ondes distinctes a l ecran.
+            float CrestAt(float since, float width)
             {
-                float4 ndc = float4(uv * 2.0 - 1.0, rawDepth, 1.0);
-                #if UNITY_UV_STARTS_AT_TOP
-                    ndc.y = -ndc.y;
-                #endif
-                float4 worldPos = mul(UNITY_MATRIX_I_VP, ndc);
-                return worldPos.xyz / worldPos.w;
+                float w = width * lerp(_CrestLead, 1.0, step(0.0, since));
+                float c = saturate(1.0 - abs(since) / max(w, 0.001));
+                return c * c;
             }
 
-            // ── Depth Sobel ──────────────────────────────────────────
-            float SobelDepth(float2 uv, float2 off)
+            //  retour .x intensite totale
+            //  retour .y poids de la crete, de 0 a 1, pour la teinte
+            //  retour .z distance normalisee, de 0 a 1, pour la couleur
+            float3 WaveFactor(float dist, float fireTime, float maxRadius, float travel, float mask,
+                              float crestWidth, float trailForce)
             {
-                float d00 = SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_CameraDepthTexture, uv + float2(-off.x,  off.y)).r;
-                float d10 = SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_CameraDepthTexture, uv + float2( 0,       off.y)).r;
-                float d20 = SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_CameraDepthTexture, uv + float2( off.x,  off.y)).r;
-                float d01 = SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_CameraDepthTexture, uv + float2(-off.x,  0    )).r;
-                float d21 = SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_CameraDepthTexture, uv + float2( off.x,  0    )).r;
-                float d02 = SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_CameraDepthTexture, uv + float2(-off.x, -off.y)).r;
-                float d12 = SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_CameraDepthTexture, uv + float2( 0,      -off.y)).r;
-                float d22 = SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_CameraDepthTexture, uv + float2( off.x, -off.y)).r;
+                float fired = step(0.001, fireTime);
+                float d01   = saturate(dist / max(maxRadius, 0.001));
 
-                float gx = -d00 - 2*d01 - d02 + d20 + 2*d21 + d22;
-                float gy = -d00 - 2*d10 - d20 + d02 + 2*d12 + d22;
-                return sqrt(gx*gx + gy*gy);
+                // Le front decelere en s eloignant : il part vif puis prend
+                // son temps sur le lointain, ce qui laisse lire la
+                // profondeur au lieu de tout balayer d un coup.
+                float delay   = pow(d01, _WaveEase) * max(travel, 0.001);
+                float since   = _Time.y - (fireTime + delay);   // < 0 : onde pas encore arrivee
+                float arrived = step(0.0, since);
+
+                // La trace ne commence qu au passage du front et decroit
+                // lentement derriere lui.
+                float fadeDur = max(_FadeDuration * _EdgeFadeMult, 0.001);
+                float trail   = arrived * saturate(1.0 - since / fadeDur);
+                trail         = trail * trail;                  // decroissance douce
+
+                // La crete est une bande SYMETRIQUE autour du front : elle
+                // deborde autant devant que derriere, ce qui lui donne sa
+                // lecture de vague qui voyage. C est la meme chose que
+                // |dist - radius| < largeur, mais exprimee en temps :
+                //
+                //     since = (radius - dist) * travel / maxRadius
+                //
+                // donc |since| * maxRadius / travel = |radius - dist|.
+                //
+                // L ecrire ainsi plutot qu a partir du rayon vivant du tween
+                // a deux consequences. La crete ne depend plus du flag
+                // _WaveActive, que le C# remet a zero des la fin de la
+                // propagation : elle ne peut plus etre coupee net. Et sa
+                // largeur, une fraction du temps de propagation, vaut la
+                // meme fraction de la portee : elle reste lisible aussi bien
+                // sur le cri du joueur que sur un prop de deux metres.
+                float crestT = max(crestWidth * max(travel, 0.001), 0.01);
+
+                float crest = CrestAt(since, crestT);
+
+                // Eclat au depart : l onde nait a la gueule du renard.
+                // Independant de la distance parcourue, il marque l instant
+                // du cri lui-meme.
+                float tSince = _Time.y - fireTime;
+                float burst  = step(0.0, tSince)
+                             * exp(-tSince / max(_BurstDecay, 0.01))
+                             * (1.0 - smoothstep(0.0, max(_BurstSize, 0.001), d01));
+
+                // Le lointain revient moins fort : donne la lecture de profondeur.
+                float falloff = lerp(1.0, 1.0 - d01, _DistanceFalloff);
+
+                // Extinction douce sur la fin de la portee. Avec un simple
+                // step(dist, maxRadius), l intensite tombait d un coup de
+                // (1 - _DistanceFalloff) a zero : un anneau franc au bord de
+                // la zone revelee.
+                float rangeFade = 1.0 - smoothstep(1.0 - _RangeSoftness, 1.0, d01);
+
+                // arrived est deja porte par trail : la crete doit pouvoir
+                // eclairer juste devant le front.
+                float live = fired * mask * falloff * rangeFade;
+
+                // La trace derriere le front n est qu une memoire sourde :
+                // c est le contraste avec la crete qui fait lire une onde qui
+                // voyage plutot qu un eclairage global qui s eteint.
+                return float3(live * (trail * trailForce + (crest + burst) * _WaveBrightness),
+                              live * saturate(crest + burst),
+                              d01);
             }
 
-            // ── Reconstruction normale depuis depth ──────────────────
-            float3 ReconstructNormal(float2 uv, float2 off)
+            float3 DepthToWorld(float2 uv)
             {
-                float dc = SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_CameraDepthTexture, uv).r;
-                float dr = SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_CameraDepthTexture, uv + float2(off.x, 0)).r;
-                float du = SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_CameraDepthTexture, uv + float2(0, off.y)).r;
-                float3 c = float3(uv,                     dc);
-                float3 r = float3(uv + float2(off.x, 0),  dr);
-                float3 u = float3(uv + float2(0, off.y),  du);
-                return normalize(cross(u - c, r - c));
+                return ComputeWorldSpacePosition(uv, SampleSceneDepth(uv), UNITY_MATRIX_I_VP);
             }
 
-            float SobelNormalFromDepth(float2 uv, float2 off)
-            {
-                float3 n00 = ReconstructNormal(uv + float2(-off.x,  off.y), off);
-                float3 n10 = ReconstructNormal(uv + float2( 0,       off.y), off);
-                float3 n20 = ReconstructNormal(uv + float2( off.x,  off.y), off);
-                float3 n01 = ReconstructNormal(uv + float2(-off.x,  0    ), off);
-                float3 n21 = ReconstructNormal(uv + float2( off.x,  0    ), off);
-                float3 n02 = ReconstructNormal(uv + float2(-off.x, -off.y), off);
-                float3 n12 = ReconstructNormal(uv + float2( 0,      -off.y), off);
-                float3 n22 = ReconstructNormal(uv + float2( off.x, -off.y), off);
-                float3 gx = -n00 - 2*n01 - n02 + n20 + 2*n21 + n22;
-                float3 gy = -n00 - 2*n10 - n20 + n02 + 2*n12 + n22;
-                return sqrt(dot(gx,gx) + dot(gy,gy));
-            }
+            // ---------------------------------------------------------
+            //  Fragment
+            // ---------------------------------------------------------
 
-            float IntersectionEdge(float2 uv, float2 off)
-            {
-                float center = SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_CameraDepthTexture, uv).r;
-                float maxDelta = 0;
-                for (int x = -1; x <= 1; x++)
-                for (int y = -1; y <= 1; y++)
-                {
-                    if (x == 0 && y == 0) { continue; }
-                    float neighbor = SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_CameraDepthTexture,
-                                     uv + float2(x, y) * off).r;
-                    maxDelta = max(maxDelta, abs(center - neighbor));
-                }
-                return step(_IntersectMin, maxDelta) * step(maxDelta, _IntersectMax);
-            }
-
-            // ── Fragment principal ────────────────────────────────────
             half4 Frag(Varyings input) : SV_Target
             {
-                float2 uv        = input.texcoord;
-                float2 texelSize = float2(1.0 / _ScreenParams.x, 1.0 / _ScreenParams.y);
-                float2 off       = texelSize * _EdgeThickness;
+                float2 uv  = input.texcoord;
+                float2 off = float2(1.0 / _ScreenParams.x, 1.0 / _ScreenParams.y) * _EdgeThickness;
 
-                // Detection aretes
-                float depthEdge  = SobelDepth(uv, off);
-                float normalEdge = SobelNormalFromDepth(uv, off);
-                float interEdge  = IntersectionEdge(uv, off);
-                float edge       = saturate(
-                    step(_DepthThreshold, depthEdge) +
-                    step(_NormalThreshold, normalEdge)
-                );
-                float finalEdge  = saturate(edge + interEdge * 2.0);
+                float rawC = SampleSceneDepth(uv);
+                float eyeC = LinearEyeDepth(rawC, _ZBufferParams);
 
-   
-                if (finalEdge < 0.01)
+                // Ciel / plan lointain : rien a reveler.
+                if (eyeC >= _ProjectionParams.z * 0.99)
                 {
                     return half4(0, 0, 0, 1);
                 }
 
+                float3 posC = ComputeWorldSpacePosition(uv, rawC, UNITY_MATRIX_I_VP);
 
-                float rawDepth = SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_CameraDepthTexture, uv).r;
-                float3 posWS   = ReconstructWorldPos(uv, rawDepth);
+                // ══ Detection d aretes : test de colinearite ══════════
+                // Une droite de l ecran se reprojette en droite sur une
+                // surface plane, quelle que soit son inclinaison. Les trois
+                // points gauche / centre / droite sont donc exactement
+                // alignes, et les deux directions exactement opposees : le
+                // terme vaut 0 meme sur un sol vu en rasant. Seule une
+                // vraie arete les fait diverger.
+                //
+                // C est ce qui manquait aux deux versions precedentes : le
+                // Sobel accrochait la triangulation des meshes, et l ecart
+                // au plan tangent explosait des que le raccourci perspectif
+                // ecrasait un voisin.
+                float3 dR = DepthToWorld(uv + float2( off.x, 0)) - posC;
+                float3 dL = DepthToWorld(uv + float2(-off.x, 0)) - posC;
+                float3 dU = DepthToWorld(uv + float2(0,  off.y)) - posC;
+                float3 dD = DepthToWorld(uv + float2(0, -off.y)) - posC;
 
-                float3 toPixel  = normalize(posWS - _WaveOrigin.xyz);
-                float  angleCos = dot(toPixel, normalize(_ConeForward.xyz));
-                float  inCone   = step(_ConeHalfAngleCos, angleCos);
-                float  dist     = distance(posWS, _WaveOrigin.xyz);
+                float3 uR = dR / max(length(dR), 1e-6);
+                float3 uL = dL / max(length(dL), 1e-6);
+                float3 uU = dU / max(length(dU), 1e-6);
+                float3 uD = dD / max(length(dD), 1e-6);
 
+                // 0 sur une surface plane, ~1 sur un angle droit,
+                // jusqu a 2 sur une silhouette franche.
+                float curvH = 1.0 + dot(uR, uL);
+                float curvV = 1.0 + dot(uU, uD);
+                float edge  = smoothstep(_EdgeThreshold, _EdgeThreshold * 2.0, max(curvH, curvV));
 
-                float inner  = smoothstep(_WaveRadius - 0.8, _WaveRadius, dist);
-                float outer  = smoothstep(_WaveRadius + 0.8, _WaveRadius, dist);
-                float wave   = inner * outer * _WaveActive * inCone;
+                if (_DebugMode > 0.5 && _DebugMode < 1.5)
+                {
+                    return half4(edge, edge, edge, 1.0);
+                }
 
+                if (edge < 0.01 && _DebugMode < 1.5)
+                {
+                    return half4(0, 0, 0, 1);
+                }
 
-                float waveDur     = max(_WaveFadeDuration, 0.001);
-                float delay       = (dist / max(_WaveMaxRadius, 0.001)) * waveDur;
-                float arrivalTime = _WaveFireTime + delay;
-                float firedOnce   = step(0.001, _WaveFireTime);
-                float waveArrived = step(arrivalTime, _Time.y);
-                float inRange     = step(dist, _WaveMaxRadius);
-                float wasSwept    = firedOnce * waveArrived * inRange * inCone;
-                float waveEndTime = _WaveFireTime + waveDur;
-                float fadeDur     = _FadeDuration * _EdgeFadeMult;
-                float elapsed     = max(0.0, _Time.y - waveEndTime);
-                float fadeOut     = 1.0 - smoothstep(fadeDur * 0.8, fadeDur, elapsed);
-                float trailFade   = wasSwept * fadeOut;
+                // Normale approchee, seulement pour orienter les emetteurs.
+                float3 nRaw = cross(uU, uR);
+                float  nLen = length(nRaw);
+                float3 nC   = nLen > 1e-6 ? nRaw / nLen : float3(0, 1, 0);
 
+                // ══ Onde du joueur (cri) : cone fige au moment du tir ══
+                float3 coneF  = _ConeForward.xyz;
+                float  coneLn = length(coneF);
+                coneF = coneLn > 1e-4 ? coneF / coneLn : float3(0, 0, 1);
 
-                float moveDist    = distance(posWS, _MoveWaveOrigin.xyz);
-                float moveInner   = smoothstep(_MoveWaveRadius - 0.8, _MoveWaveRadius, moveDist);
-                float moveOuter   = smoothstep(_MoveWaveRadius + 0.8, _MoveWaveRadius, moveDist);
-                float moveWave    = moveInner * moveOuter * _MoveWaveActive;
+                float  dist    = distance(posC, _WaveOrigin.xyz);
+                float3 toPixel = (posC - _WaveOrigin.xyz) / max(dist, 1e-4);
+                // Bord adouci : le cone etant fige dans le monde, sa limite
+                // balaie l ecran quand on tourne la tete. En dur elle se
+                // lisait comme une coupure nette au milieu du decor.
+                float  inCone  = smoothstep(_ConeHalfAngleCos - _ConeSoftness,
+                                            _ConeHalfAngleCos + _ConeSoftness * 0.25,
+                                            dot(toPixel, coneF));
 
-                float mWaveDur    = max(_MoveWaveFadeDuration, 0.001);
-                float mDelay      = (moveDist / max(_MoveWaveMaxRadius, 0.001)) * mWaveDur;
-                float mArrival    = _MoveWaveFireTime + mDelay;
-                float mFired      = step(0.001, _MoveWaveFireTime);
-                float mArrived    = step(mArrival, _Time.y);
-                float mInRange    = step(moveDist, _MoveWaveMaxRadius);
-                float mSwept      = mFired * mArrived * mInRange;
-                float mEnd        = _MoveWaveFireTime + mWaveDur;
-                float mElapsed    = max(0.0, _Time.y - mEnd);
-                float mFadeOut    = 1.0 - smoothstep(fadeDur * 0.8, fadeDur, mElapsed);
-                float moveTrail   = mSwept * mFadeOut;
+                float3 cri   = WaveFactor(dist, _WaveFireTime, _WaveMaxRadius, _WaveFadeDuration, inCone, _CrestWidth, _TrailStrength);
 
+                // ══ Onde de mouvement, omnidirectionnelle ═════════════
+                float  moveDist = distance(posC, _MoveWaveOrigin.xyz);
+                float3 pas      = WaveFactor(moveDist, _MoveWaveFireTime, _MoveWaveMaxRadius, _MoveWaveFadeDuration, 1.0, _CrestWidth, _TrailStrength);
 
+                // ══ Echolocalisation de l ennemi ══════════════════════
+                float  enemyDist = distance(posC, _EnemyWaveOrigin.xyz);
+                float3 ennemi    = WaveFactor(enemyDist, _EnemyWaveFireTime, _EnemyWaveMaxRadius, _EnemyWaveFadeDuration, 1.0, _CrestWidth, _TrailStrength);
+
+                // ══ Emetteurs sonar (jouets, pieges...) ═══════════════
                 float  eTrailAny = 0;
-                float  eWaveAny  = 0;
-                float3 eTrailCol = float3(0,0,0);
+                float3 eTrailCol = float3(0, 0, 0);
 
                 #define ENEMY_POST(IDX) { \
-                    float ed     = distance(posWS, _EnemyOrigin##IDX.xyz); \
-                    float ewi    = smoothstep(_EnemyRadius##IDX - 0.8, _EnemyRadius##IDX, ed); \
-                    float ewo    = smoothstep(_EnemyRadius##IDX + 0.8, _EnemyRadius##IDX, ed); \
-                    float ew     = ewi * ewo * _EnemyActive##IDX; \
-                    eWaveAny     = saturate(eWaveAny + ew); \
-                    float ewd    = max(_EnemyFadeDur##IDX, 0.001); \
-                    float edel   = (ed / max(_EnemyMaxRad##IDX, 0.001)) * ewd; \
-                    float earr   = _EnemyFireTime##IDX + edel; \
-                    float efire  = step(0.001, _EnemyFireTime##IDX); \
-                    float earriv = step(earr, _Time.y); \
-                    float einr   = step(ed, _EnemyMaxRad##IDX); \
-                    /* Occlusion : verifier que le pixel est du cote visible de l'onde */ \
-                    /* La surface normale pointe vers l'ennemi si le pixel est expose  */ \
-                    float3 eDir     = normalize(posWS - _EnemyOrigin##IDX.xyz); \
-                    float3 surfNorm = ReconstructNormal(uv, off); \
-                    float  facing   = saturate(dot(-eDir, surfNorm) + 0.5); \
-                    float eswept = efire * earriv * einr * step(0.01, facing); \
-                    float eend   = _EnemyFireTime##IDX + ewd; \
-                    float eelaps = max(0.0, _Time.y - eend); \
-                    float efout  = 1.0 - smoothstep(fadeDur*0.8, fadeDur, eelaps); \
-                    float etf    = eswept * efout; \
-                    eTrailCol    = lerp(eTrailCol, _EnemyColor##IDX.rgb, etf); \
-                    eTrailAny    = saturate(eTrailAny + etf); \
+                    float ed = distance(posC, _EnemyOrigin##IDX.xyz); \
+                    /* Attenue les surfaces qui tournent le dos a l emetteur */ \
+                    float3 eDir   = (posC - _EnemyOrigin##IDX.xyz) / max(ed, 1e-4); \
+                    float  facing = saturate(dot(-eDir, nC) * 0.5 + 0.6); \
+                    float3 ew = WaveFactor(ed, _EnemyFireTime##IDX, _EnemyMaxRad##IDX, _EnemyFadeDur##IDX, facing, _EmitterCrestWidth, _EmitterTrailForce); \
+                    float  e  = saturate(ew.x); \
+                    eTrailCol = lerp(eTrailCol, _EnemyColor##IDX.rgb, e); \
+                    eTrailAny = max(eTrailAny, e); \
                 }
-                ENEMY_POST(0) ENEMY_POST(1) ENEMY_POST(2) ENEMY_POST(3)
-                ENEMY_POST(4) ENEMY_POST(5) ENEMY_POST(6) ENEMY_POST(7)
+                ENEMY_POST(0)  ENEMY_POST(1)  ENEMY_POST(2)  ENEMY_POST(3)  ENEMY_POST(4)
+                ENEMY_POST(5)  ENEMY_POST(6)  ENEMY_POST(7)  ENEMY_POST(8)  ENEMY_POST(9)
+                ENEMY_POST(10)  ENEMY_POST(11)  ENEMY_POST(12)  ENEMY_POST(13)  ENEMY_POST(14)
+                ENEMY_POST(15)  ENEMY_POST(16)  ENEMY_POST(17)  ENEMY_POST(18)  ENEMY_POST(19)
 
-
-                float revealed = saturate(wave + trailFade + moveWave + moveTrail + eWaveAny + eTrailAny);
-                if (revealed < 0.01)
+                // Masque de revelation seul : vert = trace du cri,
+                // rouge = onde de mouvement, bleu = ennemis et emetteurs.
+                if (_DebugMode >= 1.5)
                 {
-                    return half4(0, 0, 0, 1);
+                    return half4(saturate(pas.x), saturate(cri.x),
+                                 saturate(ennemi.x + eTrailAny), 1.0);
                 }
 
+                // ══ Composition ═══════════════════════════════════════
+                // La teinte de crete se fond dans la trace au lieu de
+                // former un palier : plus de rupture visible entre les deux.
+                // Le retour lointain ne sonne pas comme le proche : on le
+                // teinte differemment pour que la distance se lise d un coup
+                // d oeil, sans avoir a attendre l arrivee du front.
+                float3 dom    = (cri.x >= pas.x) ? cri : pas;
+                float3 proche = lerp(_EdgeColor.rgb, _EdgeFarColor.rgb, dom.z);
 
-                float3 col = _EdgeColor.rgb * trailFade;
-                col = lerp(col, _EdgeColor.rgb * moveTrail, moveTrail);
-                col = lerp(col, eTrailCol,              eTrailAny);
-                col = lerp(col, _EdgeWaveColor.rgb,     wave);
-                col = lerp(col, _EdgeWaveColor.rgb,     moveWave);
-                col = lerp(col, eTrailCol,              eWaveAny);
+                float3 col = lerp(proche, _EdgeWaveColor.rgb, saturate(cri.y + pas.y))
+                           * max(max(cri.x, pas.x), _TrailFloor);
+                col += _EnemyRingColor.rgb * ennemi.x;
+                col += eTrailCol           * eTrailAny;
 
-                return half4(col * finalEdge, 1.0);
+                return half4(col * edge, 1.0);
             }
             ENDHLSL
         }

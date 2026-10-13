@@ -33,6 +33,9 @@ public class EnemyEcholocation : MonoBehaviour
     private static readonly int ID_EnemyWaveOrigin  = Shader.PropertyToID("_EnemyWaveOrigin");
     private static readonly int ID_EnemyWaveRadius  = Shader.PropertyToID("_EnemyWaveRadius");
     private static readonly int ID_EnemyWaveActive  = Shader.PropertyToID("_EnemyWaveActive");
+    private static readonly int ID_EnemyWaveFire   = Shader.PropertyToID("_EnemyWaveFireTime");
+    private static readonly int ID_EnemyWaveMaxRad = Shader.PropertyToID("_EnemyWaveMaxRadius");
+    private static readonly int ID_EnemyWaveFadeD  = Shader.PropertyToID("_EnemyWaveFadeDuration");
 
     // ── Etat ─────────────────────────────────────────────────────────
     private EnemyVoiceCapture _voiceCapture;
@@ -120,6 +123,12 @@ public class EnemyEcholocation : MonoBehaviour
         Shader.SetGlobalVector(ID_EnemyWaveOrigin, transform.position);
         Shader.SetGlobalFloat( ID_EnemyWaveRadius, _currentRadius);
         Shader.SetGlobalFloat( ID_EnemyWaveActive, 1f);
+
+        // Le shader rejoue la propagation a partir de ces trois valeurs
+        // pour faire persister la trace apres le passage du front.
+        Shader.SetGlobalFloat( ID_EnemyWaveFire,   Time.timeSinceLevelLoad);
+        Shader.SetGlobalFloat( ID_EnemyWaveMaxRad, echoRange);
+        Shader.SetGlobalFloat( ID_EnemyWaveFadeD,  echoRange / _waveSpeed);
 
         if (_voiceCapture.HasSamples)
         {
